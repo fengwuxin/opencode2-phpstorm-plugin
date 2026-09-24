@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "paviko.opencode"
-version = "26.9.2403"
+version = "26.9.2404"
 
 // opencode v2 only: the backend is never bundled, the CLI is resolved from the system.
 val guiOnly = project.findProperty("guiOnly")?.toString()?.toBoolean() ?: true
