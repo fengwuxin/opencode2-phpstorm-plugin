@@ -1,45 +1,23 @@
 /**
- * OpenCode SDK client instance
- * Configured to connect to the OpenCode server at the default location.
+ * OpenCode SDK facade used by the web UI.
  *
- * When `window.__OPENCODE_SERVER_URL__` is set (e.g. injected by the VS Code
- * gui-only plugin), all API requests target that absolute URL.  When absent,
- * relative URLs are used — identical to the original behaviour.
+ * Server communication goes through the opencode v2 REST API (see `./v2`).
+ * User preferences (recent/favorite models, UI state) are persisted by the IDE
+ * plugin through the ideBridge channel, exactly like before.
  */
 
-import { createOpencodeClient } from "@opencode-ai/sdk/client"
 import { ideBridge } from "../ideBridge"
+import { apiBase, setRequestDirectory } from "./v2/client"
+import { v2Api } from "./v2/facade"
+import { applyEdits, modify, parse as parseJsonc } from "jsonc-parser"
+import type { Config } from "@opencode-ai/sdk/client"
 
-export const serverBase: string =
-  ((globalThis as any).__OPENCODE_SERVER_URL__ as string | undefined)?.replace(/\/$/, "") || ""
+/** Absolute base URL of the opencode server (injected by the IDE plugin). */
+export const serverBase: string = apiBase
 
-let serverDirectory: string | undefined
-
-function requestHeaders(headers?: HeadersInit) {
-  const next = new Headers(headers)
-  if (serverDirectory && !next.has("x-opencode-directory")) {
-    next.set("x-opencode-directory", serverDirectory)
-  }
-  return next
-}
-
-function serverFetch(path: string, init?: RequestInit) {
-  return fetch(`${serverBase}${path}`, {
-    ...init,
-    headers: requestHeaders(init?.headers),
-  })
-}
-
-const baseClient = createOpencodeClient({
-  baseUrl: serverBase || "/",
-  fetch: (request: Request) => {
-    ;(request as any).timeout = false
-    return fetch(new Request(request, { headers: requestHeaders(request.headers) }))
-  },
-})
-
+/** Sets the project directory sent with every API request. */
 export function setServerDirectory(directory: string | null | undefined) {
-  serverDirectory = directory || undefined
+  setRequestDirectory(directory)
 }
 
 interface ModelEntry {
@@ -53,205 +31,96 @@ interface ModelPreferences {
   variant?: Record<string, string>
 }
 
-interface PathResponse {
-  state: string
-  config: string
-  worktree: string
-  directory: string
-}
+const emptyPreferences: ModelPreferences = { recent: [], favorite: [], variant: {} }
 
-/**
- * Extended SDK client with state management methods
- * TODO: Remove once SDK is regenerated with Stainless
- */
+type AnyRecord = Record<string, any>
+
 export const sdk = {
-  ...baseClient,
-  session: Object.assign(baseClient.session, {
-    retry: async (options: { path: { sessionID: string } }) => {
-      try {
-        const response = await serverFetch(`/app/api/session/${options.path.sessionID}/retry`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        })
-
-        if (!response.ok) {
-          return { error: { message: "Failed to retry session" }, data: null }
-        }
-
-        const data = await response.json()
-        return { data, error: null }
-      } catch (error) {
-        return {
-          error: { message: error instanceof Error ? error.message : "Unknown error" },
-          data: null,
-        }
-      }
-    },
-  }) as (typeof baseClient.session) & {
-    retry: (options: { path: { sessionID: string } }) => Promise<any>
-  },
+  ...v2Api,
   config: {
-    get: baseClient.config.get.bind(baseClient.config),
-    update: baseClient.config.update.bind(baseClient.config),
-    providers: baseClient.config.providers.bind(baseClient.config),
-  },
-  path: {
-    get: async () => {
+    ...v2Api.config,
+    /**
+     * opencode v2 has no config write endpoint, so the patch is merged into the global
+     * opencode.json(c) by the IDE plugin. Only the keys handed in are touched and
+     * jsonc-parser keeps the comments/formatting of the rest of the file intact.
+     */
+    update: async (options?: { body?: Record<string, unknown> }) => {
+      if (!ideBridge.isInstalled())
+        return {
+          data: null as Config | null,
+          error: { message: "Saving settings requires the IDE plugin" },
+        }
       try {
-        const response = await serverFetch("/path", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        })
+        const patch = options?.body ?? {}
+        const file = await ideBridge.request("config.read")
+        const current = typeof file?.payload?.text === "string" ? file.payload.text : ""
+        let text = current.trim() ? current : "{}"
 
-        if (!response.ok) {
-          return {
-            error: { message: "Failed to fetch path" },
-            data: null as PathResponse | null,
-          }
+        for (const [key, value] of Object.entries(patch)) {
+          text = applyEdits(text, modify(text, [key], value, { formattingOptions: { tabSize: 2, insertSpaces: true } }))
         }
 
-        const data = (await response.json()) as PathResponse
-        return { data, error: null as { message: string } | null }
+        await ideBridge.request("config.write", { text })
+        return { data: (parseJsonc(text) ?? {}) as Config, error: null as { message: string } | null }
       } catch (error) {
         return {
+          data: null as Config | null,
           error: { message: error instanceof Error ? error.message : "Unknown error" },
-          data: null as PathResponse | null,
         }
       }
-    },
-  },
-  auth: {
-    set: async (provider: string, value: any) => {
-      const res = await serverFetch("/app/api/auth/set", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ provider, value }),
-      })
-      if (!res.ok) throw new Error(await res.text())
-    },
-    list: async () => {
-      const res = await serverFetch("/app/api/auth/list")
-      return res.json() as Promise<Record<string, any>>
-    },
-    remove: async (provider: string) => {
-      await serverFetch("/app/api/auth/remove", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ provider }),
-      })
-    },
-    methods: async (provider: string) => {
-      const res = await serverFetch(`/app/api/auth/methods?provider=${provider}`)
-      return res.json() as Promise<
-        Array<{
-          label: string
-          type: "oauth" | "api"
-          prompts?: any[]
-        }>
-      >
-    },
-    start: async (provider: string, methodIndex: number, inputs: any) => {
-      const res = await serverFetch("/app/api/auth/login/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ provider, methodIndex, inputs }),
-      })
-      if (!res.ok) throw new Error(await res.text())
-      return res.json() as Promise<{ id: string; url?: string; method: "auto" | "code"; instructions?: string }>
-    },
-    submit: async (id: string, code: string) => {
-      const res = await serverFetch("/app/api/auth/login/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, code }),
-      })
-      if (!res.ok) throw new Error(await res.text())
-      return res.json() as Promise<boolean>
-    },
-    status: async (id: string) => {
-      const res = await serverFetch(`/app/api/auth/login/status/${id}`)
-      return res.json() as Promise<{ status: "pending" | "success" | "failed"; result?: any }>
-    },
-  },
-  permissions: {
-    respond: async (options: {
-      path: { requestID: string }
-      body: { reply: "once" | "always" | "reject"; message?: string }
-    }) => {
-      const response = await serverFetch(`/permission/${options.path.requestID}/reply`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(options.body),
-      })
-      if (!response.ok) {
-        return { error: { message: "Failed to respond to permission" }, data: null }
-      }
-      const data = await response.json()
-      return { data, error: null }
-    },
-  },
-  question: {
-    reply: async (options: { requestID: string; answers: Array<Array<string>> }) => {
-      const response = await serverFetch(`/question/${options.requestID}/reply`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers: options.answers }),
-      })
-      if (!response.ok) {
-        return { error: { message: "Failed to reply to question" }, data: null }
-      }
-      const data = await response.json()
-      return { data, error: null }
-    },
-    reject: async (options: { requestID: string }) => {
-      const response = await serverFetch(`/question/${options.requestID}/reject`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      })
-      if (!response.ok) {
-        return { error: { message: "Failed to reject question" }, data: null }
-      }
-      const data = await response.json()
-      return { data, error: null }
     },
   },
   model: {
     get: async () => {
-      if (!ideBridge.isInstalled()) return { data: { recent: [], favorite: [], variant: {} } as ModelPreferences, error: null as { message: string } | null }
+      if (!ideBridge.isInstalled()) return { data: emptyPreferences, error: null as { message: string } | null }
       try {
         const res = await ideBridge.request("model.get")
-        return { data: (res.payload ?? { recent: [], favorite: [], variant: {} }) as ModelPreferences, error: null as { message: string } | null }
+        return { data: (res.payload ?? emptyPreferences) as ModelPreferences, error: null as { message: string } | null }
       } catch (error) {
-        return { error: { message: error instanceof Error ? error.message : "Unknown error" }, data: null as ModelPreferences | null }
+        return {
+          error: { message: error instanceof Error ? error.message : "Unknown error" },
+          data: null as ModelPreferences | null,
+        }
       }
     },
     update: async (options: { body: Partial<ModelPreferences> }) => {
-      if (!ideBridge.isInstalled()) return { data: null as ModelPreferences | null, error: { message: "IdeBridge not available" } }
+      if (!ideBridge.isInstalled())
+        return { data: null as ModelPreferences | null, error: { message: "IdeBridge not available" } }
       try {
         const res = await ideBridge.request("model.update", options.body)
-        return { data: (res.payload ?? { recent: [], favorite: [], variant: {} }) as ModelPreferences, error: null as { message: string } | null }
+        return { data: (res.payload ?? emptyPreferences) as ModelPreferences, error: null as { message: string } | null }
       } catch (error) {
-        return { error: { message: error instanceof Error ? error.message : "Unknown error" }, data: null as ModelPreferences | null }
+        return {
+          error: { message: error instanceof Error ? error.message : "Unknown error" },
+          data: null as ModelPreferences | null,
+        }
       }
     },
   },
   kv: {
     get: async () => {
-      if (!ideBridge.isInstalled()) return { data: {} as Record<string, any>, error: null as { message: string } | null }
+      if (!ideBridge.isInstalled()) return { data: {} as AnyRecord, error: null as { message: string } | null }
       try {
         const res = await ideBridge.request("kv.get")
-        return { data: (res.payload ?? {}) as Record<string, any>, error: null as { message: string } | null }
+        return { data: (res.payload ?? {}) as AnyRecord, error: null as { message: string } | null }
       } catch (error) {
-        return { error: { message: error instanceof Error ? error.message : "Unknown error" }, data: null as Record<string, any> | null }
+        return {
+          error: { message: error instanceof Error ? error.message : "Unknown error" },
+          data: null as AnyRecord | null,
+        }
       }
     },
-    update: async (options: { body: Record<string, any> }) => {
-      if (!ideBridge.isInstalled()) return { data: null as Record<string, any> | null, error: { message: "IdeBridge not available" } }
+    update: async (options: { body: AnyRecord }) => {
+      if (!ideBridge.isInstalled())
+        return { data: null as AnyRecord | null, error: { message: "IdeBridge not available" } }
       try {
         const res = await ideBridge.request("kv.update", options.body)
-        return { data: (res.payload ?? {}) as Record<string, any>, error: null as { message: string } | null }
+        return { data: (res.payload ?? {}) as AnyRecord, error: null as { message: string } | null }
       } catch (error) {
-        return { error: { message: error instanceof Error ? error.message : "Unknown error" }, data: null as Record<string, any> | null }
+        return {
+          error: { message: error instanceof Error ? error.message : "Unknown error" },
+          data: null as AnyRecord | null,
+        }
       }
     },
   },

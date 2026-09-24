@@ -1,16 +1,24 @@
 plugins {
     id("java")
     id("org.jetbrains.intellij.platform") version "2.2.1"
-    kotlin("jvm") version "1.9.23"
+    // Must be able to read the Kotlin metadata of recent IDE platforms (2.3.x).
+    kotlin("jvm") version "2.2.20"
 }
 
 group = "paviko.opencode"
-version = "26.5.13"
+version = "26.9.2403"
 
-val guiOnly = project.findProperty("guiOnly")?.toString()?.toBoolean() ?: false
+// opencode v2 only: the backend is never bundled, the CLI is resolved from the system.
+val guiOnly = project.findProperty("guiOnly")?.toString()?.toBoolean() ?: true
+
+// Bundle the UX+ web UI (requires packages/opencode/webgui-dist to be built first).
+val withWebgui = project.findProperty("withWebgui")?.toString()?.toBoolean() ?: false
 val webguiDist = project.findProperty("webguiDist")?.toString()
 
 repositories {
+    // Local mirrors first: the default repositories are very slow from some networks.
+    maven("https://maven.aliyun.com/repository/public")
+    maven("https://maven.aliyun.com/repository/gradle-plugin")
     mavenCentral()
     intellijPlatform {
         defaultRepositories()
@@ -50,14 +58,19 @@ sourceSets {
 dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.1")
 
-    // IntelliJ Platform dependencies
+    // IntelliJ Platform dependencies.
+    // Pass -PlocalIde=/Applications/PhpStorm.app to build against a locally installed IDE
+    // instead of downloading a full IntelliJ IDEA distribution.
     intellijPlatform {
-        intellijIdeaCommunity("2024.3")
-        bundledPlugin("com.intellij.java")
-        bundledPlugin("org.jetbrains.plugins.terminal")
-
-        pluginVerifier()
-        zipSigner()
+        val localIde = project.findProperty("localIde")?.toString()
+        if (localIde != null) {
+            local(localIde)
+            bundledPlugin("org.jetbrains.plugins.terminal")
+        } else {
+            intellijIdeaCommunity("2024.3")
+            bundledPlugin("com.intellij.java")
+            bundledPlugin("org.jetbrains.plugins.terminal")
+        }
     }
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
@@ -108,8 +121,15 @@ intellijPlatform {
 }
 
 tasks {
+    // IntelliJ code instrumentation needs an extra JetBrains artifact that is not always
+    // reachable; this plugin does not rely on @NotNull instrumentation. The searchable
+    // options index requires launching the IDE and is not needed either.
+    matching {
+        it.name == "instrumentCode" || it.name == "instrumentTestCode" || it.name == "buildSearchableOptions"
+    }.configureEach { enabled = false }
+
     processResources {
-        val minVersion = project.findProperty("opencode.min.version")?.toString() ?: "1.1.1"
+        val minVersion = project.findProperty("opencode.min.version")?.toString() ?: "2.0.0"
         inputs.property("opencodeMinVersion", minVersion)
         filesMatching("opencode-build.properties") {
             expand("opencodeMinVersion" to minVersion)
@@ -121,30 +141,40 @@ tasks {
         }
     }
 
-    // Copy webgui-dist into resources and generate file-list.txt for gui-only variant
-    if (guiOnly) {
-        val copyWebgui = register<Copy>("copyWebguiDist") {
-            val srcDir = if (webguiDist != null) file(webguiDist!!) else rootProject.rootDir.resolve("packages/opencode/webgui-dist")
-            from(srcDir)
-            into(layout.buildDirectory.dir("resources/main/webgui-app"))
+    // Bundle the webgui-dist output into the plugin resources and generate the
+    // file-list.txt the runtime extractor uses to enumerate the bundled files.
+    if (guiOnly && withWebgui) {
+        val webguiSource = if (webguiDist != null) {
+            file(webguiDist!!)
+        } else {
+            // hosts/jetbrains-plugin -> repository root -> packages/opencode/webgui-dist
+            project.rootDir.parentFile.parentFile.resolve("packages/opencode/webgui-dist")
         }
+        val fileListDir = layout.buildDirectory.dir("webgui-filelist")
 
         val generateFileList = register("generateWebguiFileList") {
-            dependsOn(copyWebgui)
+            inputs.dir(webguiSource)
+            outputs.dir(fileListDir)
             doLast {
-                val webguiDir = layout.buildDirectory.dir("resources/main/webgui-app").get().asFile
-                val files = webguiDir.walkTopDown()
+                val outDir = fileListDir.get().asFile
+                outDir.deleteRecursively()
+                val target = outDir.resolve("webgui-app").apply { mkdirs() }
+                val files = webguiSource.walkTopDown()
                     .filter { it.isFile && it.name != "file-list.txt" }
-                    .map { it.relativeTo(webguiDir).invariantSeparatorsPath }
+                    .map { it.relativeTo(webguiSource).invariantSeparatorsPath }
                     .sorted()
                     .toList()
-                File(webguiDir, "file-list.txt").writeText(files.joinToString("\n") + "\n")
+                target.resolve("file-list.txt").writeText(files.joinToString("\n") + "\n")
                 logger.lifecycle("Generated webgui-app/file-list.txt with ${files.size} entries")
             }
         }
 
-        named("processResources") {
+        // Adding the files to processResources (instead of a separate copy task) keeps
+        // them owned by one task so Gradle does not clean them up as stale outputs.
+        named<org.gradle.language.jvm.tasks.ProcessResources>("processResources") {
             dependsOn(generateFileList)
+            from(webguiSource) { into("webgui-app") }
+            from(fileListDir)
         }
     }
 
@@ -154,8 +184,8 @@ tasks {
         untilBuild.set("261.*")
 
         if (guiOnly) {
-            pluginId.set("paviko.opencode-ux-plus-gui-only")
-            pluginName.set("OpenCode UX+ GUI Only (unofficial)")
+            pluginId.set("fengwuxin.opencode-ux-plus-gui-only")
+            pluginName.set("OpenCode UX+ GUI Only (fengwuxin)")
         }
     }
 

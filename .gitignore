@@ -1,81 +1,25 @@
+# dependencies
+node_modules/
+
+# local build toolchain (JDK / bun used for local builds)
+.toolchain/
+
+# JetBrains plugin build output
+hosts/jetbrains-plugin/build/
+hosts/jetbrains-plugin/.gradle/
+hosts/jetbrains-plugin/.intellijPlatform/
+hosts/jetbrains-plugin/.kotlin/
+
+# web UI build output (bundled into the plugin at build time)
+packages/opencode/webgui-dist/
+packages/opencode/webgui/dist/
+
+# packaged extensions
+*.vsix
+opencode-plugin-*.zip
+
+# misc
+*.log
 .DS_Store
-node_modules
-.worktrees
-.sst
 .env
 .env.local
-.idea
-.vscode
-.codex
-*~
-playground
-tmp
-dist
-ts-dist
-.turbo
-**/.serena
-.serena/
-/result
-refs
-Session.vim
-/opencode.json
-a.out
-target
-
-*.bak
-/hosts/jetbrains-plugin/bin/
-**/bin/*
-/hosts/vscode-plugin/LICENSE
-*.vsix
-.intellijPlatform/
-
-# ---- IDE / Editor ----
-.idea/
-*.iml
-*.ipr
-*.iws
-.vscode/
-.vscode-test/
-.fleet/
-.settings/
-.classpath
-.project
-
-# ---- Java/Kotlin/Gradle ----
-.gradle/
-build/
-out/
-.kotlinc/
-*.class
-*.jar
-*.war
-*.ear
-hs_err_pid*
-replay_pid*
-
-# Keep Gradle Wrapper files tracked
-!gradle/wrapper/gradle-wrapper.jar
-!gradle/wrapper/gradle-wrapper.properties
-!gradlew
-!gradlew.bat
-
-# ---- Go ----
-backend/rovo-*
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-*.test
-*.out
-coverage/
-coverage.*
-.scripts
-.direnv/
-
-# Local dev files
-opencode-dev
-UPCOMING_CHANGELOG.md
-logs/
-*.bun-build
-tsconfig.tsbuildinfo

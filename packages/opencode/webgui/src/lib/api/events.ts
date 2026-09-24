@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from "react"
 import type { FileDiff } from "@opencode-ai/sdk/client"
-import { serverBase } from "./sdkClient"
+import { V2EventStream } from "./v2/events"
 
 // Event type definitions based on server Bus events
 export type ServerEvent =
@@ -139,37 +139,22 @@ export interface EventStreamOptions {
   debug?: boolean
 }
 
-type GlobalServerEvent = {
-  directory?: string
-  payload: ServerEvent
-}
-
-function isServerEvent(value: unknown): value is ServerEvent {
-  return !!value && typeof value === "object" && "type" in value && typeof (value as { type?: unknown }).type === "string"
-}
-
-function resolveServerEvent(value: unknown, directory?: string): ServerEvent | null {
-  if (isServerEvent(value)) return value
-  if (!value || typeof value !== "object" || !("payload" in value)) return null
-
-  const event = value as GlobalServerEvent
-  if (!isServerEvent(event.payload)) return null
-  if (directory && typeof event.directory === "string" && event.directory !== directory) return null
-  return event.payload
-}
-
 /**
- * Hook for managing SSE event stream connection
+ * Hook for managing the opencode v2 SSE event stream connection.
+ *
+ * The stream is consumed through `fetch` (instead of `EventSource`) so the
+ * authorization header can be attached, and v2 events are projected onto the
+ * classic event shapes the UI subscribes to.
  *
  * @param options Configuration options
  * @returns Object with connection state, event emitter, and control functions
  */
 export function useEventStream(options: EventStreamOptions = {}) {
-  const { url = `${serverBase}/event`, directory, onConnectionStateChange, debug = false } = options
+  const { onConnectionStateChange, debug = false } = options
 
   const [connectionState, setConnectionState] = useState<ConnectionState>("connecting")
   const emitterRef = useRef<EventEmitter>(new EventEmitter({ debug }))
-  const eventSourceRef = useRef<EventSource | null>(null)
+  const streamRef = useRef<V2EventStream | null>(null)
   const mountedRef = useRef(true)
   const onConnectionStateChangeRef = useRef(onConnectionStateChange)
 
@@ -183,11 +168,8 @@ export function useEventStream(options: EventStreamOptions = {}) {
   }, [])
 
   const connect = useCallback(() => {
-    // Clean up existing connection
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close()
-      eventSourceRef.current = null
-    }
+    streamRef.current?.stop()
+    streamRef.current = null
 
     if (!mountedRef.current) return
 
@@ -196,63 +178,25 @@ export function useEventStream(options: EventStreamOptions = {}) {
     }
     updateConnectionState("connecting")
 
-    try {
-      const eventSource = new EventSource(url)
-      eventSourceRef.current = eventSource
-
-      eventSource.onopen = () => {
-        if (debug) {
-          console.log("[SSE] Connection established")
-        }
-        updateConnectionState("connected")
-      }
-
-      eventSource.onmessage = (event) => {
-        try {
-          const data = resolveServerEvent(JSON.parse(event.data), directory)
-          if (data) emitterRef.current.emit(data)
-        } catch (error) {
-          if (debug) {
-            console.error("[SSE] Failed to parse event data:", error)
-          }
-        }
-      }
-
-      eventSource.onerror = (error) => {
-        if (debug) {
-          console.error("[SSE] Connection error (browser will auto-reconnect)", error)
-        }
-
-        if (!mountedRef.current) {
-          eventSource.close()
-          if (eventSourceRef.current === eventSource) {
-            eventSourceRef.current = null
-          }
-          return
-        }
-
-        updateConnectionState("connecting")
-      }
-    } catch (error) {
-      if (debug) {
-        console.error("[SSE] Failed to create EventSource:", error)
-      }
-      updateConnectionState("error")
-    }
-  }, [directory, url, updateConnectionState, debug])
+    const stream = new V2EventStream((event) => {
+      if (!mountedRef.current) return
+      updateConnectionState("connected")
+      emitterRef.current.emit(event)
+    })
+    streamRef.current = stream
+    stream.start()
+  }, [updateConnectionState, debug])
 
   const disconnect = useCallback(() => {
     if (debug) {
       console.log("[SSE] Disconnecting...")
     }
 
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close()
-      eventSourceRef.current = null
-    }
+    streamRef.current?.stop()
+    streamRef.current = null
 
     updateConnectionState("disconnected")
-  }, [updateConnectionState])
+  }, [updateConnectionState, debug])
 
   // Connect on mount
   useEffect(() => {

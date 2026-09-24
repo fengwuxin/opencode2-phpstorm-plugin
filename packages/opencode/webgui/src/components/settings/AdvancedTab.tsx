@@ -1,25 +1,13 @@
-import type { Config } from "@opencode-ai/sdk/client"
+import type { SetSettingsFormData, SettingsFormData } from "./types"
 
 interface AdvancedTabProps {
-  formData: Partial<Config>
-  setFormData: (data: Partial<Config>) => void
+  formData: SettingsFormData
+  setFormData: SetSettingsFormData
 }
 
 export function AdvancedTab({ formData, setFormData }: AdvancedTabProps) {
   return (
     <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Theme</label>
-        <input
-          type="text"
-          value={formData.theme || ""}
-          onChange={(e) => setFormData({ ...formData, theme: e.target.value })}
-          placeholder="Theme name"
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">TUI theme name (not used in web GUI)</p>
-      </div>
-
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Watch Ignore Patterns</label>
         <textarea
@@ -40,11 +28,11 @@ export function AdvancedTab({ formData, setFormData }: AdvancedTabProps) {
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Plugins</label>
         <textarea
-          value={formData.plugin?.join("\n") || ""}
+          value={formData.plugins?.join("\n") || ""}
           onChange={(e) =>
             setFormData({
               ...formData,
-              plugin: e.target.value.split("\n").filter((line) => line.trim()),
+              plugins: e.target.value.split("\n").filter((line) => line.trim()),
             })
           }
           placeholder="plugin-name&#10;another-plugin"

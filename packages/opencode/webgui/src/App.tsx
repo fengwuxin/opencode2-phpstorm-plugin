@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useState, useRef } from "react"
 import { useEventStream, useEventHandler, eventEmitter, type ServerEvent, type ConnectionState } from "./lib/api/events"
 import { useSessionEvents } from "./lib/api/useSessionEvents"
-import { serverBase } from "./lib/api/sdkClient"
 import { useSession } from "./state/SessionContext"
 import { useMessages } from "./state/MessagesContext"
-import { useProject } from "./state/ProjectContext"
 import { useToast } from "./state/ToastContext"
 import { MessageInput } from "./components/MessageInput"
 import { MessageList } from "./components/MessageList"
@@ -301,10 +299,7 @@ function AppInner({ connectionState }: { connectionState: ConnectionState }) {
 }
 
 function AppContent() {
-  const { worktree } = useProject()
   const { connectionState, emitter } = useEventStream({
-    url: `${serverBase}/global/event`,
-    directory: worktree ?? undefined,
     debug: true,
     onConnectionStateChange: (state) => {
       console.log("[App] Connection state changed:", state)

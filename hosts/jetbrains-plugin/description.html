@@ -1,31 +1,15 @@
-<h2>OpenCode UX+ (unofficial) JetBrains Plugin</h2>
-<p>Unofficial OpenCode JetBrains plugin.</p>
+<h2>OpenCode UX+ JetBrains Plugin (fengwuxin)</h2>
+<p>OpenCode JetBrains plugin for <b>opencode v2</b>.</p>
 <ul>
-  <li>Drag and drop files to context (JetBrains: from Project Window; VS Code: from Explorer or editor tab)</li>
-  <li>Add all opened files to context via command or shortcut</li>
-  <li>Add current opened file to context via command or shortcut</li>
-  <li>Add selected line ranges to context via command or shortcut</li>
-  <li>Easier prompt editing in a dedicated text area</li>
+  <li>Runs the locally installed <code>opencode serve</code> for the current project</li>
+  <li>Embeds the chat UI in the IDE tool window, scoped to the current project</li>
+  <li>Drag and drop files to add them to the prompt</li>
+  <li>Add the current file / selected line ranges to context via command or shortcut</li>
+  <li>Clicking a file path in a message opens it in the editor</li>
 </ul>
 
 <p>
-  <b>Install only one variant of the plugin.</b>
-</p>
-
-<p>
-  <b>OpenCode UX+ GUI only (unofficial)</b> plugin does not bundle the OpenCode backend executable and <b>requires it to be installed on the system - PATH or OPENCODE_BIN</b>.
-</p>
-
-<p>
-  <b>OpenCode UX+ (unofficial)</b> plugin bundles the OpenCode backend executable for supported platforms and runs it locally. The binaries are
-  stored under <code>src/main/resources/bin</code>
-  inside the plugin and are used to provide the chat and analysis features.
-</p>
-
-<p>
-  <img
-    src="https://raw.githubusercontent.com/paviko/opencode-ide-plugin/ide-plugin/hosts/screenshot.png"
-    alt="OpenCode IDE plugin screenshot"
-    width="600"
-  />
+  <b>Requirements:</b> opencode v2.0.0 or newer installed on the system. The plugin does not
+  bundle the backend. The executable is resolved from the IDE settings, well known install
+  locations (homebrew, nvm, bun, ...) or the shell <code>PATH</code>.
 </p>

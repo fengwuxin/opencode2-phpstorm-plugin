@@ -20,10 +20,27 @@ interface SettingsPanelProps {
 
 type TabType = "general" | "api-keys" | "models" | "advanced"
 
+/**
+ * Config fields the settings panel owns. They are written to the global
+ * opencode.json(c) on save; other fields shown in the tabs are read-only.
+ */
+const CONFIG_FIELDS = [
+  "username",
+  "update",
+  "snapshots",
+  "share",
+  "watcher",
+  "plugins",
+  "model",
+  "small_model",
+  "disabled_providers",
+] as const
+
 export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const [activeTab, setActiveTab] = useState<TabType>("general")
   const [isSaving, setIsSaving] = useState(false)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const { markProvidersDirty } = useProviders()
   const customApi = useCustomApi()
 
@@ -81,23 +98,30 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   const handleSave = async () => {
     setIsSaving(true)
     setSuccessMessage(null)
+    setSaveError(null)
 
     try {
-      // Save config if it changed
-      if (JSON.stringify(formData) !== JSON.stringify(originalFormData)) {
+      // Only the fields owned by this panel are written, and only when they changed:
+      // opencode validates its config strictly, so unrelated form state must not leak in.
+      const patch = Object.fromEntries(
+        CONFIG_FIELDS.filter(
+          (field) => JSON.stringify(formData[field]) !== JSON.stringify(originalFormData[field]),
+        ).map((field) => [field, formData[field]]),
+      )
+
+      if (Object.keys(patch).length > 0) {
         const configResponse = await sdk.config.update({
-          body: formData,
+          body: patch,
         })
 
         if (configResponse.error) {
-          throw new Error("Failed to save config")
+          throw new Error(configResponse.error.message)
         }
 
-        if (configResponse.data) {
-          const savedData = structuredClone(configResponse.data)
-          setFormData(savedData)
-          setOriginalFormData(savedData)
-        }
+        // Keep the form in sync with what was just saved.
+        const savedData = structuredClone(formData)
+        setFormData(savedData)
+        setOriginalFormData(savedData)
       }
 
       // Save API keys (only when custom API is available)
@@ -122,7 +146,8 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         onClose()
       }, 1500)
     } catch (err) {
-      throw err instanceof Error ? err : new Error(String(err))
+      // Keep the panel open and surface the reason instead of failing silently
+      setSaveError(err instanceof Error ? err.message : String(err))
     } finally {
       setIsSaving(false)
     }
@@ -140,6 +165,11 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto px-3 py-3">
+            {saveError && (
+              <div className="mb-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded p-3 text-sm text-red-800 dark:text-red-200">
+                {saveError}
+              </div>
+            )}
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="text-gray-500 dark:text-gray-400">Loading settings...</div>

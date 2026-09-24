@@ -32,14 +32,12 @@ object DragAndDropInstaller {
                         AppExecutorUtil.getAppExecutorService().execute {
                             val filePaths = files.asSequence().filter { it.isFile }.map { it.absolutePath }.toList()
                             if (filePaths.isNotEmpty()) {
-                                IdeBridge.send(project, "insertPaths", mapOf("paths" to filePaths))
+                                PathInserter.insertPaths(project, filePaths)
                             }
 
                             val dirPaths = files.asSequence().filter { it.isDirectory }.map { it.absolutePath }.toList()
-                            if (dirPaths.isNotEmpty()) {
-                                for (dp in dirPaths) {
-                                    IdeBridge.send(project, "pastePath", mapOf("path" to dp))
-                                }
+                            for (dp in dirPaths) {
+                                PathInserter.pastePath(project, dp)
                             }
 
                             try {

@@ -1,8 +1,9 @@
-import type { Config, Provider } from "@opencode-ai/sdk/client"
+import type { Provider } from "@opencode-ai/sdk/client"
+import type { SetSettingsFormData, SettingsFormData } from "./types"
 
 interface ModelsTabProps {
-  formData: Partial<Config>
-  setFormData: (data: Partial<Config>) => void
+  formData: SettingsFormData
+  setFormData: SetSettingsFormData
   providers: Provider[]
   configuredProviders: string[]
 }

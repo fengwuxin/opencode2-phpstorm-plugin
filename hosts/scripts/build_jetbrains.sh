@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Opencode JetBrains Plugin Build Script
-# Supports building two variants:
-#   - Standard:  bundles opencode binaries (default)
-#   - GUI-only:  no binaries, uses system opencode, embeds webgui-dist
+# OpenCode UX+ JetBrains plugin build script (opencode v2, no bundled backend).
 #
-# By default both variants are built. Use --gui-only or --standard-only to
-# build a single variant.
+# The plugin talks to the opencode v2 CLI installed on the system, so no backend
+# binaries are packaged. The UX+ web UI is built from packages/opencode/webgui and
+# embedded into the plugin.
+#
+# Requirements:
+#   - JDK 21 for Gradle (set JAVA_HOME or pass JDK_HOME=/path/to/jdk-21)
+#   - bun (preferred), pnpm or npm for the web UI build
+#
+# Usage:
+#   ./build_jetbrains.sh [--skip-webgui] [--local-ide /Applications/PhpStorm.app] [extra gradle args]
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -16,34 +21,22 @@ GRADLEW="$PLUGIN_DIR/gradlew"
 WEBGUI_DIR="$ROOT_DIR/packages/opencode/webgui"
 WEBGUI_DIST="$ROOT_DIR/packages/opencode/webgui-dist"
 
-BUILD_STANDARD=true
-BUILD_GUI_ONLY=true
-SKIP_BINARIES=false
+SKIP_WEBGUI=false
+LOCAL_IDE=""
 EXTRA_ARGS=()
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --gui-only)
-      BUILD_STANDARD=false
-      BUILD_GUI_ONLY=true
+    --skip-webgui)
+      SKIP_WEBGUI=true
       shift
       ;;
-    --standard-only)
-      BUILD_STANDARD=true
-      BUILD_GUI_ONLY=false
-      shift
-      ;;
-    --skip-binaries)
-      SKIP_BINARIES=true
-      shift
+    --local-ide)
+      LOCAL_IDE="$2"
+      shift 2
       ;;
     --help)
-      echo "Usage: $0 [OPTIONS]"
-      echo "Options:"
-      echo "  --gui-only        Build only the gui-only variant (no binaries)"
-      echo "  --standard-only   Build only the standard variant (with binaries)"
-      echo "  --skip-binaries   Skip building backend binaries"
-      echo "  --help            Show this help message"
+      echo "Usage: $0 [--skip-webgui] [--local-ide <IDE path>] [gradle args]"
       exit 0
       ;;
     *)
@@ -53,78 +46,72 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-echo "Opencode JetBrains Plugin Build Script"
-echo "Plugin directory: $PLUGIN_DIR"
-[ "$BUILD_STANDARD" = true ] && echo "  Variant: standard (with binaries)"
-[ "$BUILD_GUI_ONLY" = true ] && echo "  Variant: gui-only (system opencode)"
+if [[ -n "${JDK_HOME:-}" ]]; then
+  export JAVA_HOME="$JDK_HOME"
+fi
 
-echo "=> Verifying JetBrains plugin workspace"
-if [ ! -d "$PLUGIN_DIR" ]; then
-  echo "Error: JetBrains plugin directory not found at $PLUGIN_DIR" >&2
+if [[ -z "${JAVA_HOME:-}" ]]; then
+  echo "Error: JAVA_HOME is not set. JDK 21 is required to run Gradle." >&2
   exit 1
 fi
 
-if [ ! -x "$GRADLEW" ] && [ -f "$GRADLEW" ]; then
-  chmod +x "$GRADLEW"
-fi
+echo "OpenCode UX+ JetBrains plugin build"
+echo "  plugin : $PLUGIN_DIR"
+echo "  java   : $JAVA_HOME"
 
-if [ ! -f "$GRADLEW" ]; then
-  echo "Error: gradlew not found at $GRADLEW" >&2
-  exit 1
-fi
+# ─── Web UI ──────────────────────────────────────────────────────────────
 
-# ─── Standard variant ────────────────────────────────────────────────────
-
-if [ "$BUILD_STANDARD" = true ]; then
-  echo "=> Building standard variant"
-
-  if [ "$SKIP_BINARIES" = false ]; then
-    echo "=> Building opencode binaries"
-    "$SCRIPT_DIR/build_opencode.sh"
-  fi
-
-  cd "$PLUGIN_DIR"
-  "$GRADLEW" clean buildPlugin "${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}"
-  echo "=> Standard variant built"
-fi
-
-# ─── GUI-only variant ────────────────────────────────────────────────────
-
-if [ "$BUILD_GUI_ONLY" = true ]; then
-  echo "=> Building gui-only variant"
-
-  # Build webgui if webgui-dist doesn't exist yet
-  if [ ! -d "$WEBGUI_DIST" ] || [ -z "$(ls -A "$WEBGUI_DIST" 2>/dev/null)" ]; then
-    echo "=> Building webgui..."
-    cd "$WEBGUI_DIR"
+if [[ "$SKIP_WEBGUI" == false ]]; then
+  echo "=> Building web UI"
+  cd "$WEBGUI_DIR"
+  if [[ ! -d node_modules ]]; then
     if command -v bun >/dev/null 2>&1; then
-      bun run build
+      bun install
     elif command -v pnpm >/dev/null 2>&1; then
-      pnpm run build
+      pnpm install
     else
-      npm run build
+      npm install
     fi
   fi
 
-  if [ ! -d "$WEBGUI_DIST" ]; then
-    echo "Error: webgui-dist not found at $WEBGUI_DIST after build" >&2
-    exit 1
+  if command -v bun >/dev/null 2>&1; then
+    bun run build
+  elif command -v pnpm >/dev/null 2>&1; then
+    pnpm run build
+  else
+    npm run build
   fi
-
-  cd "$PLUGIN_DIR"
-  "$GRADLEW" buildPlugin -PguiOnly=true "-PwebguiDist=$WEBGUI_DIST" "${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}"
-  echo "=> GUI-only variant built"
 fi
 
-echo "=> Build completed"
+if [[ ! -d "$WEBGUI_DIST" ]]; then
+  echo "Error: web UI build output not found at $WEBGUI_DIST" >&2
+  exit 1
+fi
 
-# List output artifacts
+# ─── Plugin ──────────────────────────────────────────────────────────────
+
+echo "=> Building plugin"
+if [[ ! -x "$GRADLEW" && -f "$GRADLEW" ]]; then
+  chmod +x "$GRADLEW"
+fi
+
+cd "$PLUGIN_DIR"
+# withWebgui=true embeds the built web UI into the plugin; without it Gradle only
+# packs the Kotlin code and the plugin falls back to the official opencode web UI.
+GRADLE_ARGS=(buildPlugin -PguiOnly=true -PwithWebgui=true "-PwebguiDist=$WEBGUI_DIST")
+if [[ -n "$LOCAL_IDE" ]]; then
+  GRADLE_ARGS+=("-PlocalIde=$LOCAL_IDE")
+fi
+
+"$GRADLEW" "${GRADLE_ARGS[@]}" "${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}"
+
+echo "=> Build completed"
 shopt -s nullglob
-ARTIFACTS=( "$PLUGIN_DIR"/build/distributions/*.zip )
+ARTIFACTS=("$PLUGIN_DIR"/build/distributions/*.zip)
 shopt -u nullglob
 if ((${#ARTIFACTS[@]} > 0)); then
   echo "Artifacts:"
   for a in "${ARTIFACTS[@]}"; do
-    echo "  $(basename "$a")"
+    echo "  $a"
   done
 fi

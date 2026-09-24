@@ -10,8 +10,12 @@ import java.util.concurrent.Executors
 
 /**
  * Lightweight HTTP server that serves the embedded webgui-dist files
- * under the `/app/` prefix and injects `window.__OPENCODE_SERVER_URL__`
- * into index.html so the webgui can reach the opencode REST API.
+ * under the `/app/` prefix and injects the opencode server location into
+ * index.html so the webgui can reach the opencode v2 REST API.
+ *
+ * Injected globals:
+ *  - `window.__OPENCODE_SERVER_URL__`: absolute base URL of the opencode server
+ *  - `window.__OPENCODE_AUTH__`: base64 encoded `opencode:<password>` credentials
  *
  * Mirrors hosts/vscode-plugin/src/ui/WebguiStaticServer.ts
  */
@@ -41,17 +45,17 @@ object WebguiStaticServer {
     )
 
     @Synchronized
-    fun start(root: String, opencodeServerUrl: String): String {
+    fun start(root: String, opencodeServerUrl: String, authToken: String?): String {
         val canonicalRoot = File(root).canonicalPath
         val normalizedServerUrl = opencodeServerUrl.trimEnd('/')
-        val key = "$canonicalRoot|$normalizedServerUrl"
+        val key = "$canonicalRoot|$normalizedServerUrl|${authToken ?: ""}"
 
         val existing = instances[key]
         if (existing != null) return existing.base
 
         val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0).apply {
             executor = Executors.newCachedThreadPool()
-            createContext("/") { exchange -> handle(exchange, canonicalRoot, normalizedServerUrl) }
+            createContext("/") { exchange -> handle(exchange, canonicalRoot, normalizedServerUrl, authToken) }
             start()
         }
         val base = "http://127.0.0.1:${server.address.port}"
@@ -75,7 +79,7 @@ object WebguiStaticServer {
         instances.remove(target.key)
     }
 
-    private fun handle(exchange: HttpExchange, rootDir: String, serverUrl: String) {
+    private fun handle(exchange: HttpExchange, rootDir: String, serverUrl: String, authToken: String?) {
         exchange.responseHeaders.apply {
             add("Access-Control-Allow-Origin", "*")
             add("Access-Control-Allow-Methods", "GET, OPTIONS")
@@ -139,7 +143,7 @@ object WebguiStaticServer {
             if (isSpaRoute) {
                 val index = File(rootDir, "index.html")
                 if (index.exists()) {
-                    serveFile(exchange, index, true, serverUrl)
+                    serveFile(exchange, index, true, serverUrl, authToken)
                     return
                 }
             }
@@ -148,17 +152,26 @@ object WebguiStaticServer {
             return
         }
 
-        serveFile(exchange, file, file.name == "index.html", serverUrl)
+        serveFile(exchange, file, file.name == "index.html", serverUrl, authToken)
     }
 
-    private fun serveFile(exchange: HttpExchange, file: File, inject: Boolean, serverUrl: String) {
+    private fun serveFile(exchange: HttpExchange, file: File, inject: Boolean, serverUrl: String, authToken: String?) {
         val ext = file.extension.let { if (it.isNotEmpty()) ".$it" else "" }.lowercase()
         val mime = MIME[ext] ?: "application/octet-stream"
 
         if (inject && ext == ".html") {
             var html = file.readText(Charsets.UTF_8)
-            val escaped = serverUrl.replace("\"", "\\\"")
-            val script = "<script>window.__OPENCODE_SERVER_URL__=\"$escaped\";</script>"
+            val script = buildString {
+                append("<script>window.__OPENCODE_SERVER_URL__=\"")
+                append(serverUrl.replace("\"", "\\\""))
+                append("\";")
+                if (!authToken.isNullOrEmpty()) {
+                    append("window.__OPENCODE_AUTH__=\"")
+                    append(authToken.replace("\"", "\\\""))
+                    append("\";")
+                }
+                append("</script>")
+            }
             val idx = html.indexOf("<script")
             html = if (idx != -1) {
                 html.substring(0, idx) + script + "\n    " + html.substring(idx)

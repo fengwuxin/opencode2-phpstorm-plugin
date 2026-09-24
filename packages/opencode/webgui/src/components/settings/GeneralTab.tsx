@@ -1,9 +1,9 @@
-import type { Config } from "@opencode-ai/sdk/client"
 import { useProject } from "../../state/ProjectContext"
+import type { SetSettingsFormData, SettingsFormData } from "./types"
 
 interface GeneralTabProps {
-  formData: Partial<Config>
-  setFormData: (data: Partial<Config>) => void
+  formData: SettingsFormData
+  setFormData: SetSettingsFormData
 }
 
 export function GeneralTab({ formData, setFormData }: GeneralTabProps) {
@@ -23,24 +23,25 @@ export function GeneralTab({ formData, setFormData }: GeneralTabProps) {
       </div>
 
       <div>
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            checked={formData.autoupdate === true}
-            onChange={(e) => setFormData({ ...formData, autoupdate: e.target.checked })}
-            className="rounded border-gray-300 dark:border-gray-700"
-          />
-          <span className="text-sm text-gray-700 dark:text-gray-300">Auto-update</span>
-        </label>
-        <p className="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">Automatically update to the latest version</p>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Auto-update</label>
+        <select
+          value={formData.update || "auto"}
+          onChange={(e) => setFormData({ ...formData, update: e.target.value as "disable" | "notify" | "auto" })}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="auto">Auto</option>
+          <option value="notify">Notify</option>
+          <option value="disable">Disable</option>
+        </select>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Update opencode automatically, on notification or never</p>
       </div>
 
       <div>
         <label className="flex items-center space-x-2">
           <input
             type="checkbox"
-            checked={formData.snapshot ?? false}
-            onChange={(e) => setFormData({ ...formData, snapshot: e.target.checked })}
+            checked={formData.snapshots ?? false}
+            onChange={(e) => setFormData({ ...formData, snapshots: e.target.checked })}
             className="rounded border-gray-300 dark:border-gray-700"
           />
           <span className="text-sm text-gray-700 dark:text-gray-300">Enable snapshots</span>

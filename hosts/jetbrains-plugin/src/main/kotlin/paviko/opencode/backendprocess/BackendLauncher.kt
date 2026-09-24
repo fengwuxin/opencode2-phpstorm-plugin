@@ -13,6 +13,7 @@ package paviko.opencode.backendprocess
  * - Maintains compatibility with ShellTerminalWidget for terminal output capture
  */
 
+import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -23,25 +24,41 @@ import com.intellij.util.Alarm
 import org.jetbrains.plugins.terminal.ShellTerminalWidget
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager
 import paviko.opencode.settings.OpenCodeSettings
+import java.io.File
 import java.io.PipedOutputStream
+import java.security.SecureRandom
+import java.util.Base64
 import javax.swing.JComponent
 import javax.swing.SwingUtilities
+
+/**
+ * Result of launching the opencode backend: the process handle plus the password the
+ * server was started with (opencode v2 always protects its HTTP API with basic auth).
+ */
+data class BackendLaunch(val process: BackendProcess, val password: String?)
 
 object BackendLauncher {
     private val logger = Logger.getInstance(BackendLauncher::class.java)
 
+    /** Environment variable opencode v2 reads for the HTTP API password. */
+    const val PASSWORD_ENV = "OPENCODE_PASSWORD"
+
+    /** Username expected by the opencode v2 basic auth middleware. */
+    const val PASSWORD_USER = "opencode"
+
+    /** Password length in random bytes (base64url encoded, no padding). */
+    private const val PASSWORD_BYTES = 32
+
     /**
-     * Launches the backend process.
+     * Launches the opencode v2 backend process.
      */
-    fun launchBackend(project: Project): BackendProcess {
+    fun launchBackend(project: Project): BackendLaunch {
         require(!ApplicationManager.getApplication().isDispatchThread) {
             "launchBackend must not be called from EDT - it performs heavy I/O operations"
         }
-        val isWin = System.getProperty("os.name").lowercase().contains("win")
-        val bin = findBundledBinary(if (isWin) "opencode.exe" else "opencode") ?: "opencode" // fallback to PATH
 
         val settings = OpenCodeSettings.getInstance()
-
+        val bin = resolveExecutable(settings.state.executablePath)
         val customCommand = settings.state.customCommand.trim()
 
         // Build command arguments
@@ -55,17 +72,24 @@ object BackendLauncher {
             logger.info("Launching backend with default args")
         }
 
+        // opencode v2 generates a random password unless one is provided. Injecting our own
+        // password keeps the API reachable for the embedded UI and avoids parsing stdout.
+        // Windows shells need a different syntax, so there the password is parsed from the log.
+        val password = if (isWindows()) null else generatePassword()
+        logger.info("Backend executable: $bin (password injected: ${password != null})")
+
         val baseDir = project.basePath ?: System.getProperty("user.dir")
-        
+
         // Return a TerminalBackendProcess (async wrapper) that handles terminal waiting internally
-        return TerminalBackendProcess(project, args, baseDir, customCommand)
+        return BackendLaunch(TerminalBackendProcess(project, args, baseDir, customCommand, password), password)
     }
-    
+
     internal fun launchBackendWithTerminalCheck(
         project: Project,
         args: List<String>,
         baseDir: String,
         customCommand: String,
+        password: String?,
         outputBuffer: PipedOutputStream,
         callback: (BackendProcess?, Exception?) -> Unit
     ) {
@@ -73,7 +97,7 @@ object BackendLauncher {
         waitForTerminalAvailabilityAsync(project) { success, isVisible ->
             if (success) {
                 try {
-                    val result = doLaunchBackend(project, args, baseDir, customCommand, outputBuffer, isVisible)
+                    val result = doLaunchBackend(project, args, baseDir, customCommand, password, outputBuffer, isVisible)
                     callback(result, null)
                 } catch (e: Exception) {
                     callback(null, e)
@@ -82,6 +106,51 @@ object BackendLauncher {
                 callback(null, RuntimeException("Terminal tool window is not available. Please ensure the Terminal plugin is installed and enabled."))
             }
         }
+    }
+
+    private fun isWindows(): Boolean = System.getProperty("os.name").lowercase().contains("win")
+
+    private fun generatePassword(): String {
+        val bytes = ByteArray(PASSWORD_BYTES)
+        SecureRandom().nextBytes(bytes)
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
+    }
+
+    /**
+     * Resolves the opencode executable: explicit setting first, then well known install
+     * locations (homebrew, nvm, bun, ...) and finally the IDE process PATH.
+     */
+    private fun resolveExecutable(configuredPath: String): String {
+        val name = if (isWindows()) "opencode.exe" else "opencode"
+
+        val explicit = configuredPath.trim()
+        if (explicit.isNotEmpty()) {
+            if (File(explicit).isFile) return explicit
+            logger.warn("Configured opencode executable not found: $explicit")
+        }
+
+        val home = System.getProperty("user.home")
+        val candidates = buildList {
+            add("/opt/homebrew/bin/$name")
+            add("/usr/local/bin/$name")
+            add("$home/.local/bin/$name")
+            add("$home/.bun/bin/$name")
+            add("$home/.opencode/bin/$name")
+            val nvmVersions = File(home, ".nvm/versions/node")
+            if (nvmVersions.isDirectory) {
+                nvmVersions.listFiles()
+                    ?.filter { it.isDirectory }
+                    ?.sortedByDescending { it.name }
+                    ?.forEach { add(File(File(it, "bin"), name).absolutePath) }
+            }
+        }
+        candidates.firstOrNull { File(it).isFile }?.let { return it }
+
+        // Fall back to the IDE process PATH (works when PhpStorm was started from a shell)
+        PathEnvironmentVariableUtil.findInPath(name)?.let { return it.absolutePath }
+
+        // Last resort: let the terminal shell resolve it, it has the user's own PATH
+        return name
     }
     
     /**
@@ -129,13 +198,14 @@ object BackendLauncher {
         args: List<String>,
         baseDir: String,
         customCommand: String,
+        password: String?,
         outputBuffer: PipedOutputStream,
         isVisible: Boolean
     ): BackendProcess {
         // At this point, terminal should be available
         return try {
             logger.info("Starting backend in minimized terminal: ${args.joinToString(" ")}")
-            launchInTerminal(project, args, baseDir, outputBuffer, isVisible, minimized = true)
+            launchInTerminal(project, args, baseDir, password, outputBuffer, isVisible, minimized = true)
         } catch (e: Exception) {
             // If launching with custom command fails, try with default command
             if (customCommand.isNotEmpty()) {
@@ -146,7 +216,7 @@ object BackendLauncher {
                     val bin = args.first()
                     val fallbackArgs = listOf(bin, "serve")
                     logger.info("Starting fallback backend in minimized terminal: ${fallbackArgs.joinToString(" ")}")
-                    launchInTerminal(project, fallbackArgs, baseDir, outputBuffer, isVisible, minimized = true)
+                    launchInTerminal(project, fallbackArgs, baseDir, password, outputBuffer, isVisible, minimized = true)
                 } catch (fallbackException: Exception) {
                     logger.error("Fallback backend launch also failed", fallbackException)
                     throw RuntimeException("Failed to launch backend with custom command '$customCommand' and fallback also failed: ${fallbackException.message}")
@@ -275,6 +345,7 @@ object BackendLauncher {
         project: Project,
         args: List<String>,
         workingDir: String,
+        password: String?,
         outputBuffer: PipedOutputStream,
         isVisible: Boolean,
         minimized: Boolean = false 
@@ -286,7 +357,7 @@ object BackendLauncher {
         // with the desired working directory, so we can execute the backend command directly
         // without shell-specific 'cd' or chaining operators that vary by shell (cmd vs PowerShell).
         val adjustedArgs = args.toList()
-        val command = (listOf(quoteIfNeeded(adjustedArgs.first())) + adjustedArgs.drop(1)).joinToString(" ")
+        val command = buildCommand(adjustedArgs, password)
         
         // Create a terminal-only backend process
         val backendProcess = RunningTerminalBackendProcess(shellWidget, adjustedArgs.joinToString(" "), outputBuffer)
@@ -473,37 +544,21 @@ object BackendLauncher {
     }
 
 
-    private fun ensureQuoted(value: String): String {
-        val t = value.trim()
-        return if (t.startsWith("\"") && t.endsWith("\"")) t else "\"$t\""
+    /**
+     * Builds the shell command line. On POSIX systems the injected password is exported
+     * inline so opencode v2 starts with a known HTTP API password.
+     */
+    private fun buildCommand(args: List<String>, password: String?): String {
+        val command = (listOf(quoteIfNeeded(args.first())) + args.drop(1)).joinToString(" ")
+        if (password.isNullOrEmpty() || isWindows()) return command
+        return "$PASSWORD_ENV='$password' $command"
     }
 
     private fun quoteIfNeeded(path: String): String {
-        val isWin = System.getProperty("os.name").lowercase().contains("win")
-        if (!isWin) return path
         val trimmed = path.trim()
+        if (!isWindows()) return trimmed
         val needsQuotes = trimmed.any { it.isWhitespace() } || trimmed.contains("(") || trimmed.contains(")") || trimmed.contains("&")
         return if (needsQuotes && !(trimmed.startsWith("\"") && trimmed.endsWith("\""))) "\"$trimmed\"" else trimmed
-    }
-
-    private fun findBundledBinary(name: String): String? {
-        val override = System.getenv("OPENCODE_BIN")
-        if (!override.isNullOrBlank()) return override
-        val os = System.getProperty("os.name").lowercase()
-        val arch = System.getProperty("os.arch").lowercase()
-        val osDir = when {
-            os.contains("win") -> "windows"
-            os.contains("mac") || os.contains("darwin") -> "macos"
-            os.contains("nux") || os.contains("linux") -> "linux"
-            else -> null
-        } ?: return null
-        val archDir = when {
-            arch.contains("aarch64") || arch.contains("arm64") -> "arm64"
-            arch.contains("64") -> "amd64"
-            else -> null
-        } ?: return null
-        val resourcePath = "bin/$osDir/$archDir/$name"
-        return paviko.opencode.util.ResourceExtractor.extractToTemp(resourcePath, name)
     }
 
     /**

@@ -1,4 +1,39 @@
-<h2>OpenCode UX+ (unofficial) JetBrains Plugin Changelog</h2>
+<h2>OpenCode UX+ (fengwuxin) JetBrains Plugin Changelog</h2>
+
+<h3>26.9.2403</h3>
+<ul>
+  <li>Pasting images works again: inside the IDE the clipboard is read by the plugin, because JetBrains' embedded browser does not always expose clipboard images to the page</li>
+</ul>
+
+<h3>26.9.2402</h3>
+<ul>
+  <li>Settings: saving works again — changes are written to the global <code>opencode.json(c)</code>, since the opencode v2 server has no config write API</li>
+  <li>Settings: failed saves show the reason in the panel instead of silently doing nothing</li>
+  <li>Settings: config fields now use the opencode v2 names (<code>update</code>, <code>snapshots</code>, <code>plugins</code>) so the current values are displayed correctly</li>
+</ul>
+
+<h3>26.9.2401</h3>
+<ul>
+  <li>Fix the reasoning effort selector offering "0 / 1 / 2" instead of the model variants (opencode v2 returns variants as an array)</li>
+  <li>Reset a stored reasoning variant when the selected model does not offer it</li>
+</ul>
+
+<h3>26.9.24</h3>
+<ul>
+  <li>Show sent user messages again (opencode v2 delivers them through the inbox event)</li>
+  <li>Scope the session list to the current project</li>
+  <li>Plugin id, name and vendor are now fengwuxin</li>
+</ul>
+
+<h3>26.9.23</h3>
+<ul>
+  <li>opencode v2 support (v2 only, v1 is no longer supported)</li>
+  <li>Runs the locally installed <code>opencode serve</code> and connects the IDE tool window to its web UI</li>
+  <li>Handles the opencode v2 HTTP basic auth automatically (password is injected on launch)</li>
+  <li>New setting: path to the opencode executable (auto detected when empty)</li>
+  <li>Removed bundled v1 backend binaries and the v1 REST/ideBridge coupling</li>
+  <li>"Add to context" / drag and drop fall back to copying the path to the clipboard</li>
+</ul>
 
 <h3>26.5.13</h3>
 <ul>

@@ -1,140 +1,84 @@
-<p align="center">
-  <a href="https://opencode.ai">
-    <picture>
-      <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="packages/console/app/src/asset/logo-ornate-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="OpenCode logo">
-    </picture>
-  </a>
-</p>
-<p align="center">开源的 AI Coding Agent。</p>
-<p align="center">
-  <a href="https://opencode.ai/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
-  <a href="https://www.npmjs.com/package/opencode-ai"><img alt="npm" src="https://img.shields.io/npm/v/opencode-ai?style=flat-square" /></a>
-  <a href="https://github.com/anomalyco/opencode/actions/workflows/publish.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/opencode/publish.yml?style=flat-square&branch=dev" /></a>
-</p>
+# OpenCode UX+ —— JetBrains / PhpStorm 插件
 
-<p align="center">
-  <a href="README.md">English</a> |
-  <a href="README.zh.md">简体中文</a> |
-  <a href="README.zht.md">繁體中文</a> |
-  <a href="README.ko.md">한국어</a> |
-  <a href="README.de.md">Deutsch</a> |
-  <a href="README.es.md">Español</a> |
-  <a href="README.fr.md">Français</a> |
-  <a href="README.it.md">Italiano</a> |
-  <a href="README.da.md">Dansk</a> |
-  <a href="README.ja.md">日本語</a> |
-  <a href="README.pl.md">Polski</a> |
-  <a href="README.ru.md">Русский</a> |
-  <a href="README.bs.md">Bosanski</a> |
-  <a href="README.ar.md">العربية</a> |
-  <a href="README.no.md">Norsk</a> |
-  <a href="README.br.md">Português (Brasil)</a> |
-  <a href="README.th.md">ไทย</a> |
-  <a href="README.tr.md">Türkçe</a> |
-  <a href="README.uk.md">Українська</a> |
-  <a href="README.bn.md">বাংলা</a> |
-  <a href="README.gr.md">Ελληνικά</a> |
-  <a href="README.vi.md">Tiếng Việt</a>
-</p>
+面向 **opencode v2** 的非官方 [opencode](https://opencode.ai) 插件，支持 JetBrains 全家桶
+（PhpStorm、IntelliJ IDEA、WebStorm 等）。
 
-[![OpenCode Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://opencode.ai)
+它为你当前打开的项目启动 `opencode serve`，并把聊天界面嵌进工具窗口，另外提供了一些 IDE 集成能力。
 
----
+[English](README.md) | [简体中文](README.zh.md)
 
-### 安装
+## 功能
 
-```bash
-# 直接安装 (YOLO)
-curl -fsSL https://opencode.ai/install | bash
+- 使用系统已安装的 `opencode`（v2）为当前项目启动后端，插件不内置后端二进制
+- 工具窗口内的聊天界面，会话列表按当前项目过滤
+- 从 Project 视图拖拽文件到输入框，直接加入上下文
+- 通过菜单或快捷键把当前文件 / 选中行加入上下文（`Ctrl/Cmd + \`、`Ctrl/Cmd + Shift + \`）
+- 点击消息里的文件路径直接在编辑器中打开
+- 自动处理 opencode 服务端的 HTTP Basic 鉴权
 
-# 软件包管理器
-npm i -g opencode-ai@latest        # 也可使用 bun/pnpm/yarn
-scoop install opencode             # Windows
-choco install opencode             # Windows
-brew install anomalyco/tap/opencode # macOS 和 Linux（推荐，始终保持最新）
-brew install opencode              # macOS 和 Linux（官方 brew formula，更新频率较低）
-sudo pacman -S opencode            # Arch Linux (Stable)
-paru -S opencode-bin               # Arch Linux (Latest from AUR)
-mise use -g opencode               # 任意系统
-nix run nixpkgs#opencode           # 或用 github:anomalyco/opencode 获取最新 dev 分支
-```
+## 环境要求
 
-> [!TIP]
-> 安装前请先移除 0.1.x 之前的旧版本。
+- **opencode v2.0.0 或更高版本**，已安装且在 `PATH` 中（或在设置里指定路径）
+- IntelliJ 系 IDE **2024.3（build 243）或更高版本**，且启用了 JCEF
 
-### 桌面应用程序 (BETA)
+## 安装
 
-OpenCode 也提供桌面版应用。可直接从 [发布页 (releases page)](https://github.com/anomalyco/opencode/releases) 或 [opencode.ai/download](https://opencode.ai/download) 下载。
+1. 从 Releases 下载 `opencode-plugin-gui-only-<版本>.zip`（也可以自行构建，见下文）
+2. IDE 中打开 `Settings → Plugins → ⚙ → Install Plugin from Disk…`
+3. 选择该 zip 并重启 IDE
+4. 打开右侧的 **OpenCode** 工具窗口
 
-| 平台                  | 下载文件                           |
-| --------------------- | ---------------------------------- |
-| macOS (Apple Silicon) | `opencode-desktop-mac-arm64.dmg`   |
-| macOS (Intel)         | `opencode-desktop-mac-x64.dmg`     |
-| Windows               | `opencode-desktop-windows-x64.exe` |
-| Linux                 | `.deb`、`.rpm` 或 AppImage         |
+如果之前装过上游 `paviko` 的版本，请先卸载 —— 两者注册的是同一个工具窗口。
+
+## 设置
+
+`Settings → Tools → OpenCode Plug`
+
+| 设置项 | 说明 |
+| --- | --- |
+| opencode executable | `opencode` 可执行文件的绝对路径；留空则自动查找（homebrew、nvm、bun、`~/.local/bin`、`PATH`） |
+| Additional serve args | 追加到 `opencode serve` 之后的额外参数 |
+
+## 工作原理
+
+1. 插件在 IDE 终端里以项目目录为工作目录启动 `opencode serve`，并注入随机生成的 `OPENCODE_PASSWORD`，
+   让 HTTP API 既可访问又受保护
+2. 等待输出 `server listening on http://…`，并通过 `GET /api/info` 校验服务端
+3. 内置的本地静态服务器托管 web UI，并把服务端地址与鉴权信息注入页面
+4. UI 通过 opencode v2 的 REST API（`/api/*`）和 `/api/event` 事件流通信，事件会被投影回
+   UI 使用的消息/片段模型
+
+## 从源码构建
+
+前置条件：JDK 21 与 [bun](https://bun.sh)（也可以用 pnpm/npm）。
 
 ```bash
-# macOS (Homebrew Cask)
-brew install --cask opencode-desktop
-# Windows (Scoop)
-scoop bucket add extras; scoop install extras/opencode-desktop
+JAVA_HOME=/path/to/jdk-21 ./hosts/scripts/build_jetbrains.sh
 ```
 
-#### 安装目录
-
-安装脚本按照以下优先级决定安装路径：
-
-1. `$OPENCODE_INSTALL_DIR` - 自定义安装目录
-2. `$XDG_BIN_DIR` - 符合 XDG 基础目录规范的路径
-3. `$HOME/bin` - 如果存在或可创建的用户二进制目录
-4. `$HOME/.opencode/bin` - 默认备用路径
+可选参数：
 
 ```bash
-# 示例
-OPENCODE_INSTALL_DIR=/usr/local/bin curl -fsSL https://opencode.ai/install | bash
-XDG_BIN_DIR=$HOME/.local/bin curl -fsSL https://opencode.ai/install | bash
+# 复用已经构建好的 web UI
+JAVA_HOME=/path/to/jdk-21 ./hosts/scripts/build_jetbrains.sh --skip-webgui
+
+# 使用本地已安装的 IDE 编译，避免下载完整 IDEA 发行版
+JAVA_HOME=/path/to/jdk-21 ./hosts/scripts/build_jetbrains.sh --local-ide /Applications/PhpStorm.app
 ```
 
-### Agents
+插件 zip 会生成到 `hosts/jetbrains-plugin/build/distributions/`。
 
-OpenCode 内置两种 Agent，可用 `Tab` 键快速切换：
+## 说明
 
-- **build** - 默认模式，具备完整权限，适合开发工作
-- **plan** - 只读模式，适合代码分析与探索
-  - 默认拒绝修改文件
-  - 运行 bash 命令前会询问
-  - 便于探索未知代码库或规划改动
+- 这是只支持 v2 的分支：已移除内置的 v1 后端二进制和 v1 REST 兼容层
+- 在设置面板中修改 opencode 配置、以及会话分享，v2 API 暂不支持，目前是空实现
+- 与 opencode 官方团队、以及上游 `opencode-ide-plugin` 项目均无隶属关系
 
-另外还包含一个 **general** 子 Agent，用于复杂搜索和多步任务，内部使用，也可在消息中输入 `@general` 调用。
+## 致谢
 
-了解更多 [Agents](https://opencode.ai/docs/agents) 相关信息。
+- [opencode](https://github.com/anomalyco/opencode) —— 智能体本体与其 web UI
+- [paviko/opencode-ide-plugin](https://github.com/paviko/opencode-ide-plugin) —— 本分支基于的原始 IDE 插件
 
-### 文档
+## 许可
 
-更多配置说明请查看我们的 [**官方文档**](https://opencode.ai/docs)。
-
-### 参与贡献
-
-如有兴趣贡献代码，请在提交 PR 前阅读 [贡献指南 (Contributing Docs)](./CONTRIBUTING.md)。
-
-### 基于 OpenCode 进行开发
-
-如果你在项目名中使用了 “opencode”（如 “opencode-dashboard” 或 “opencode-mobile”），请在 README 里注明该项目不是 OpenCode 团队官方开发，且不存在隶属关系。
-
-### 常见问题 (FAQ)
-
-#### 这和 Claude Code 有什么不同？
-
-功能上很相似，关键差异：
-
-- 100% 开源。
-- 不绑定特定提供商。推荐使用 [OpenCode Zen](https://opencode.ai/zen) 的模型，但也可搭配 Claude、OpenAI、Google 甚至本地模型。模型迭代会缩小差异、降低成本，因此保持 provider-agnostic 很重要。
-- 内置 LSP 支持。
-- 聚焦终端界面 (TUI)。OpenCode 由 Neovim 爱好者和 [terminal.shop](https://terminal.shop) 的创建者打造，会持续探索终端的极限。
-- 客户端/服务器架构。可在本机运行，同时用移动设备远程驱动。TUI 只是众多潜在客户端之一。
-
----
-
-**加入我们的社区** [飞书](https://applink.feishu.cn/client/chat/chatter/add_by_link?link_token=738j8655-cd59-4633-a30a-1124e0096789&qr_code=true) | [X.com](https://x.com/opencode)
+MIT，详见 [LICENSE](LICENSE)。

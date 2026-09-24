@@ -1,151 +1,87 @@
-# Unofficial OpenCode JetBrain / VSCode plugin
+# OpenCode UX+ — JetBrains / PhpStorm plugin
 
-- Drag and drop files to context (JetBrains: from Project Window; VS Code: from Explorer or editor tab)
-- Add all opened files to context via command/shortcut
-- Add current opened file to context via command/shortcut
-- Add selected line ranges to context via command/shortcut
-- Easier prompt editing in a dedicated text area
+Unofficial [opencode](https://opencode.ai) plugin for JetBrains IDEs (PhpStorm, IntelliJ IDEA, WebStorm, ...),
+built for **opencode v2**.
 
-<img src="hosts/screenshot.png" alt="OpenCode IDE plugin" width="600" />
+It runs the `opencode serve` process for the project you have open and embeds the chat UI in a tool window,
+with a few IDE integrations on top.
 
-<p align="center">
-  <a href="https://opencode.ai">
-    <picture>
-      <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="packages/console/app/src/asset/logo-ornate-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="OpenCode logo">
-    </picture>
-  </a>
-</p>
-<p align="center">The open source AI coding agent.</p>
-<p align="center">
-  <a href="https://opencode.ai/discord"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
-  <a href="https://www.npmjs.com/package/opencode-ai"><img alt="npm" src="https://img.shields.io/npm/v/opencode-ai?style=flat-square" /></a>
-  <a href="https://github.com/anomalyco/opencode/actions/workflows/publish.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/anomalyco/opencode/publish.yml?style=flat-square&branch=dev" /></a>
-</p>
+[English](README.md) | [简体中文](README.zh.md)
 
-<p align="center">
-  <a href="README.md">English</a> |
-  <a href="README.zh.md">简体中文</a> |
-  <a href="README.zht.md">繁體中文</a> |
-  <a href="README.ko.md">한국어</a> |
-  <a href="README.de.md">Deutsch</a> |
-  <a href="README.es.md">Español</a> |
-  <a href="README.fr.md">Français</a> |
-  <a href="README.it.md">Italiano</a> |
-  <a href="README.da.md">Dansk</a> |
-  <a href="README.ja.md">日本語</a> |
-  <a href="README.pl.md">Polski</a> |
-  <a href="README.ru.md">Русский</a> |
-  <a href="README.bs.md">Bosanski</a> |
-  <a href="README.ar.md">العربية</a> |
-  <a href="README.no.md">Norsk</a> |
-  <a href="README.br.md">Português (Brasil)</a> |
-  <a href="README.th.md">ไทย</a> |
-  <a href="README.tr.md">Türkçe</a> |
-  <a href="README.uk.md">Українська</a> |
-  <a href="README.bn.md">বাংলা</a> |
-  <a href="README.gr.md">Ελληνικά</a> |
-  <a href="README.vi.md">Tiếng Việt</a>
-</p>
+## Features
 
-[![OpenCode Terminal UI](packages/web/src/assets/lander/screenshot.png)](https://opencode.ai)
+- Runs the locally installed `opencode` (v2) for the current project — no backend is bundled
+- Chat UI in a tool window, scoped to the current project
+- Drag and drop files from the Project view into the prompt
+- Add the current file / selected line ranges to the prompt via action or shortcut
+  (`Ctrl/Cmd + \`, `Ctrl/Cmd + Shift + \`)
+- Clicking a file path in a message opens it in the editor
+- HTTP basic auth of the opencode server is handled automatically
 
----
+## Requirements
 
-### Installation
+- **opencode v2.0.0 or newer**, installed and available on `PATH` (or configured in the settings)
+- IntelliJ based IDE **2024.3 (build 243) or newer**, with JCEF enabled
 
-```bash
-# YOLO
-curl -fsSL https://opencode.ai/install | bash
+## Installation
 
-# Package managers
-npm i -g opencode-ai@latest        # or bun/pnpm/yarn
-scoop install opencode             # Windows
-choco install opencode             # Windows
-brew install anomalyco/tap/opencode # macOS and Linux (recommended, always up to date)
-brew install opencode              # macOS and Linux (official brew formula, updated less)
-sudo pacman -S opencode            # Arch Linux (Stable)
-paru -S opencode-bin               # Arch Linux (Latest from AUR)
-mise use -g opencode               # Any OS
-nix run nixpkgs#opencode           # or github:anomalyco/opencode for latest dev branch
-```
+1. Download `opencode-plugin-gui-only-<version>.zip` from the releases page (or build it, see below)
+2. In the IDE: `Settings → Plugins → ⚙ → Install Plugin from Disk…`
+3. Select the zip and restart the IDE
+4. Open the **OpenCode** tool window (right side)
 
-> [!TIP]
-> Remove versions older than 0.1.x before installing.
+If you previously installed the upstream `paviko` build, uninstall it first — it registers the same tool window.
 
-### Desktop App (BETA)
+## Settings
 
-OpenCode is also available as a desktop application. Download directly from the [releases page](https://github.com/anomalyco/opencode/releases) or [opencode.ai/download](https://opencode.ai/download).
+`Settings → Tools → OpenCode Plug`
 
-| Platform              | Download                           |
-| --------------------- | ---------------------------------- |
-| macOS (Apple Silicon) | `opencode-desktop-mac-arm64.dmg`   |
-| macOS (Intel)         | `opencode-desktop-mac-x64.dmg`     |
-| Windows               | `opencode-desktop-windows-x64.exe` |
-| Linux                 | `.deb`, `.rpm`, or `.AppImage`     |
+| Setting | Description |
+| --- | --- |
+| opencode executable | Absolute path to the `opencode` binary. Empty = auto detect (homebrew, nvm, bun, `~/.local/bin`, `PATH`) |
+| Additional serve args | Extra arguments appended to `opencode serve` |
+
+## How it works
+
+1. The plugin starts `opencode serve` in the IDE terminal with the project directory as working directory
+   and a generated `OPENCODE_PASSWORD`, so the HTTP API is protected and reachable
+2. It waits for the `server listening on http://…` line and verifies the server through `GET /api/info`
+3. The bundled web UI is served from a local static server which injects the server URL and credentials
+4. The UI talks to the opencode v2 REST API (`/api/*`) and consumes the `/api/event` stream, which is
+   projected back onto the message/part model the UI renders
+
+## Building from source
+
+Prerequisites: JDK 21 and [bun](https://bun.sh) (or pnpm/npm).
 
 ```bash
-# macOS (Homebrew)
-brew install --cask opencode-desktop
-# Windows (Scoop)
-scoop bucket add extras; scoop install extras/opencode-desktop
+JAVA_HOME=/path/to/jdk-21 ./hosts/scripts/build_jetbrains.sh
 ```
 
-#### Installation Directory
-
-The install script respects the following priority order for the installation path:
-
-1. `$OPENCODE_INSTALL_DIR` - Custom installation directory
-2. `$XDG_BIN_DIR` - XDG Base Directory Specification compliant path
-3. `$HOME/bin` - Standard user binary directory (if it exists or can be created)
-4. `$HOME/.opencode/bin` - Default fallback
+Options:
 
 ```bash
-# Examples
-OPENCODE_INSTALL_DIR=/usr/local/bin curl -fsSL https://opencode.ai/install | bash
-XDG_BIN_DIR=$HOME/.local/bin curl -fsSL https://opencode.ai/install | bash
+# reuse an already built web UI
+JAVA_HOME=/path/to/jdk-21 ./hosts/scripts/build_jetbrains.sh --skip-webgui
+
+# compile against a locally installed IDE instead of downloading one
+JAVA_HOME=/path/to/jdk-21 ./hosts/scripts/build_jetbrains.sh --local-ide /Applications/PhpStorm.app
 ```
 
-### Agents
+The plugin zip is written to `hosts/jetbrains-plugin/build/distributions/`.
 
-OpenCode includes two built-in agents you can switch between with the `Tab` key.
+## Notes
 
-- **build** - Default, full-access agent for development work
-- **plan** - Read-only agent for analysis and code exploration
-  - Denies file edits by default
-  - Asks permission before running bash commands
-  - Ideal for exploring unfamiliar codebases or planning changes
+- This is a v2-only fork: the bundled v1 backend binaries and the v1 REST compatibility layer were removed
+- Editing the opencode configuration from the settings panel and session sharing are not supported by the
+  v2 API and are currently no-ops
+- Not affiliated with the opencode team or with the upstream `opencode-ide-plugin` project
 
-Also included is a **general** subagent for complex searches and multistep tasks.
-This is used internally and can be invoked using `@general` in messages.
+## Credits
 
-Learn more about [agents](https://opencode.ai/docs/agents).
+- [opencode](https://github.com/anomalyco/opencode) — the agent and its web UI
+- [paviko/opencode-ide-plugin](https://github.com/paviko/opencode-ide-plugin) — the original IDE plugin this fork is based on
 
-### Documentation
+## License
 
-For more info on how to configure OpenCode, [**head over to our docs**](https://opencode.ai/docs).
-
-### Contributing
-
-If you're interested in contributing to OpenCode, please read our [contributing docs](./CONTRIBUTING.md) before submitting a pull request.
-
-### Building on OpenCode
-
-If you are working on a project that's related to OpenCode and is using "opencode" as part of its name, for example "opencode-dashboard" or "opencode-mobile", please add a note to your README to clarify that it is not built by the OpenCode team and is not affiliated with us in any way.
-
-### FAQ
-
-#### How is this different from Claude Code?
-
-It's very similar to Claude Code in terms of capability. Here are the key differences:
-
-- 100% open source
-- Not coupled to any provider. Although we recommend the models we provide through [OpenCode Zen](https://opencode.ai/zen), OpenCode can be used with Claude, OpenAI, Google, or even local models. As models evolve, the gaps between them will close and pricing will drop, so being provider-agnostic is important.
-- Built-in opt-in LSP support
-- A focus on TUI. OpenCode is built by neovim users and the creators of [terminal.shop](https://terminal.shop); we are going to push the limits of what's possible in the terminal.
-- A client/server architecture. This, for example, can allow OpenCode to run on your computer while you drive it remotely from a mobile app, meaning that the TUI frontend is just one of the possible clients.
-
----
-
-**Join our community** [Discord](https://discord.gg/opencode) | [X.com](https://x.com/opencode)
+MIT — see [LICENSE](LICENSE).

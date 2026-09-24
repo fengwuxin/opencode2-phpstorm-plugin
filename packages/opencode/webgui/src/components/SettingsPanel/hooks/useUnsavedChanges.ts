@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react"
-import type { Config } from "@opencode-ai/sdk/client"
+import type { SettingsFormData } from "../../settings/types"
 
 export function useUnsavedChanges(
-  formData: Partial<Config>,
-  originalFormData: Partial<Config>,
+  formData: SettingsFormData,
+  originalFormData: SettingsFormData,
   apiKeys: Record<string, string>,
 ) {
   const [showCloseConfirm, setShowCloseConfirm] = useState(false)

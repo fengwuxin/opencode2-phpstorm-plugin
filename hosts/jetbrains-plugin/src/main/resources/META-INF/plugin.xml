@@ -1,7 +1,7 @@
 <idea-plugin>
-  <vendor email="paviko.github.sitting433@slmails.com" url="https://github.com/paviko/opencode-ide-plugin">paviko</vendor>
-  <id>paviko</id>
-  <name>OpenCode UX+ (unofficial)</name>
+  <vendor>fengwuxin</vendor>
+  <id>fengwuxin</id>
+  <name>OpenCode UX+ (fengwuxin)</name>
   <description>Runs local OpenCode backend and displays the chat UI.</description>
 
   <depends>com.intellij.modules.platform</depends>
@@ -13,6 +13,7 @@
                            id="paviko.opencode.settings.OpenCodeConfigurable"
                            displayName="OpenCode Plug"/>
     <applicationService serviceImplementation="paviko.opencode.settings.OpenCodeSettings"/>
+    <notificationGroup id="paviko.opencode.notifications" displayType="BALLOON"/>
   </extensions>
 
   <actions>

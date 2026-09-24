@@ -19,7 +19,8 @@ internal class TerminalBackendProcess(
     private val project: Project,
     private val args: List<String>,
     private val baseDir: String,
-    private val customCommand: String
+    private val customCommand: String,
+    private val password: String?
 ) : BackendProcess {
 
     private val logger = Logger.getInstance(TerminalBackendProcess::class.java)
@@ -38,6 +39,7 @@ internal class TerminalBackendProcess(
             args,
             baseDir,
             customCommand,
+            password,
             outputBuffer
         ) { process, exception ->
             if (process != null) {

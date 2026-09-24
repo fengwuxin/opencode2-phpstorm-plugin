@@ -23,10 +23,16 @@ class OpenCodeSettings : PersistentStateComponent<OpenCodeSettings.State> {
      */
     data class State(
         /**
-         * Custom command to override the default "opencode web".
+         * Custom command to override the default "opencode serve".
          * Empty string means use the default command.
          */
-        var customCommand: String = ""
+        var customCommand: String = "",
+
+        /**
+         * Absolute path to the opencode executable. Empty string means auto discovery
+         * (well known install locations, then the IDE process PATH, then the shell PATH).
+         */
+        var executablePath: String = ""
     )
 
     private var state = State()
@@ -43,13 +49,13 @@ class OpenCodeSettings : PersistentStateComponent<OpenCodeSettings.State> {
 
     override fun loadState(state: State) {
         try {
-            // Only customCommand remains
             val validatedState = State(
-                customCommand = state.customCommand
+                customCommand = state.customCommand,
+                executablePath = state.executablePath
             )
 
             this.state = validatedState
-            logger.info("Settings loaded successfully: customCommand='${validatedState.customCommand}'")
+            logger.info("Settings loaded successfully: customCommand='${validatedState.customCommand}', executablePath='${validatedState.executablePath}'")
         } catch (e: Exception) {
             logger.error("Failed to load settings state, using defaults", e)
             this.state = State() // Use default state on error

@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react"
 import { ideBridge } from "../lib/ideBridge"
-import { serverBase } from "../lib/api/sdkClient"
+import { apiFetch } from "../lib/api/v2/client"
 
 function compareVersions(a: string, b: string): number {
   const pa = a.split(".").map(Number)
@@ -39,12 +39,12 @@ export function VersionGate({ children }: { children: ReactNode }) {
       }
 
       try {
-        const res = await fetch(`${serverBase}/global/health`)
+        const res = await apiFetch("/api/info")
         if (!res.ok) {
           if (!cancelled) setState({ status: "ok" })
           return
         }
-        const json = await res.json() as { healthy: boolean; version: string }
+        const json = (await res.json()) as { version?: string }
         if (!json.version) {
           if (!cancelled) setState({ status: "ok" })
           return

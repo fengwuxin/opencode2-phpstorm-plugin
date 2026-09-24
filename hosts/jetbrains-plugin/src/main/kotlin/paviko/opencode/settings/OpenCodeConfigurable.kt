@@ -18,6 +18,7 @@ class OpenCodeConfigurable : Configurable {
 
     private var mainPanel: JPanel? = null
     private var customCommandField: JBTextField? = null
+    private var executablePathField: JBTextField? = null
     private var commandErrorLabel: JBLabel? = null
 
     private val settings = OpenCodeSettings.getInstance()
@@ -29,6 +30,7 @@ class OpenCodeConfigurable : Configurable {
         try {
             // Create UI components
             customCommandField = JBTextField(settings.state.customCommand)
+            executablePathField = JBTextField(settings.state.executablePath)
 
             // Create error label for validation messages
             commandErrorLabel = JBLabel().apply {
@@ -41,7 +43,10 @@ class OpenCodeConfigurable : Configurable {
 
             // Build the form
             mainPanel = FormBuilder.createFormBuilder()
-                .addLabeledComponent(JBLabel("Command:"), customCommandField!!, 1, false)
+                .addLabeledComponent(JBLabel("opencode executable:"), executablePathField!!, 1, false)
+                .addComponentToRightColumn(JBLabel("Leave empty to auto detect (homebrew, nvm, bun, PATH)."))
+                .addLabeledComponent(JBLabel("Additional serve args:"), customCommandField!!, 1, false)
+                .addComponentToRightColumn(JBLabel("Extra arguments appended to \"opencode serve\"."))
                 .addComponent(commandErrorLabel!!)
                 .addComponentFillVertically(JPanel(), 0)
                 .panel
@@ -90,7 +95,8 @@ class OpenCodeConfigurable : Configurable {
     override fun isModified(): Boolean {
         val currentState = settings.state
 
-        return customCommandField?.text != currentState.customCommand
+        return customCommandField?.text != currentState.customCommand ||
+            executablePathField?.text != currentState.executablePath
     }
 
     override fun apply() {
@@ -109,6 +115,13 @@ class OpenCodeConfigurable : Configurable {
                 logger.info("Applied custom command: '$newCommand'")
             }
 
+            // Apply executable path
+            executablePathField?.text?.let { path ->
+                val newPath = path.trim()
+                state.executablePath = newPath
+                logger.info("Applied executable path: '$newPath'")
+            }
+
             logger.info("Settings applied successfully")
         } catch (e: ConfigurationException) {
             logger.error("Configuration validation failed", e)
@@ -124,6 +137,7 @@ class OpenCodeConfigurable : Configurable {
             val currentState = settings.state
 
             customCommandField?.text = currentState.customCommand
+            executablePathField?.text = currentState.executablePath
 
             // Clear any error messages
             commandErrorLabel?.isVisible = false
@@ -138,6 +152,7 @@ class OpenCodeConfigurable : Configurable {
         try {
             mainPanel = null
             customCommandField = null
+            executablePathField = null
             commandErrorLabel = null
             logger.debug("Settings UI resources disposed")
         } catch (e: Exception) {

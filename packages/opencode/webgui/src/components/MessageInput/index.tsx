@@ -311,16 +311,31 @@ const MessageInputInner = forwardRef<
     }
     const model = provider.models?.[selectedModelId] as
       | ((typeof provider.models)[string] & {
-          variants?: Record<string, unknown>
+          // opencode v2 lists the thinking variants as an array of { id, settings }
+          // objects (e.g. [{ id: "low" }, { id: "max" }]), not as a keyed record.
+          variants?: (string | { id?: string })[]
           capabilities?: { reasoning?: boolean }
         })
       | undefined
 
+    const variants = model?.variants
+      ?.map((variant) => (typeof variant === "string" ? variant : variant.id))
+      .filter((id): id is string => typeof id === "string" && id.length > 0)
+
     return {
-      variants: model?.variants ? Object.keys(model.variants) : undefined,
-      isReasoning: !!model?.capabilities?.reasoning,
+      variants: variants?.length ? variants : undefined,
+      isReasoning: !!model?.capabilities?.reasoning || !!variants?.length,
     }
   }, [providers, selectedProviderId, selectedModelId])
+
+  // A stored variant may belong to a previously selected model (e.g. "max" while the
+  // current model only offers "low"/"high"); reset it so the request stays valid.
+  useEffect(() => {
+    if (!selectedVariant) return
+    const variants = currentModelInfo.variants
+    if (!variants || variants.includes(selectedVariant)) return
+    void setSelectedVariant(undefined)
+  }, [currentModelInfo.variants, selectedVariant, setSelectedVariant])
 
   const isDisabled = isSending
   const isButtonDisabled = isDisabled || isEmpty

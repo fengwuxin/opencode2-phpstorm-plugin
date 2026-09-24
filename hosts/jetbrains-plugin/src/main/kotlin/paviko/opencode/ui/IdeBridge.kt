@@ -14,6 +14,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
+import java.awt.Toolkit
+import java.awt.datatransfer.DataFlavor
+import java.awt.image.BufferedImage
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.OutputStreamWriter
 import java.net.InetSocketAddress
@@ -21,6 +25,7 @@ import java.net.URLDecoder
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
+import javax.imageio.ImageIO
 
 data class Session(
     val id: String,
@@ -126,6 +131,12 @@ object IdeBridge {
         }
         broadcastSSE(session, gson.toJson(msg))
     }
+
+    /**
+     * Whether a web UI session is attached for this project. The bundled UX+ web UI
+     * registers one, the official opencode web UI does not.
+     */
+    fun isAttached(project: Project): Boolean = projectToSession.containsKey(project)
     
     /**
      * Send a message to UI using project reference (looks up session automatically).
@@ -392,6 +403,37 @@ object IdeBridge {
                     replyWithPayload(session, id, normalized)
                 }
 
+                // opencode v2 has no config write API (the CLI only reads opencode.json(c)),
+                // so the settings panel edits the global config file through the IDE.
+                "config.read" -> {
+                    val file = globalConfigFile()
+                    val exists = file.exists()
+                    replyWithPayload(session, id, JsonObject().apply {
+                        addProperty("path", file.absolutePath)
+                        addProperty("exists", exists)
+                        addProperty("text", if (exists) file.readText() else "")
+                    })
+                }
+
+                "config.write" -> {
+                    val text = payload?.get("text")?.asString
+                    if (text == null) {
+                        replyError(session, id, "Missing text")
+                    } else {
+                        val file = globalConfigFile()
+                        writeTextAtomically(file, text)
+                        replyWithPayload(session, id, JsonObject().apply {
+                            addProperty("path", file.absolutePath)
+                        })
+                    }
+                }
+
+                // Embedded browsers do not always expose clipboard images to the page, so the
+                // web UI asks the IDE for the clipboard content when the user pastes.
+                "clipboardRead" -> {
+                    replyWithPayload(session, id, readClipboard())
+                }
+
                 else -> replyError(session, id, "Unknown type: $type")
             }
 
@@ -432,6 +474,96 @@ object IdeBridge {
         }
 
         return normalized
+    }
+
+    /**
+     * Global opencode config file, resolved the same way the CLI does it: prefer an
+     * existing opencode.json, then opencode.jsonc, otherwise create opencode.json.
+     */
+    private fun globalConfigFile(): File {
+        val dir = File(System.getenv("XDG_CONFIG_HOME") ?: "${System.getProperty("user.home")}/.config", "opencode")
+        val json = File(dir, "opencode.json")
+        val jsonc = File(dir, "opencode.jsonc")
+        return when {
+            json.exists() -> json
+            jsonc.exists() -> jsonc
+            else -> json
+        }
+    }
+
+    /**
+     * Reads the system clipboard for the web UI: an image is returned as a PNG data URL,
+     * otherwise the plain text. Copying a screenshot often puts a text flavour (the file
+     * path) on the clipboard too, so the image wins when both are present.
+     */
+    private fun readClipboard(): JsonObject {
+        val clipboard = try {
+            Toolkit.getDefaultToolkit().systemClipboard
+        } catch (_: Throwable) {
+            null
+        }
+
+        if (clipboard != null) {
+            try {
+                if (clipboard.isDataFlavorAvailable(DataFlavor.imageFlavor)) {
+                    val image = clipboard.getData(DataFlavor.imageFlavor) as? java.awt.Image
+                    if (image != null) {
+                        val png = encodePng(image)
+                        return JsonObject().apply {
+                            addProperty("kind", "image")
+                            addProperty("mime", "image/png")
+                            addProperty("size", png.size)
+                            addProperty("dataUrl", "data:image/png;base64," + Base64.getEncoder().encodeToString(png))
+                        }
+                    }
+                }
+            } catch (_: Throwable) {
+            }
+        }
+
+        val text = try {
+            clipboard?.getData(DataFlavor.stringFlavor) as? String
+        } catch (_: Throwable) {
+            null
+        }
+
+        return JsonObject().apply {
+            if (text.isNullOrEmpty()) {
+                addProperty("kind", "empty")
+            } else {
+                addProperty("kind", "text")
+                addProperty("text", text)
+            }
+        }
+    }
+
+    /** Converts a clipboard image into PNG bytes. */
+    private fun encodePng(image: java.awt.Image): ByteArray {
+        val width = image.getWidth(null).coerceAtLeast(1)
+        val height = image.getHeight(null).coerceAtLeast(1)
+        val buffered = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+        val graphics = buffered.createGraphics()
+        try {
+            graphics.drawImage(image, 0, 0, null)
+        } finally {
+            graphics.dispose()
+        }
+        val out = ByteArrayOutputStream()
+        ImageIO.write(buffered, "png", out)
+        return out.toByteArray()
+    }
+
+    /** Writes through a temp file so a crash cannot leave a truncated config behind. */
+    private fun writeTextAtomically(file: File, text: String) {
+        file.parentFile?.mkdirs()
+        val temp = File(file.parentFile, "${file.name}.tmp")
+        temp.writeText(text)
+        java.nio.file.Files.move(
+            temp.toPath(),
+            file.toPath(),
+            java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+            java.nio.file.StandardCopyOption.ATOMIC_MOVE
+        )
     }
 
     private fun replyWithPayload(session: Session, id: String?, payload: Any) {

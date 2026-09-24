@@ -1,8 +1,6 @@
 package paviko.opencode.ui
 
 
-import com.intellij.ide.plugins.PluginManagerCore
-import com.intellij.ide.plugins.PluginUtil
 import com.intellij.openapi.diagnostic.Logger
 
 import com.intellij.openapi.project.DumbAware
@@ -14,7 +12,11 @@ import com.intellij.ui.jcef.JBCefApp
 import com.intellij.ui.jcef.JBCefBrowser
 import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.util.ui.JBUI
+import org.cef.browser.CefBrowser
+import org.cef.callback.CefAuthCallback
+import org.cef.handler.CefRequestHandlerAdapter
 import paviko.opencode.backendprocess.BackendLauncher
+import paviko.opencode.backendprocess.BackendLaunch
 import java.awt.BorderLayout
 import java.awt.Font
 import java.io.BufferedReader
@@ -22,7 +24,12 @@ import java.io.File
 import java.io.InputStreamReader
 import java.net.URI
 import java.net.URLEncoder
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.nio.charset.StandardCharsets
+import java.time.Duration
+import java.util.Base64
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
@@ -91,7 +98,6 @@ class ChatToolWindowFactory : ToolWindowFactory, DumbAware {
         mainPanel.add(hideableLogs, BorderLayout.SOUTH)
 
         val procRef = AtomicReference<paviko.opencode.backendprocess.BackendProcess?>(null)
-        val staticServerBaseRef = AtomicReference<String?>(null)
         val connected = AtomicBoolean(false)
         val logLock = Any()
         val logBuffer = StringBuilder()
@@ -127,12 +133,17 @@ class ChatToolWindowFactory : ToolWindowFactory, DumbAware {
             scheduleLogFlush()
         }
 
-        val timeoutMs = 300_000L
+        val timeoutMs = 180_000L
         val timeoutFuture = AppExecutorUtil.getAppScheduledExecutorService().schedule({
             if (connected.get()) return@schedule
             logger.warn("Backend connection timeout after ${timeoutMs}ms")
             SwingUtilities.invokeLater {
-                showError(mainPanel, hideableLogs, "Backend connection timeout.<br/>Check logs for details.")
+                showError(
+                    mainPanel,
+                    hideableLogs,
+                    "Backend connection timeout.<br/>Make sure opencode v2 is installed and check the logs below.<br/>" +
+                        "The executable path can be set in Settings | Tools | OpenCode Plug."
+                )
             }
             try { procRef.get()?.destroy() } catch (_: Throwable) {}
             try { procRef.get()?.inputStream?.close() } catch (_: Throwable) {}
@@ -142,11 +153,10 @@ class ChatToolWindowFactory : ToolWindowFactory, DumbAware {
             timeoutFuture.cancel(false)
             try { procRef.get()?.destroy() } catch (_: Throwable) {}
             try { procRef.get()?.inputStream?.close() } catch (_: Throwable) {}
-            try { staticServerBaseRef.get()?.let { WebguiStaticServer.stop(it) } } catch (_: Throwable) {}
         }
 
         AppExecutorUtil.getAppExecutorService().execute {
-            val proc = try {
+            val launch = try {
                 BackendLauncher.launchBackend(project)
             } catch (e: Exception) {
                 logger.error("Failed to launch backend", e)
@@ -156,105 +166,50 @@ class ChatToolWindowFactory : ToolWindowFactory, DumbAware {
                 timeoutFuture.cancel(false)
                 return@execute
             }
-            procRef.set(proc)
+            procRef.set(launch.process)
 
-            val reader = BufferedReader(InputStreamReader(proc.inputStream, StandardCharsets.UTF_8))
+            val reader = BufferedReader(InputStreamReader(launch.process.inputStream, StandardCharsets.UTF_8))
             val logThread = Thread {
                 try {
                     var line: String?
+                    // opencode v2 prints the listening URL first and the generated password
+                    // afterwards (only when no password was supplied through the environment).
+                    var serverUrl: String? = null
+                    var reportedPassword: String? = null
+
                     while (reader.readLine().also { line = it } != null) {
                         val l = line!!.trim()
                         queueLog(l)
 
-                        if (!connected.get()) {
-                            val serverMatch = Regex("opencode server listening on (https?://\\S+)", RegexOption.IGNORE_CASE).find(l)
-                            if (serverMatch != null) {
-                                val serverUrlRaw = serverMatch.groupValues[1]
-                                try {
-                                    val serverUri = URI(serverUrlRaw)
-                                    val port = if (serverUri.port != -1) serverUri.port else when (serverUri.scheme?.lowercase()) {
-                                        "https" -> 443
-                                        else -> 80
-                                    }
-                                    val baseUrl = serverUri.toString().trimEnd('/')
-                                    val appUrl = "$baseUrl/app"
+                        if (connected.get()) continue
 
-                                    proc.stopCapture()
-                                    connectionInfo = ConnInfo(port, appUrl)
-                                    connected.set(true)
-                                    timeoutFuture.cancel(false)
-                                    logger.info("Backend connection established at $appUrl")
+                        extractServerUrl(l)?.let { serverUrl = it }
+                        extractPassword(l)?.let { reportedPassword = it }
 
-                                    // Detect gui-only mode: check if webgui-app is bundled as a resource
-                                    val isGuiOnly = javaClass.classLoader.getResource("webgui-app/index.html") != null
-                                    val uiBaseUrl = if (isGuiOnly) {
-                                        val webguiDir = extractWebguiResources()
-                                        val serverRoot = serverUri.let { "${it.scheme}://${it.host}:${it.port}" }
-                                        logger.info("gui-only mode: serving embedded webgui, REST API at $serverRoot")
-                                        val base = WebguiStaticServer.start(webguiDir, serverRoot)
-                                        staticServerBaseRef.set(base)
-                                        "$base/app"
-                                    } else {
-                                        appUrl
-                                    }
+                        val url = serverUrl ?: continue
+                        val password = launch.password ?: reportedPassword ?: envPassword() ?: continue
 
-                                    SwingUtilities.invokeLater {
-                                        try {
-                                            val client = JBCefApp.getInstance().createClient()
-                                            
-                                            // Create browser WITHOUT URL first
-                                            val browser = JBCefBrowser.createBuilder()
-                                                .setClient(client)
-                                                .build()
+                        try {
+                            val version = probeServer(url, password)
+                            procRef.get()?.stopCapture()
+                            connectionInfo = ConnInfo(URI(url).port, "$url/")
+                            connected.set(true)
+                            timeoutFuture.cancel(false)
+                            logger.info("opencode v$version backend detected at $url")
 
-                                            try {
-                                                DragAndDropInstaller.install(project, browser, logger)
-                                            } catch (e: Exception) {
-                                                logger.warn("Failed to set up drag and drop", e)
-                                            }
-
-                                            mainPanel.removeAll()
-                                            mainPanel.add(browser.component, BorderLayout.CENTER)
-                                            mainPanel.add(hideableLogs, BorderLayout.SOUTH)
-                                            mainPanel.revalidate()
-                                            mainPanel.repaint()
-
-                                            // Create bridge session and build URL with bridge params
-                                            val session = IdeBridge.createSession(project, isGuiOnly)
-                                            val baseUrl = withCacheBuster(uiBaseUrl, pluginVersion())
-                                            val urlWithBridge = buildString {
-                                                append(baseUrl)
-                                                append(if ('?' in baseUrl) '&' else '?')
-                                                append("ideBridge=")
-                                                append(URLEncoder.encode(session.baseUrl, StandardCharsets.UTF_8))
-                                                append("&ideBridgeToken=")
-                                                append(URLEncoder.encode(session.token, StandardCharsets.UTF_8))
-                                            }
-                                            
-                                            // Load the URL with bridge params
-                                            browser.loadURL(urlWithBridge)
-                                            
-                                            // Register cleanup for the session
-                                            Disposer.register(toolWindow.disposable) {
-                                                IdeBridge.removeSession(session.sessionId)
-                                            }
-                                            
-                                            try {
-                                                val filesUpdater = IdeOpenFilesUpdater(project, browser, session.sessionId)
-                                                filesUpdater.install()
-                                                Disposer.register(browser, filesUpdater)
-                                            } catch (e: Exception) {
-                                                logger.warn("Failed to install IdeOpenFilesUpdater", e)
-                                            }
-                                        } catch (e: Exception) {
-                                            logger.error("Failed to create browser component", e)
-                                            showError(mainPanel, hideableLogs, "Failed to create browser:<br/>${e.message}")
-                                        }
-                                    }
-                                } catch (e: Exception) {
-                                    logger.warn("Failed to set up browser for backend connection", e)
-                                }
+                            SwingUtilities.invokeLater {
+                                showBrowser(project, toolWindow, mainPanel, hideableLogs, url, password)
                             }
+                        } catch (e: Exception) {
+                            logger.warn("Failed to connect to opencode backend at $url", e)
+                            SwingUtilities.invokeLater {
+                                showError(
+                                    mainPanel,
+                                    hideableLogs,
+                                    "Failed to connect to the opencode backend:<br/>${e.message}<br/><br/>Check logs for details."
+                                )
+                            }
+                            timeoutFuture.cancel(false)
                         }
                     }
                 } catch (e: Exception) {
@@ -268,6 +223,99 @@ class ChatToolWindowFactory : ToolWindowFactory, DumbAware {
             }
             logThread.isDaemon = true
             logThread.start()
+        }
+    }
+
+    /**
+     * Creates the JCEF browser and loads the opencode web UI.
+     *
+     * The bundled UX+ web UI is used when it is part of the plugin resources, otherwise
+     * the official opencode v2 web UI is loaded. HTTP basic auth is answered automatically
+     * so the UI can reach the protected API.
+     */
+    private fun showBrowser(
+        project: Project,
+        toolWindow: ToolWindow,
+        mainPanel: JPanel,
+        hideableLogs: JComponent,
+        serverUrl: String,
+        password: String
+    ) {
+        try {
+            val uri = URI(serverUrl)
+            val client = JBCefApp.getInstance().createClient()
+            val browser = JBCefBrowser.createBuilder()
+                .setClient(client)
+                .build()
+
+            // opencode v2 protects every /api call with basic auth; answer the challenge
+            // instead of letting the embedded browser show a login dialog.
+            client.addRequestHandler(
+                BasicAuthHandler(uri.host, uri.port, BackendLauncher.PASSWORD_USER, password),
+                browser.cefBrowser
+            )
+
+            try {
+                DragAndDropInstaller.install(project, browser, logger)
+            } catch (e: Exception) {
+                logger.warn("Failed to set up drag and drop", e)
+            }
+
+            mainPanel.removeAll()
+            mainPanel.add(browser.component, BorderLayout.CENTER)
+            mainPanel.add(hideableLogs, BorderLayout.SOUTH)
+            mainPanel.revalidate()
+            mainPanel.repaint()
+
+            browser.loadURL(buildUiUrl(project, toolWindow, browser, serverUrl, password))
+        } catch (e: Exception) {
+            logger.error("Failed to create browser component", e)
+            showError(mainPanel, hideableLogs, "Failed to create browser:<br/>${e.message}")
+        }
+    }
+
+    /**
+     * Builds the URL to load: the bundled UX+ web UI when it is available, the official
+     * opencode v2 web UI otherwise.
+     */
+    private fun buildUiUrl(
+        project: Project,
+        toolWindow: ToolWindow,
+        browser: JBCefBrowser,
+        serverUrl: String,
+        password: String
+    ): String {
+        if (javaClass.classLoader.getResource("webgui-app/index.html") == null) {
+            return withCacheBuster("$serverUrl/", pluginVersion())
+        }
+
+        val webguiDir = extractWebguiResources()
+        val authToken = Base64.getEncoder()
+            .encodeToString("${BackendLauncher.PASSWORD_USER}:$password".toByteArray(StandardCharsets.UTF_8))
+        val staticBase = WebguiStaticServer.start(webguiDir, serverUrl, authToken)
+        val session = IdeBridge.createSession(project)
+
+        Disposer.register(toolWindow.disposable) {
+            IdeBridge.removeSession(session.sessionId)
+            try { WebguiStaticServer.stop(staticBase) } catch (_: Throwable) {}
+        }
+
+        try {
+            val filesUpdater = IdeOpenFilesUpdater(project, browser, session.sessionId)
+            filesUpdater.install()
+            Disposer.register(browser, filesUpdater)
+        } catch (e: Exception) {
+            logger.warn("Failed to install IdeOpenFilesUpdater", e)
+        }
+
+        val baseUrl = withCacheBuster("$staticBase/app", pluginVersion())
+        return buildString {
+            append(baseUrl)
+            append(if ('?' in baseUrl) '&' else '?')
+            append("ideBridge=")
+            append(URLEncoder.encode(session.baseUrl, StandardCharsets.UTF_8))
+            append("&ideBridgeToken=")
+            append(URLEncoder.encode(session.token, StandardCharsets.UTF_8))
         }
     }
 
@@ -329,5 +377,86 @@ class ChatToolWindowFactory : ToolWindowFactory, DumbAware {
 
         logger.info("Extracted $copied/${listing.size} webgui files to ${dest.absolutePath}")
         return dest.absolutePath
+    }
+
+    /**
+     * Answers HTTP basic auth challenges for the local opencode server only.
+     */
+    private class BasicAuthHandler(
+        private val host: String?,
+        private val port: Int,
+        private val user: String,
+        private val password: String
+    ) : CefRequestHandlerAdapter() {
+        override fun getAuthCredentials(
+            browser: CefBrowser?,
+            originUrl: String?,
+            isProxy: Boolean,
+            host: String?,
+            port: Int,
+            realm: String?,
+            scheme: String?,
+            callback: CefAuthCallback?
+        ): Boolean {
+            if (isProxy || callback == null) return false
+            if (host == null || host != this.host || port != this.port) return false
+            callback.Continue(user, password)
+            return true
+        }
+    }
+
+    /**
+     * Queries `/api/info` with basic auth and returns the reported opencode version.
+     * Fails when the endpoint is missing (older servers) or the password is rejected.
+     */
+    private fun probeServer(serverUrl: String, password: String): String {
+        val credentials = Base64.getEncoder()
+            .encodeToString("${BackendLauncher.PASSWORD_USER}:$password".toByteArray(StandardCharsets.UTF_8))
+        val request = HttpRequest.newBuilder(URI("$serverUrl/api/info"))
+            .header("Authorization", "Basic $credentials")
+            .timeout(Duration.ofSeconds(10))
+            .GET()
+            .build()
+
+        val response = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(5))
+            .build()
+            .send(request, HttpResponse.BodyHandlers.ofString())
+
+        if (response.statusCode() == 401) {
+            throw IllegalStateException("authentication failed (HTTP 401). Unset OPENCODE_PASSWORD or restart the IDE.")
+        }
+        if (response.statusCode() != 200) {
+            throw IllegalStateException("unexpected response HTTP ${response.statusCode()}. opencode v2.0.0 or newer is required.")
+        }
+
+        val version = Regex("\"version\"\\s*:\\s*\"([^\"]+)\"").find(response.body())?.groupValues?.get(1)
+            ?: throw IllegalStateException("could not read the server version from /api/info")
+
+        val major = version.substringBefore('.').toIntOrNull()
+        if (major == null || major < 2) {
+            throw IllegalStateException("opencode $version detected, but v2.0.0 or newer is required")
+        }
+        return version
+    }
+
+    /** Reads the password from the IDE environment as a last resort. */
+    private fun envPassword(): String? {
+        return System.getenv(BackendLauncher.PASSWORD_ENV)?.takeIf { it.isNotBlank() }
+            ?: System.getenv("OPENCODE_SERVER_PASSWORD")?.takeIf { it.isNotBlank() }
+    }
+
+    private companion object {
+        /** opencode v2 prints `server listening on http://host:port` (v1 prefixed it with `opencode `). */
+        val SERVER_URL_REGEX = Regex("(?:opencode\\s+)?server listening on (https?://\\S+)", RegexOption.IGNORE_CASE)
+
+        /** Printed by opencode v2 when it generated the HTTP API password itself. */
+        val PASSWORD_REGEX = Regex("server password (\\S+)", RegexOption.IGNORE_CASE)
+
+        fun extractServerUrl(line: String): String? =
+            SERVER_URL_REGEX.find(line)?.groupValues?.get(1)?.trimEnd('/')
+
+        fun extractPassword(line: String): String? =
+            PASSWORD_REGEX.find(line)?.groupValues?.get(1)
     }
 }

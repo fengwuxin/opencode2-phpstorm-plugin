@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { sdk } from "../../../lib/api/sdkClient"
-import type { Config, Provider } from "@opencode-ai/sdk/client"
+import type { Provider } from "@opencode-ai/sdk/client"
+import type { SettingsFormData } from "../../settings/types"
 
 interface ProviderWithAuth extends Provider {
   hasAuth?: boolean
@@ -8,8 +9,8 @@ interface ProviderWithAuth extends Provider {
 }
 
 export function useSettingsForm(isOpen: boolean, customApi?: boolean) {
-  const [formData, setFormData] = useState<Partial<Config>>({})
-  const [originalFormData, setOriginalFormData] = useState<Partial<Config>>({})
+  const [formData, setFormData] = useState<SettingsFormData>({})
+  const [originalFormData, setOriginalFormData] = useState<SettingsFormData>({})
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({})
   const [showApiKeys, setShowApiKeys] = useState<Record<string, boolean>>({})
   const [providers, setProviders] = useState<ProviderWithAuth[]>([])
