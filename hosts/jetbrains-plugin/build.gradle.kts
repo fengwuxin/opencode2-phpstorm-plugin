@@ -10,7 +10,7 @@ group = "paviko.opencode"
 // Artifact version rule: `YY.M.DD<NN>` — year, month, day of the month and a
 // two-digit per-day build sequence (first build of a day = 01).
 // Example: the first build on 2026-09-25 is 26.9.2501, the next one is 26.9.2502.
-version = "26.9.2515"
+version = "26.9.2516"
 
 // opencode v2 only: the backend is never bundled, the CLI is resolved from the system.
 val guiOnly = project.findProperty("guiOnly")?.toString()?.toBoolean() ?: true
@@ -189,7 +189,7 @@ tasks {
 
         if (guiOnly) {
             pluginId.set("fengwuxin.opencode-ux-plus-gui-only")
-            pluginName.set("OpenCode UX+ GUI Only (fengwuxin)")
+            pluginName.set("OpenCode Studio")
         }
     }
 

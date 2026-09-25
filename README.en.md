@@ -1,84 +1,87 @@
-# OpenCode UX+ —— JetBrains / PhpStorm 插件
+# OpenCode Studio — JetBrains / PhpStorm plugin
 
-面向 **opencode v2** 的非官方 [opencode](https://opencode.ai) 插件，支持 JetBrains 全家桶
-（PhpStorm、IntelliJ IDEA、WebStorm 等）。
+Unofficial [opencode](https://opencode.ai) plugin for JetBrains IDEs (PhpStorm, IntelliJ IDEA, WebStorm, ...),
+built for **opencode v2**.
 
-它为你当前打开的项目启动 `opencode serve`，并把聊天界面嵌进工具窗口，另外提供了一些 IDE 集成能力。
+It runs the `opencode serve` process for the project you have open and embeds the chat UI in a tool window,
+with a few IDE integrations on top.
 
-[简体中文](README.md) | [English](README.en.md)
+[English](README.md) | [简体中文](README.zh.md)
 
-## 功能
+## Features
 
-- 使用系统已安装的 `opencode`（v2）为当前项目启动后端，插件不内置后端二进制
-- 工具窗口内的聊天界面，会话列表按当前项目过滤
-- 从 Project 视图拖拽文件到输入框，直接加入上下文
-- 通过菜单或快捷键把当前文件 / 选中行加入上下文（`Ctrl/Cmd + \`、`Ctrl/Cmd + Shift + \`）
-- 点击消息里的文件路径直接在编辑器中打开
-- 自动处理 opencode 服务端的 HTTP Basic 鉴权
+- Runs the locally installed `opencode` (v2) for the current project — no backend is bundled
+- Chat UI in a tool window, scoped to the current project
+- Drag and drop files from the Project view into the prompt
+- Add the current file / selected line ranges to the prompt via action or shortcut
+  (`Ctrl/Cmd + \`, `Ctrl/Cmd + Shift + \`)
+- Clicking a file path in a message opens it in the editor
+- HTTP basic auth of the opencode server is handled automatically
 
-## 环境要求
+## Requirements
 
-- **opencode v2.0.0 或更高版本**，已安装且在 `PATH` 中（或在设置里指定路径）
-- IntelliJ 系 IDE **2024.3（build 243）或更高版本**，且启用了 JCEF
+- **opencode v2.0.0 or newer**, installed and available on `PATH` (or configured in the settings)
+- IntelliJ based IDE **2024.3 (build 243) or newer**, with JCEF enabled
 
-## 安装
+## Installation
 
-1. 从 Releases 下载 `opencode-plugin-gui-only-<版本>.zip`（也可以自行构建，见下文）
-2. IDE 中打开 `Settings → Plugins → ⚙ → Install Plugin from Disk…`
-3. 选择该 zip 并重启 IDE
-4. 打开右侧的 **OpenCode** 工具窗口
+1. Download `opencode-plugin-gui-only-<version>.zip` from the releases page (or build it, see below)
+2. In the IDE: `Settings → Plugins → ⚙ → Install Plugin from Disk…`
+3. Select the zip and restart the IDE
+4. Open the **OpenCode** tool window (right side)
 
-如果之前装过上游 `paviko` 的版本，请先卸载 —— 两者注册的是同一个工具窗口。
+If you previously installed the upstream `paviko` build, uninstall it first — it registers the same tool window.
 
-## 设置
+## Settings
 
 `Settings → Tools → OpenCode Plug`
 
-| 设置项 | 说明 |
+| Setting | Description |
 | --- | --- |
-| opencode executable | `opencode` 可执行文件的绝对路径；留空则自动查找（homebrew、nvm、bun、`~/.local/bin`、`PATH`） |
-| Additional serve args | 追加到 `opencode serve` 之后的额外参数 |
+| opencode executable | Absolute path to the `opencode` binary. Empty = auto detect (homebrew, nvm, bun, `~/.local/bin`, `PATH`) |
+| Additional serve args | Extra arguments appended to `opencode serve` |
 
-## 工作原理
+## How it works
 
-1. 插件在 IDE 终端里以项目目录为工作目录启动 `opencode serve`，并注入随机生成的 `OPENCODE_PASSWORD`，
-   让 HTTP API 既可访问又受保护
-2. 等待输出 `server listening on http://…`，并通过 `GET /api/info` 校验服务端
-3. 内置的本地静态服务器托管 web UI，并把服务端地址与鉴权信息注入页面
-4. UI 通过 opencode v2 的 REST API（`/api/*`）和 `/api/event` 事件流通信，事件会被投影回
-   UI 使用的消息/片段模型
+1. The plugin starts `opencode serve` in the IDE terminal with the project directory as working directory
+   and a generated `OPENCODE_PASSWORD`, so the HTTP API is protected and reachable
+2. It waits for the `server listening on http://…` line and verifies the server through `GET /api/info`
+3. The bundled web UI is served from a local static server which injects the server URL and credentials
+4. The UI talks to the opencode v2 REST API (`/api/*`) and consumes the `/api/event` stream, which is
+   projected back onto the message/part model the UI renders
 
-## 从源码构建
+## Building from source
 
-前置条件：JDK 21 与 [bun](https://bun.sh)（也可以用 pnpm/npm）。
+Prerequisites: JDK 21 and [bun](https://bun.sh) (or pnpm/npm).
 
 ```bash
 JAVA_HOME=/path/to/jdk-21 ./hosts/scripts/build_jetbrains.sh
 ```
 
-可选参数：
+Options:
 
 ```bash
-# 复用已经构建好的 web UI
+# reuse an already built web UI
 JAVA_HOME=/path/to/jdk-21 ./hosts/scripts/build_jetbrains.sh --skip-webgui
 
-# 使用本地已安装的 IDE 编译，避免下载完整 IDEA 发行版
+# compile against a locally installed IDE instead of downloading one
 JAVA_HOME=/path/to/jdk-21 ./hosts/scripts/build_jetbrains.sh --local-ide /Applications/PhpStorm.app
 ```
 
-插件 zip 会生成到 `hosts/jetbrains-plugin/build/distributions/`。
+The plugin zip is written to `hosts/jetbrains-plugin/build/distributions/`.
 
-## 说明
+## Notes
 
-- 这是只支持 v2 的分支：已移除内置的 v1 后端二进制和 v1 REST 兼容层
-- 在设置面板中修改 opencode 配置、以及会话分享，v2 API 暂不支持，目前是空实现
-- 与 opencode 官方团队、以及上游 `opencode-ide-plugin` 项目均无隶属关系
+- This is a v2-only fork: the bundled v1 backend binaries and the v1 REST compatibility layer were removed
+- Editing the opencode configuration from the settings panel and session sharing are not supported by the
+  v2 API and are currently no-ops
+- Not affiliated with the opencode team or with the upstream `opencode-ide-plugin` project
 
-## 致谢
+## Credits
 
-- [opencode](https://github.com/anomalyco/opencode) —— 智能体本体与其 web UI
-- [paviko/opencode-ide-plugin](https://github.com/paviko/opencode-ide-plugin) —— 本分支基于的原始 IDE 插件
+- [opencode](https://github.com/anomalyco/opencode) — the agent and its web UI
+- [paviko/opencode-ide-plugin](https://github.com/paviko/opencode-ide-plugin) — the original IDE plugin this fork is based on
 
-## 许可
+## License
 
-MIT，详见 [LICENSE](LICENSE)。
+MIT — see [LICENSE](LICENSE).
