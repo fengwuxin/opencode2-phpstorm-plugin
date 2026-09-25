@@ -48,32 +48,32 @@ export function UsageDisplay({ usage }: UsageDisplayProps) {
       </button>
 
       {showDetails && (
-        <div className="modern-card absolute top-full left-0 mt-1 w-64 z-50 overflow-hidden ring-1 ring-black/5 p-2">
+        <div className="absolute top-full left-0 mt-1 w-64 z-50 overflow-hidden rounded-lg border border-gray-200 bg-white p-2 text-xs text-gray-900 shadow-lg dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
           <div className="max-h-[calc(100vh-200px)] overflow-y-auto py-1">
             <div className="flex items-center justify-between py-0.5">
-              <span>已用上下文</span>
+              <span className="text-gray-700 dark:text-gray-300">已用上下文</span>
               <span className="tabular-nums">
                 {formatK(usage.contextUsed)}/{formatK(usage.contextLimit)}
               </span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span>输入 token</span>
+              <span className="text-gray-700 dark:text-gray-300">输入 token</span>
               <span className="tabular-nums">{formatK(usage.breakdown.input)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span>缓存写入</span>
+              <span className="text-gray-700 dark:text-gray-300">缓存写入</span>
               <span className="tabular-nums">{formatK(usage.breakdown.cacheWrite)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span>缓存读取</span>
+              <span className="text-gray-700 dark:text-gray-300">缓存读取</span>
               <span className="tabular-nums">{formatK(usage.breakdown.cacheRead)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span>输出 token</span>
+              <span className="text-gray-700 dark:text-gray-300">输出 token</span>
               <span className="tabular-nums">{formatK(usage.breakdown.output)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span>思考 token</span>
+              <span className="text-gray-700 dark:text-gray-300">思考 token</span>
               <span className="tabular-nums">{formatK(usage.breakdown.reasoning)}</span>
             </div>
           </div>

@@ -83,37 +83,37 @@ export function MessageStats({ tokens, cost }: MessageStatsProps) {
         <div
           ref={popoverRef}
           className={cn(
-            "modern-card absolute left-1/2 -translate-x-1/2 w-48 z-50 overflow-hidden ring-1 ring-black/5 p-2 text-xs",
+            "absolute left-1/2 -translate-x-1/2 w-48 z-50 overflow-hidden rounded-lg border border-gray-200 bg-white p-2 text-xs text-gray-900 shadow-lg dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100",
             position === "above" ? "bottom-full mb-2" : "top-full mt-2",
           )}
         >
           <div className="space-y-1">
-            <div className="flex items-center justify-between py-0.5 font-medium border-b border-gray-200 dark:border-gray-700 pb-1 mb-1">
+            <div className="flex items-center justify-between py-0.5 font-semibold border-b border-gray-300 dark:border-gray-600 pb-1 mb-1">
               <span>总计</span>
               <span className="tabular-nums">{formatK(total)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span className="text-gray-600 dark:text-gray-400">输入</span>
+              <span className="text-gray-700 dark:text-gray-300">输入</span>
               <span className="tabular-nums">{formatK(tokens.input)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span className="text-gray-600 dark:text-gray-400">缓存读取</span>
+              <span className="text-gray-700 dark:text-gray-300">缓存读取</span>
               <span className="tabular-nums">{formatK(tokens.cache.read)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span className="text-gray-600 dark:text-gray-400">缓存写入</span>
+              <span className="text-gray-700 dark:text-gray-300">缓存写入</span>
               <span className="tabular-nums">{formatK(tokens.cache.write)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span className="text-gray-600 dark:text-gray-400">输出</span>
+              <span className="text-gray-700 dark:text-gray-300">输出</span>
               <span className="tabular-nums">{formatK(tokens.output)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span className="text-gray-600 dark:text-gray-400">思考</span>
+              <span className="text-gray-700 dark:text-gray-300">思考</span>
               <span className="tabular-nums">{formatK(tokens.reasoning)}</span>
             </div>
-            <div className="flex items-center justify-between py-0.5 border-t border-gray-200 dark:border-gray-700 pt-1 mt-1">
-              <span className="text-gray-600 dark:text-gray-400">费用</span>
+            <div className="flex items-center justify-between py-0.5 border-t border-gray-300 dark:border-gray-600 pt-1 mt-1">
+              <span className="text-gray-700 dark:text-gray-300">费用</span>
               <span className="tabular-nums">{formatCost(cost)}</span>
             </div>
           </div>
