@@ -1,4 +1,4 @@
-# OpenCode UX —— JetBrains / PhpStorm 插件
+# OpenCode GUI Only —— JetBrains / PhpStorm 插件
 
 面向 **opencode v2** 的非官方 [opencode](https://opencode.ai) 插件，支持 JetBrains 全家桶
 （PhpStorm、IntelliJ IDEA、WebStorm 等）。
