@@ -1,9 +1,9 @@
 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Tool window icon (light theme): opencode mark silhouette. -->
+  <!-- Tool window icon (dark theme): opencode mark silhouette. -->
   <path
     fill-rule="evenodd"
     clip-rule="evenodd"
     d="M2.4 1H13.6V15H2.4V1ZM5.2 3.8H10.8V12.2H5.2V3.8Z"
-    fill="#3C4149"
+    fill="#D7DCE3"
   />
 </svg>
