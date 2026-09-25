@@ -1,5 +1,5 @@
 <idea-plugin>
-  <vendor>dqping</vendor>
+  <vendor>fengwuxin</vendor>
   <id>fengwuxin</id>
   <name>OpenCode GUI Only</name>
   <description>Runs local OpenCode backend and displays the chat UI.</description>
