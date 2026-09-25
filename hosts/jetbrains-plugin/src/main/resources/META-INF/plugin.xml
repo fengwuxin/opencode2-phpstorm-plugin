@@ -1,7 +1,7 @@
 <idea-plugin>
-  <vendor>fengwuxin</vendor>
+  <vendor>wuxin</vendor>
   <id>fengwuxin</id>
-  <name>OpenCode Studio</name>
+  <name>OpenCode UX</name>
   <description>Runs local OpenCode backend and displays the chat UI.</description>
 
   <depends>com.intellij.modules.platform</depends>

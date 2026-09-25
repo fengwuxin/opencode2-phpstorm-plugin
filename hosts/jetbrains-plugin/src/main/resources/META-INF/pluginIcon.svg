@@ -1,17 +1,13 @@
 <svg width="40" height="40" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Vector version of opencode.png (repo root), used as the plugin icon. -->
+  <!-- OpenCode UX plugin icon: Xiaomi-style squircle with a rounded terminal mark. -->
   <defs>
-    <linearGradient id="opencode-bg" x1="0" y1="0" x2="0" y2="320" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#333333" />
-      <stop offset="1" stop-color="#000000" />
-    </linearGradient>
-    <linearGradient id="opencode-body" x1="0" y1="139" x2="0" y2="223" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#606060" />
-      <stop offset="1" stop-color="#585858" />
+    <linearGradient id="oc-bg" x1="60" y1="30" x2="270" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2C3444" />
+      <stop offset="1" stop-color="#0A0E16" />
     </linearGradient>
   </defs>
-  <rect width="320" height="320" fill="url(#opencode-bg)" />
-  <rect x="76" y="55" width="168" height="210" fill="#FFFFFF" />
-  <rect x="118" y="97" width="84" height="42" fill="#212121" />
-  <rect x="118" y="139" width="84" height="84" fill="url(#opencode-body)" />
+  <path d="M306 160L305.84 197.34L305.37 212.75L304.59 224.49L303.49 234.28L302.07 242.78L300.33 250.32L298.27 257.1L295.87 263.24L293.13 268.82L290.04 273.91L286.59 278.55L282.77 282.77L278.55 286.59L273.91 290.04L268.82 293.13L263.24 295.87L257.1 298.27L250.32 300.33L242.78 302.07L234.28 303.49L224.49 304.59L212.75 305.37L197.34 305.84L160 306L122.66 305.84L107.25 305.37L95.51 304.59L85.72 303.49L77.22 302.07L69.68 300.33L62.9 298.27L56.76 295.87L51.18 293.13L46.09 290.04L41.45 286.59L37.23 282.77L33.41 278.55L29.96 273.91L26.87 268.82L24.13 263.24L21.73 257.1L19.67 250.32L17.93 242.78L16.51 234.28L15.41 224.49L14.63 212.75L14.16 197.34L14 160L14.16 122.66L14.63 107.25L15.41 95.51L16.51 85.72L17.93 77.22L19.67 69.68L21.73 62.9L24.13 56.76L26.87 51.18L29.96 46.09L33.41 41.45L37.23 37.23L41.45 33.41L46.09 29.96L51.18 26.87L56.76 24.13L62.9 21.73L69.68 19.67L77.22 17.93L85.72 16.51L95.51 15.41L107.25 14.63L122.66 14.16L160 14L197.34 14.16L212.75 14.63L224.49 15.41L234.28 16.51L242.78 17.93L250.32 19.67L257.1 21.73L263.24 24.13L268.82 26.87L273.91 29.96L278.55 33.41L282.77 37.23L286.59 41.45L290.04 46.09L293.13 51.18L295.87 56.76L298.27 62.9L300.33 69.68L302.07 77.22L303.49 85.72L304.59 95.51L305.37 107.25L305.84 122.66Z" fill="url(#oc-bg)" />
+  <rect x="94" y="94" width="132" height="132" rx="34" stroke="#F5F7FA" stroke-width="17" />
+  <path d="M134 150L157 173L134 196" stroke="#F5F7FA" stroke-width="17" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M173 196H199" stroke="#F5F7FA" stroke-width="17" stroke-linecap="round" />
 </svg>

@@ -1,4 +1,4 @@
-# OpenCode Studio — JetBrains / PhpStorm plugin
+# OpenCode UX — JetBrains / PhpStorm plugin
 
 Unofficial [opencode](https://opencode.ai) plugin for JetBrains IDEs (PhpStorm, IntelliJ IDEA, WebStorm, ...),
 built for **opencode v2**.
