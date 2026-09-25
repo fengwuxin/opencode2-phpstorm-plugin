@@ -27,14 +27,28 @@ export function ModelsTab({ formData, setFormData, providers }: ModelsTabProps) 
       <select
         value={value ?? ""}
         onChange={(e) => onChange(e.target.value || undefined)}
-        className="modern-input w-full font-mono text-sm"
+        className="modern-input w-full font-mono text-sm text-gray-900 dark:text-gray-100"
       >
-        <option value="">（未设置）</option>
-        {value && !known && <option value={value}>{value}</option>}
+        <option className="bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100" value="">
+          （未设置）
+        </option>
+        {value && !known && (
+          <option className="bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100" value={value}>
+            {value}
+          </option>
+        )}
         {groups.map((group) => (
-          <optgroup key={group.id} label={group.name}>
+          <optgroup
+            key={group.id}
+            className="bg-gray-100 text-gray-600 dark:bg-gray-900 dark:text-gray-300"
+            label={group.name}
+          >
             {group.models.map((model) => (
-              <option key={model.id} value={`${group.id}/${model.id}`}>
+              <option
+                key={model.id}
+                className="bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100"
+                value={`${group.id}/${model.id}`}
+              >
                 {model.name}
               </option>
             ))}

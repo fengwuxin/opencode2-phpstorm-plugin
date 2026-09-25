@@ -40,7 +40,7 @@ export function GeneralTab({ formData, setFormData }: GeneralTabProps) {
         <label className="flex items-center space-x-2">
           <input
             type="checkbox"
-            checked={formData.snapshots ?? false}
+            checked={formData.snapshots ?? true}
             onChange={(e) => setFormData({ ...formData, snapshots: e.target.checked })}
             className="rounded border-gray-300 dark:border-gray-700"
           />

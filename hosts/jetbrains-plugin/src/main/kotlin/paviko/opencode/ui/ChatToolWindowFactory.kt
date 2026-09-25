@@ -28,6 +28,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.nio.charset.StandardCharsets
+import javax.swing.SwingConstants
 import java.time.Duration
 import java.util.Base64
 import java.util.concurrent.TimeUnit
@@ -68,7 +69,7 @@ class ChatToolWindowFactory : ToolWindowFactory, DumbAware {
 
         if (!JBCefApp.isSupported()) {
             val notSupported = JPanel(BorderLayout()).apply {
-                add(JLabel("当前平台不支持 JCEF"), BorderLayout.CENTER)
+                add(JLabel("当前平台不支持 JCEF", SwingConstants.CENTER), BorderLayout.CENTER)
             }
             mainPanel.add(notSupported, BorderLayout.CENTER)
             return
@@ -87,12 +88,12 @@ class ChatToolWindowFactory : ToolWindowFactory, DumbAware {
             border = JBUI.Borders.empty(4)
             add(logScroll, BorderLayout.CENTER)
         }
-        val hideableLogs = com.intellij.ui.HideableTitledPanel("Backend logs (merged stdout/stderr)", false)
+        val hideableLogs = com.intellij.ui.HideableTitledPanel("后端日志（合并 stdout/stderr）", false)
         hideableLogs.setContentComponent(logsPanel)
 
         // Placeholder center until browser loads
         mainPanel.add(JPanel(BorderLayout()).apply {
-            add(JLabel("正在启动后端..."), BorderLayout.CENTER)
+            add(JLabel("正在启动……", SwingConstants.CENTER), BorderLayout.CENTER)
         }, BorderLayout.CENTER)
         // Add collapsible logs at the bottom
         mainPanel.add(hideableLogs, BorderLayout.SOUTH)
