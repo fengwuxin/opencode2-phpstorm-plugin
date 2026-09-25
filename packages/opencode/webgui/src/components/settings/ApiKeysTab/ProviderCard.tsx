@@ -1,3 +1,4 @@
+import { t } from "../../../lib/i18n"
 import type { Provider } from "@opencode-ai/sdk/client"
 import { OAuthSection } from "./OAuthSection"
 import { KeyInput } from "./KeyInput"
@@ -81,13 +82,13 @@ export function ProviderCard({
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500 dark:text-gray-400">
-            {isConnected ? "已连接" : "未配置"}
+            {isConnected ? t("已连接") : t("未配置")}
           </span>
           <button
             onClick={(e) => onDelete(provider.id, e)}
             className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-            title="移除 Provider"
-            data-tip="移除 Provider"
+            title={t("移除 Provider")}
+            data-tip={t("移除 Provider")}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -107,7 +108,7 @@ export function ProviderCard({
       {isExpanded && (
         <div className="px-3 pb-3 pt-0 border-t border-blue-100 dark:border-blue-900/30 mt-2">
           <div className="pt-3 space-y-3">
-            {isLoading && <div className="text-xs text-gray-400 animate-pulse">加载认证方式...</div>}
+            {isLoading && <div className="text-xs text-gray-400 animate-pulse">{t("加载认证方式...")}</div>}
 
             {hasOAuth && (
               <OAuthSection
@@ -136,7 +137,7 @@ export function ProviderCard({
                       <span className="w-full border-t border-gray-200 dark:border-gray-700" />
                     </div>
                     <div className="relative flex justify-center text-[10px] uppercase tracking-wider">
-                      <span className="bg-white dark:bg-gray-900 px-2 text-gray-400">或使用 API Key</span>
+                      <span className="bg-white dark:bg-gray-900 px-2 text-gray-400">{t("或使用 API Key")}</span>
                     </div>
                   </div>
                 )}

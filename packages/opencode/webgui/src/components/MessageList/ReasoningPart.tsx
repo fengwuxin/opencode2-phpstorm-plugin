@@ -1,3 +1,4 @@
+import { t } from "../../lib/i18n"
 import type { Part } from "../../state/MessagesContext"
 import { MarkdownRenderer } from "../MarkdownRenderer"
 import { CollapsiblePart } from "./CollapsiblePart"
@@ -8,7 +9,7 @@ interface ReasoningPartProps {
 }
 
 export function ReasoningPart({ part, durationMs }: ReasoningPartProps) {
-  const label = durationMs !== undefined ? `Thought for ${Math.max(1, Math.floor(durationMs / 1000))}s` : "思考中..."
+  const label = durationMs !== undefined ? `Thought for ${Math.max(1, Math.floor(durationMs / 1000))}s` : t("思考中...")
 
   return (
     <CollapsiblePart

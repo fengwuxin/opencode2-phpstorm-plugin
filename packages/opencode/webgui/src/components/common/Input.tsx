@@ -1,3 +1,4 @@
+import { t } from "../../lib/i18n"
 import type { InputHTMLAttributes, ReactNode } from "react"
 import { forwardRef } from "react"
 
@@ -107,4 +108,4 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
   },
 )
 
-Input.displayName = "输入"
+Input.displayName = t("输入")

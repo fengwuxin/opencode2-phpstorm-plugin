@@ -1,3 +1,4 @@
+import { t } from "../../i18n"
 /**
  * opencode v2 implementation of the SDK surface the web UI uses.
  *
@@ -155,7 +156,7 @@ export const sessionApi = {
         ? sessions.filter((session) => (session.location?.directory ?? "") === directory)
         : sessions
       return scoped.map(projectSession)
-    }, "加载会话列表失败"),
+    }, t("加载会话列表失败")),
 
   create: (options?: { body?: Record<string, unknown> }) =>
     wrap<Session>(async () => {
@@ -164,22 +165,22 @@ export const sessionApi = {
       if (directory) body.location = { directory }
       const session = await apiData<V2Session>("/api/session", jsonInit("POST", body))
       return projectSession(session)
-    }, "创建会话失败"),
+    }, t("创建会话失败")),
 
   get: (options: { path: { id: string } }) =>
-    wrap<Session>(async () => loadSession(options.path.id), "加载会话失败"),
+    wrap<Session>(async () => loadSession(options.path.id), t("加载会话失败")),
 
   update: (options: { path: { id: string }; body?: Record<string, unknown> }) =>
     wrap<Session>(async () => {
       await apiData(`/api/session/${options.path.id}`, jsonInit("PATCH", options.body ?? {}))
       return loadSession(options.path.id)
-    }, "更新会话失败"),
+    }, t("更新会话失败")),
 
   delete: (options: { path: { id: string } }) =>
     wrap<Record<string, never>>(async () => {
       await apiData(`/api/session/${options.path.id}`, { method: "DELETE" })
       return {}
-    }, "删除会话失败"),
+    }, t("删除会话失败")),
 
   fork: (options: { path: { id: string }; body?: Record<string, unknown> }) =>
     wrap<Session>(async () => {
@@ -188,7 +189,7 @@ export const sessionApi = {
         jsonInit("POST", options.body ?? {})
       )
       return projectSession(session)
-    }, "创建会话分支失败"),
+    }, t("创建会话分支失败")),
 
   messages: (options: { path: { id: string }; query?: { limit?: number } }) =>
     wrap(async () => {
@@ -198,7 +199,7 @@ export const sessionApi = {
       return messages
         .map((message) => projectMessage(message, sessionID))
         .filter((message): message is NonNullable<typeof message> => message !== null)
-    }, "加载消息失败"),
+    }, t("加载消息失败")),
 
   prompt: (options: { path: { id: string }; body?: Record<string, unknown> }) =>
     wrap<unknown>(async () => {
@@ -206,7 +207,7 @@ export const sessionApi = {
       const body = options.body ?? {}
       await applySelection(sessionID, body)
       return apiData(`/api/session/${sessionID}/prompt`, jsonInit("POST", promptPayload(body)))
-    }, "发送消息失败"),
+    }, t("发送消息失败")),
 
   command: (options: { path: { id: string }; body?: Record<string, unknown> }) =>
     wrap<unknown>(async () => {
@@ -216,20 +217,20 @@ export const sessionApi = {
       const name = typeof body.command === "string" ? body.command.replace(/^\//, "") : ""
       const args = Array.isArray(body.arguments) ? (body.arguments as string[]).join(" ") : ""
       return apiData(`/api/session/${sessionID}/command`, jsonInit("POST", { name, text: args }))
-    }, "执行命令失败"),
+    }, t("执行命令失败")),
 
   abort: (options: { path: { id: string } }) =>
     wrap<Record<string, never>>(async () => {
       await apiData(`/api/session/${options.path.id}/interrupt`, jsonInit("POST", {}))
       return {}
-    }, "中止会话失败"),
+    }, t("中止会话失败")),
 
   diff: (options: { path: { id: string }; query?: Record<string, unknown> }) =>
     wrap<FileDiff[]>(async () => {
       const diff = await apiData<unknown>(`/api/session/${options.path.id}/diff`)
       const list = Array.isArray(diff) ? diff : []
       return list.map((entry) => projectDiff(entry as Record<string, unknown>))
-    }, "加载会话差异失败"),
+    }, t("加载会话差异失败")),
 
   revert: (options: { path: { id: string }; body?: { messageID?: string } }) =>
     wrap<Session>(async () => {
@@ -240,27 +241,27 @@ export const sessionApi = {
       }
       await apiData(`/api/session/${sessionID}/revert/commit`, jsonInit("POST", {}))
       return loadSession(sessionID)
-    }, "回退会话失败"),
+    }, t("回退会话失败")),
 
   unrevert: (options: { path: { id: string } }) =>
     wrap<Session>(async () => {
       await apiData(`/api/session/${options.path.id}/revert`, { method: "DELETE" })
       return loadSession(options.path.id)
-    }, "恢复会话失败"),
+    }, t("恢复会话失败")),
 
   summarize: (options: { path: { id: string }; body?: Record<string, unknown> }) =>
     wrap<Session>(async () => {
       await apiData(`/api/session/${options.path.id}/compact`, jsonInit("POST", options.body ?? {}))
       return loadSession(options.path.id)
-    }, "压缩会话失败"),
+    }, t("压缩会话失败")),
 
   // opencode v2 has no session sharing and no custom retry endpoint: report success
   // with the current session so the UI stays consistent.
-  share: (options: { path: { id: string } }) => wrap<Session>(async () => loadSession(options.path.id), "分享失败"),
+  share: (options: { path: { id: string } }) => wrap<Session>(async () => loadSession(options.path.id), t("分享失败")),
   unshare: (options: { path: { id: string } }) =>
-    wrap<Session>(async () => loadSession(options.path.id), "取消分享失败"),
+    wrap<Session>(async () => loadSession(options.path.id), t("取消分享失败")),
   retry: (options: { path: { sessionID: string } }) =>
-    wrap<Session>(async () => loadSession(options.path.sessionID), "重试失败"),
+    wrap<Session>(async () => loadSession(options.path.sessionID), t("重试失败")),
 }
 
 export const configApi = {
@@ -271,14 +272,40 @@ export const configApi = {
         apiData<{ id?: string; providerID?: string } | null>("/api/model/default").catch(() => null),
       ])
       const config = projectConfig(documents) as Record<string, unknown>
-      if (defaults?.id && defaults?.providerID) config.model = `${defaults.providerID}/${defaults.id}`
+
+      // opencode v2 normalizes `model`/`small_model` into `{ providerID, model }` refs and
+      // moves the small model under `agents.title`; map them back to the flat strings the
+      // settings form edits, otherwise saved values look like they were not applied.
+      const asModelRef = (value: unknown): string | undefined => {
+        if (typeof value === "string") return value
+        if (!value || typeof value !== "object") return undefined
+        const ref = value as { providerID?: unknown; model?: unknown; modelID?: unknown }
+        const model = ref.model ?? ref.modelID
+        return typeof ref.providerID === "string" && typeof model === "string"
+          ? `${ref.providerID}/${model}`
+          : undefined
+      }
+
+      const configuredModel = asModelRef(config.model)
+      if (configuredModel) config.model = configuredModel
+      else if (defaults?.id && defaults?.providerID) config.model = `${defaults.providerID}/${defaults.id}`
+
+      const configuredSmall = asModelRef(config.small_model)
+      if (configuredSmall) config.small_model = configuredSmall
+      else {
+        const agents = config.agents
+        const title = agents && typeof agents === "object" ? (agents as Record<string, unknown>).title : undefined
+        const small = title && typeof title === "object" ? asModelRef((title as Record<string, unknown>).model) : undefined
+        if (small) config.small_model = small
+      }
+
       return config as unknown as Config
-    }, "加载配置失败"),
+    }, t("加载配置失败")),
 
   update: (_options?: { body?: Record<string, unknown> }) =>
     wrap<Config>(async () => {
-      throw new Error("此插件暂不支持编辑 opencode 配置")
-    }, "opencode v2 不支持更新配置"),
+      throw new Error(t("此插件暂不支持编辑 opencode 配置"))
+    }, t("opencode v2 不支持更新配置")),
 
   providers: () =>
     wrap<{ providers: Provider[]; default: Record<string, string> }>(async (): Promise<{ providers: Provider[]; default: Record<string, string> }> => {
@@ -299,7 +326,7 @@ export const configApi = {
         providers: projected,
         default: defaults?.id && defaults?.providerID ? { provider: defaults.providerID, model: defaults.id } : {},
       }
-    }, "加载 Provider 失败"),
+    }, t("加载 Provider 失败")),
 }
 
 export const appApi = {
@@ -307,7 +334,7 @@ export const appApi = {
     wrap<Agent[]>(async () => {
       const agents = await apiData<V2Agent[]>("/api/agent")
       return agents.filter((agent) => !agent.hidden).map(projectAgent)
-    }, "加载 Agent 失败"),
+    }, t("加载 Agent 失败")),
 }
 
 export const findApi = {
@@ -319,10 +346,10 @@ export const findApi = {
         `/api/fs/find?query=${encodeURIComponent(query)}&limit=${limit}`
       )
       return files.map((file) => file.path)
-    }, "搜索文件失败"),
+    }, t("搜索文件失败")),
 
   symbols: (_options: { query: { query: string } }) =>
-    wrap<string[]>(async () => [], "opencode v2 不支持符号搜索"),
+    wrap<string[]>(async () => [], t("opencode v2 不支持符号搜索")),
 }
 
 export const pathApi = {
@@ -335,7 +362,7 @@ export const pathApi = {
         worktree: location.project?.canonical ?? location.directory,
         directory: location.directory,
       }
-    }, "加载路径失败"),
+    }, t("加载路径失败")),
 }
 
 export const projectApi = {
@@ -343,7 +370,7 @@ export const projectApi = {
     wrap(async () => {
       const location = await apiData<{ directory: string; project?: { id: string; canonical: string } }>("/api/location")
       return { id: location.project?.id ?? "", worktree: location.project?.canonical ?? location.directory }
-    }, "加载项目失败"),
+    }, t("加载项目失败")),
 }
 
 export const commandApi = {
@@ -351,7 +378,7 @@ export const commandApi = {
     wrap<Command[]>(async () => {
       const commands = await apiData<V2Command[]>("/api/command")
       return commands.map(projectCommand)
-    }, "加载命令失败"),
+    }, t("加载命令失败")),
 }
 
 export const permissionApi = {
@@ -359,7 +386,7 @@ export const permissionApi = {
     wrap<boolean>(async () => {
       const requestID = options.path.requestID
       const sessionID = permissionSessions.get(requestID)
-      if (!sessionID) throw new Error("未知权限请求：" + requestID)
+      if (!sessionID) throw new Error(t("未知权限请求：") + requestID)
       const decision = options.body.reply === "reject" ? "reject" : options.body.reply === "always" ? "always" : "once"
       await apiData(
         `/api/session/${sessionID}/permission/${requestID}/reply`,
@@ -367,7 +394,7 @@ export const permissionApi = {
       )
       forgetPermission(requestID)
       return true
-    }, "处理授权请求失败"),
+    }, t("处理授权请求失败")),
 }
 
 export const questionApi = {
@@ -375,7 +402,7 @@ export const questionApi = {
     wrap<boolean>(async () => {
       const requestID = options.requestID
       const sessionID = formSessions.get(requestID)
-      if (!sessionID) throw new Error("未知表单请求：" + requestID)
+      if (!sessionID) throw new Error(t("未知表单请求：") + requestID)
       const flat = options.answers.flat()
       await apiData(
         `/api/session/${sessionID}/form/${requestID}/reply`,
@@ -383,17 +410,17 @@ export const questionApi = {
       )
       forgetForm(requestID)
       return true
-    }, "回答提问失败"),
+    }, t("回答提问失败")),
 
   reject: (options: { requestID: string }) =>
     wrap<boolean>(async () => {
       const requestID = options.requestID
       const sessionID = formSessions.get(requestID)
-      if (!sessionID) throw new Error("未知表单请求：" + requestID)
+      if (!sessionID) throw new Error(t("未知表单请求：") + requestID)
       await apiData(`/api/session/${sessionID}/form/${requestID}`, { method: "DELETE" })
       forgetForm(requestID)
       return true
-    }, "拒绝提问失败"),
+    }, t("拒绝提问失败")),
 }
 
 /**

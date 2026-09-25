@@ -1,3 +1,4 @@
+import { t } from "../lib/i18n"
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from "./common"
 
 interface ConfirmModalProps {
@@ -18,8 +19,8 @@ export function ConfirmModal({
   onConfirm,
   title,
   message,
-  confirmText = "确认",
-  cancelText = "取消",
+  confirmText = t("确认"),
+  cancelText = t("取消"),
   variant = "danger",
   isLoading = false,
 }: ConfirmModalProps) {

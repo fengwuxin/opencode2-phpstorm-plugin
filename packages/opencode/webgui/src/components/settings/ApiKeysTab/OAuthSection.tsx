@@ -1,3 +1,4 @@
+import { t } from "../../../lib/i18n"
 import { ManualCodeInput } from "./ManualCodeInput"
 
 interface AuthMethod {
@@ -36,7 +37,7 @@ export function OAuthSection({
   onManualCodeSubmit,
   onManualCodeCancel,
 }: OAuthSectionProps) {
-  const isWaiting = authStatus && (authStatus.startsWith("Waiting") || authStatus === "初始化...")
+  const isWaiting = authStatus && (authStatus.startsWith("Waiting") || authStatus === t("初始化..."))
   const showManualCodeInput = manualCodeState?.providerId === providerId
 
   // Get instructions from either props or manualCodeState
@@ -47,7 +48,7 @@ export function OAuthSection({
       <div className="flex items-center gap-2">
         <button
           onClick={() => onOAuthLogin(providerId, oauthMethodIndex)}
-          disabled={!!authStatus && authStatus !== "等待授权码..."}
+          disabled={!!authStatus && authStatus !== t("等待授权码...")}
           className="px-3 py-1.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-md text-xs font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors disabled:opacity-50 shadow-sm"
         >
           {methods[oauthMethodIndex].label || `Login with ${providerName}`}

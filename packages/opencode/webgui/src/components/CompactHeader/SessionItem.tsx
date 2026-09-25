@@ -1,3 +1,4 @@
+import { t } from "../../lib/i18n"
 import { isDefaultTitle } from "../../state/SessionContext"
 import { formatTimestamp } from "./utils"
 import { ideBridge } from "../../lib/ideBridge"
@@ -159,8 +160,8 @@ export function SessionItem({
                   <button
                     onClick={handleLinkClick}
                     className="p-1 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
-                    title="打开分享链接"
-                    data-tip="打开分享链接"
+                    title={t("打开分享链接")}
+                    data-tip={t("打开分享链接")}
                   >
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
@@ -177,8 +178,8 @@ export function SessionItem({
                   onClick={onToggleShare}
                   disabled={isSharing}
                   className="p-1 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-50"
-                  title={isShared ? "取消分享" : "分享会话"}
-                  data-tip={isShared ? "取消分享" : "分享会话"}
+                  title={isShared ? t("取消分享") : t("分享会话")}
+                  data-tip={isShared ? t("取消分享") : t("分享会话")}
                 >
                   {isShared ? (
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -204,8 +205,8 @@ export function SessionItem({
                 <button
                   onClick={onEditStart}
                   className="p-1 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
-                  title="编辑标题"
-                  data-tip="编辑标题"
+                  title={t("编辑标题")}
+                  data-tip={t("编辑标题")}
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -220,8 +221,8 @@ export function SessionItem({
                 <button
                   onClick={onDeleteStart}
                   className="p-1 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400"
-                  title="删除会话"
-                  data-tip="删除会话"
+                  title={t("删除会话")}
+                  data-tip={t("删除会话")}
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path

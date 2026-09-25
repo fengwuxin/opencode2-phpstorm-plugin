@@ -1,3 +1,4 @@
+import { t } from "../../lib/i18n"
 import type { ButtonHTMLAttributes, ReactNode } from "react"
 
 /**
@@ -84,7 +85,7 @@ export function Button({
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             />
           </svg>
-          <span>加载中...</span>
+          <span>{t("加载中...")}</span>
         </>
       ) : (
         children

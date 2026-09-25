@@ -1,3 +1,4 @@
+import { t } from "../../lib/i18n"
 import { useState, useRef, useCallback, useEffect, forwardRef, useImperativeHandle, useMemo } from "react"
 import { LexicalComposer } from "@lexical/react/LexicalComposer"
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
@@ -419,10 +420,10 @@ const MessageInputInner = forwardRef<
         isOpen={isCompactConfirmOpen}
         onClose={() => setIsCompactConfirmOpen(false)}
         onConfirm={handleCompactWithModal}
-        title="压缩会话历史"
-        message="这会总结对话的较早内容以节省上下文；最近的消息会保留，但更早的细节可能丢失。继续？"
-        confirmText="压缩"
-        cancelText="取消"
+        title={t("压缩会话历史")}
+        message={t("这会总结对话的较早内容以节省上下文；最近的消息会保留，但更早的细节可能丢失。继续？")}
+        confirmText={t("压缩")}
+        cancelText={t("取消")}
         variant="warning"
         isLoading={isCompacting}
       />

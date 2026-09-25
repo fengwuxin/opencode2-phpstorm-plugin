@@ -1,3 +1,4 @@
+import { t } from "../../i18n"
 /**
  * opencode v2 event stream (`GET /api/event`) translated into the event shapes the
  * web UI consumes.
@@ -559,7 +560,7 @@ function projectFormQuestions(form: Record<string, unknown>) {
     return [
       {
         question: String(form.title ?? "Input required"),
-        header: String(form.title ?? "输入").slice(0, 30),
+        header: String(form.title ?? t("输入")).slice(0, 30),
         options: [],
         custom: true,
       },
@@ -570,7 +571,7 @@ function projectFormQuestions(form: Record<string, unknown>) {
     const options = Array.isArray(field.options) ? (field.options as Record<string, unknown>[]) : []
     return {
       question: String(field.label ?? field.title ?? form.title ?? "Input required"),
-      header: String(field.label ?? field.name ?? "输入").slice(0, 30),
+      header: String(field.label ?? field.name ?? t("输入")).slice(0, 30),
       options: options.map((option) => ({
         label: String(option.label ?? option.value ?? ""),
         description: option.description ? String(option.description) : undefined,

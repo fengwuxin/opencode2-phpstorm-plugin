@@ -1,3 +1,4 @@
+import { t } from "../../lib/i18n"
 import { useState, useRef, useEffect, useLayoutEffect } from "react"
 import { formatK, formatCost } from "../../utils/formatting"
 import { cn } from "../../utils/classNames"
@@ -63,9 +64,9 @@ export function MessageStats({ tokens, cost }: MessageStatsProps) {
         ref={buttonRef}
         onClick={() => setShowDetails((v) => !v)}
         className="modern-icon-button w-6 h-6 p-0.5 flex items-center justify-center"
-        aria-label="查看 token 用量"
-        title="查看 token 用量"
-        data-tip="查看 token 用量"
+        aria-label={t("查看 token 用量")}
+        title={t("查看 token 用量")}
+        data-tip={t("查看 token 用量")}
       >
         <div className="w-3 h-3">
           <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,31 +90,31 @@ export function MessageStats({ tokens, cost }: MessageStatsProps) {
         >
           <div className="space-y-1">
             <div className="flex items-center justify-between py-0.5 font-semibold border-b border-gray-300 dark:border-gray-600 pb-1 mb-1">
-              <span>总计</span>
+              <span>{t("总计")}</span>
               <span className="tabular-nums">{formatK(total)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span className="text-gray-700 dark:text-gray-300">输入</span>
+              <span className="text-gray-700 dark:text-gray-300">{t("输入")}</span>
               <span className="tabular-nums">{formatK(tokens.input)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span className="text-gray-700 dark:text-gray-300">缓存读取</span>
+              <span className="text-gray-700 dark:text-gray-300">{t("缓存读取")}</span>
               <span className="tabular-nums">{formatK(tokens.cache.read)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span className="text-gray-700 dark:text-gray-300">缓存写入</span>
+              <span className="text-gray-700 dark:text-gray-300">{t("缓存写入")}</span>
               <span className="tabular-nums">{formatK(tokens.cache.write)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span className="text-gray-700 dark:text-gray-300">输出</span>
+              <span className="text-gray-700 dark:text-gray-300">{t("输出")}</span>
               <span className="tabular-nums">{formatK(tokens.output)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span className="text-gray-700 dark:text-gray-300">思考</span>
+              <span className="text-gray-700 dark:text-gray-300">{t("思考")}</span>
               <span className="tabular-nums">{formatK(tokens.reasoning)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5 border-t border-gray-300 dark:border-gray-600 pt-1 mt-1">
-              <span className="text-gray-700 dark:text-gray-300">费用</span>
+              <span className="text-gray-700 dark:text-gray-300">{t("费用")}</span>
               <span className="tabular-nums">{formatCost(cost)}</span>
             </div>
           </div>

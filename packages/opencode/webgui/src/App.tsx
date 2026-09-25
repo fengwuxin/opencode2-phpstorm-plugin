@@ -1,3 +1,4 @@
+import { t } from "./lib/i18n"
 import { useCallback, useEffect, useState, useRef } from "react"
 import { useEventStream, useEventHandler, eventEmitter, type ServerEvent, type ConnectionState } from "./lib/api/events"
 import { useSessionEvents } from "./lib/api/useSessionEvents"
@@ -238,7 +239,7 @@ function AppInner({ connectionState }: { connectionState: ConnectionState }) {
   useEffect(() => {
     if (error) {
       showToast(error.message, {
-        title: "错误",
+        title: t("错误"),
         variant: "error",
         duration: 8000,
       })
@@ -316,7 +317,7 @@ function AppContent() {
 
       if (event.type === "server.connected") {
         console.log("[App] Successfully connected to OpenCode server")
-        showToast("已连接到 OpenCode 服务", { variant: "success", duration: 3000 })
+        showToast(t("已连接到 OpenCode 服务"), { variant: "success", duration: 3000 })
       }
 
       // Handle session.idle events to show/hide typing indicator
@@ -339,8 +340,8 @@ function AppContent() {
         const { sessionID } = event.properties
         if (currentSession?.id === sessionID) {
           console.log("[App] Session compacted:", sessionID)
-          showToast("会话历史已压缩以节省空间", {
-            title: "会话已压缩",
+          showToast(t("会话历史已压缩以节省空间"), {
+            title: t("会话已压缩"),
             variant: "info",
             duration: 5000,
           })
@@ -372,6 +373,15 @@ function AppContent() {
 }
 
 function App() {
+  const [, setLanguageVersion] = useState(0)
+
+  // Re-render the tree when the UI language changes so every t() call refreshes.
+  useEffect(() => {
+    const listener = () => setLanguageVersion((version) => version + 1)
+    window.addEventListener("opencode:language", listener)
+    return () => window.removeEventListener("opencode:language", listener)
+  }, [])
+
   return (
     <ThemeProvider>
       <AppContent />

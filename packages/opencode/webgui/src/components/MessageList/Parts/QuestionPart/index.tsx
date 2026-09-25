@@ -1,3 +1,4 @@
+import { t } from "../../../../lib/i18n"
 import { useState, useCallback, useMemo } from "react"
 import type { QuestionRequest, QuestionAnswer } from "@opencode-ai/sdk/v2/client"
 import { QuestionTabs } from "./QuestionTabs"
@@ -220,7 +221,7 @@ export function QuestionPart({ request }: QuestionPartProps) {
     <div className="my-0.5 border rounded-lg border-blue-300 dark:border-blue-700 overflow-hidden bg-[#fbfdff] dark:bg-gray-900">
       {/* Header */}
       <div className="px-3 py-2 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800">
-        <div className="text-xs font-medium text-blue-700 dark:text-blue-300">助手提问</div>
+        <div className="text-xs font-medium text-blue-700 dark:text-blue-300">{t("助手提问")}</div>
       </div>
 
       {/* Tabs (only show if multiple questions or multi-select) */}
@@ -276,7 +277,7 @@ export function QuestionPart({ request }: QuestionPartProps) {
                 onClick={handleNext}
                 className="px-2 py-1 text-xs rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
               >
-                下一步 →
+                {t("下一步 →")}
               </button>
             )}
           </div>

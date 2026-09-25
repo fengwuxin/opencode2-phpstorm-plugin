@@ -1,3 +1,4 @@
+import { t } from "../lib/i18n"
 import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from "react"
 import { eventEmitter, useEventHandler, type EventEmitter, type ServerEvent } from "../lib/api/events"
 import type { Message, Part, WebguiPart, SDKMessage, QuestionRequest } from "../types/messages"
@@ -57,9 +58,9 @@ interface MessagesProviderProps {
 }
 
 function sessionErrorText(error: unknown): string {
-  if (!error) return "会话发生错误"
+  if (!error) return t("会话发生错误")
   if (typeof error === "string") return error
-  if (typeof error !== "object") return "会话发生错误"
+  if (typeof error !== "object") return t("会话发生错误")
 
   const data = (error as { data?: { message?: unknown }; message?: unknown }).data
   const dataMessage = data && typeof data.message === "string" ? data.message : undefined
@@ -68,7 +69,7 @@ function sessionErrorText(error: unknown): string {
   const msg = (error as { message?: unknown }).message
   if (typeof msg === "string" && msg.length > 0) return msg
 
-  return "会话发生错误"
+  return t("会话发生错误")
 }
 
 function sessionErrorKey(error: unknown): string | undefined {

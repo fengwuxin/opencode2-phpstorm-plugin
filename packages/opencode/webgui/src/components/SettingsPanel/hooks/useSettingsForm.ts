@@ -1,3 +1,4 @@
+import { t } from "../../../lib/i18n"
 import { useState, useEffect, useMemo } from "react"
 import { sdk } from "../../../lib/api/sdkClient"
 import { disabledProviderIds } from "../../../lib/provider-config"
@@ -41,7 +42,7 @@ export function useSettingsForm(isOpen: boolean, customApi?: boolean) {
         const configResponse = await sdk.config.get()
 
         if (configResponse.error) {
-          throw new Error("加载配置失败")
+          throw new Error(t("加载配置失败"))
         }
 
         if (configResponse.data) {
@@ -60,7 +61,7 @@ export function useSettingsForm(isOpen: boolean, customApi?: boolean) {
         // Fetch providers
         const providersRes = await sdk.config.providers()
         if (providersRes.error) {
-          throw new Error("加载 Provider 失败")
+          throw new Error(t("加载 Provider 失败"))
         }
         if (providersRes.data) {
           setProviders(providersRes.data.providers.sort((a, b) => a.name.localeCompare(b.name)))

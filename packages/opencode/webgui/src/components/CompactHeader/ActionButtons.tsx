@@ -1,3 +1,4 @@
+import { t } from "../../lib/i18n"
 import { IconButton } from "../common"
 
 interface ActionButtonsProps {
@@ -23,8 +24,8 @@ export function ActionButtons({
       <IconButton
         onClick={toggleTheme}
         size="md"
-        aria-label={theme === "light" ? "切换到深色模式" : "切换到浅色模式"}
-        title={theme === "light" ? "切换到深色模式" : "切换到浅色模式"}
+        aria-label={theme === "light" ? t("切换到深色模式") : t("切换到浅色模式")}
+        title={theme === "light" ? t("切换到深色模式") : t("切换到浅色模式")}
         icon={
           theme === "light" ? (
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,8 +53,8 @@ export function ActionButtons({
       <IconButton
         onClick={onOpenCommandPalette}
         size="md"
-        aria-label="命令面板"
-        title="命令面板 (Cmd/Ctrl+K)"
+        aria-label={t("命令面板")}
+        title={t("命令面板 (Cmd/Ctrl+K)")}
         icon={
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -71,7 +72,7 @@ export function ActionButtons({
         onClick={onOpenSettings}
         size="md"
         aria-label="Settings"
-        title="设置 (Cmd/Ctrl+,)"
+        title={t("设置 (Cmd/Ctrl+,)")}
         icon={
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -92,8 +93,8 @@ export function ActionButtons({
         onClick={onNewSession}
         disabled={isCreatingSession}
         className="w-5 h-5 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-        title="新建会话 (Cmd/Ctrl+N)"
-        data-tip="新建会话 (Cmd/Ctrl+N)"
+        title={t("新建会话 (Cmd/Ctrl+N)")}
+        data-tip={t("新建会话 (Cmd/Ctrl+N)")}
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

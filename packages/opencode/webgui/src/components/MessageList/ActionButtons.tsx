@@ -1,3 +1,4 @@
+import { t } from "../../lib/i18n"
 import { useEffect, useRef, useState } from "react"
 import { IconButton } from "../common"
 import { MessageStats } from "./MessageStats"
@@ -102,9 +103,9 @@ export function ActionButtons({ onFork, onRevert, revertBusy, tokens, cost, isUs
               onClick={handleCopy}
               size="sm"
               className="p-0.5"
-              aria-label={copied ? "已复制到剪贴板" : "复制到剪贴板"}
-              title={copied ? "已复制！" : "复制到剪贴板"}
-              data-tip={copied ? "已复制！" : "复制到剪贴板"}
+              aria-label={copied ? t("已复制到剪贴板") : t("复制到剪贴板")}
+              title={copied ? t("已复制！") : t("复制到剪贴板")}
+              data-tip={copied ? t("已复制！") : t("复制到剪贴板")}
               icon={
                 copied ? (
                   <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,9 +130,9 @@ export function ActionButtons({ onFork, onRevert, revertBusy, tokens, cost, isUs
               onClick={onFork}
               size="sm"
               className="p-0.5"
-              aria-label="从这条消息创建会话分支"
-              title="从这条消息创建会话分支"
-              data-tip="从这条消息创建会话分支"
+              aria-label={t("从这条消息创建会话分支")}
+              title={t("从这条消息创建会话分支")}
+              data-tip={t("从这条消息创建会话分支")}
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -150,9 +151,9 @@ export function ActionButtons({ onFork, onRevert, revertBusy, tokens, cost, isUs
               size="sm"
               className="p-0.5 hover:text-red-600 dark:hover:text-red-400"
               disabled={revertBusy}
-              aria-label="从此消息回退"
-              title="从此消息回退"
-              data-tip="从此消息回退"
+              aria-label={t("从此消息回退")}
+              title={t("从此消息回退")}
+              data-tip={t("从此消息回退")}
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path

@@ -1,3 +1,4 @@
+import { t } from "../../../lib/i18n"
 interface EditToolProps {
   diff: string
 }
@@ -5,7 +6,7 @@ interface EditToolProps {
 export function EditTool({ diff }: EditToolProps) {
   return (
     <div className="px-3 py-1.5 border-b border-gray-100 dark:border-gray-800">
-      <div className="text-[10px] uppercase font-semibold text-gray-500 dark:text-gray-400 mb-1">改动</div>
+      <div className="text-[10px] uppercase font-semibold text-gray-500 dark:text-gray-400 mb-1">{t("改动")}</div>
       <div className="text-xs bg-white dark:bg-gray-900 rounded p-1.5 overflow-x-auto max-h-60 overflow-y-auto">
         <pre className="font-mono text-[11px] whitespace-pre">
           {diff.split("\n").map((line, i) => {

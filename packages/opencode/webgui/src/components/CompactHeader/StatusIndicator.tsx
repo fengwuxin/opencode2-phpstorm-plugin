@@ -1,4 +1,5 @@
 import type { ConnectionState } from "../../lib/api/events"
+import { t } from "../../lib/i18n"
 import { CONNECTION_COLORS, CONNECTION_TOOLTIPS } from "./utils"
 
 interface StatusIndicatorProps {
@@ -6,7 +7,7 @@ interface StatusIndicatorProps {
 }
 
 export function StatusIndicator({ connectionState }: StatusIndicatorProps) {
-  const tip = CONNECTION_TOOLTIPS[connectionState]
+  const tip = t(CONNECTION_TOOLTIPS[connectionState])
   return (
     <div
       className={`w-2 h-2 rounded-full ${CONNECTION_COLORS[connectionState]} ${

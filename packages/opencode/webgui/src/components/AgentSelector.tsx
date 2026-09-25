@@ -1,3 +1,4 @@
+import { t, getLanguage } from "../lib/i18n"
 import { useState, useEffect } from "react"
 import { sdk } from "../lib/api/sdkClient"
 import { eventEmitter } from "../lib/api/events"
@@ -8,6 +9,28 @@ interface AgentSelectorProps {
   selectedAgent?: string
   onSelect: (agentName: string) => void | Promise<void>
   disabled?: boolean
+}
+
+/** Built-in agent descriptions, translated locally (the server sends English). */
+const AGENT_DESCRIPTIONS: Record<string, { zh: string; en: string }> = {
+  build: {
+    zh: "默认 Agent，按配置的权限执行工具。",
+    en: "The default agent. Executes tools based on configured permissions.",
+  },
+  plan: {
+    zh: "只读 Agent，用于探索代码库并在实现前做规划。",
+    en: "Read-only agent for exploring the codebase and planning work before implementation.",
+  },
+  general: {
+    zh: "通用 Agent，用于执行多步骤任务。",
+    en: "General-purpose agent for multi-step tasks.",
+  },
+}
+
+function agentDescription(agent: Agent) {
+  const known = AGENT_DESCRIPTIONS[agent.name]
+  if (known) return getLanguage() === "en" ? known.en : known.zh
+  return agent.description
 }
 
 export function AgentSelector({ selectedAgent, onSelect, disabled }: AgentSelectorProps) {
@@ -92,8 +115,8 @@ export function AgentSelector({ selectedAgent, onSelect, disabled }: AgentSelect
         onClick={toggle}
         disabled={disabled || isLoading}
         className="h-6 px-2 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-        title="选择 Agent"
-        data-tip="选择 Agent"
+        title={t("选择 Agent")}
+        data-tip={t("选择 Agent")}
       >
         {getCurrentDisplay()}
         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,7 +132,7 @@ export function AgentSelector({ selectedAgent, onSelect, disabled }: AgentSelect
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="搜索 Agent..."
+              placeholder={t("搜索 Agent...")}
               className="w-full px-2 py-1 text-xs bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               autoFocus
             />
@@ -118,10 +141,10 @@ export function AgentSelector({ selectedAgent, onSelect, disabled }: AgentSelect
           {/* Agents list */}
           <div className="overflow-y-auto flex-1">
             {isLoading ? (
-              <div className="p-4 text-xs text-gray-500 dark:text-gray-400 text-center">加载 Agent...</div>
+              <div className="p-4 text-xs text-gray-500 dark:text-gray-400 text-center">{t("加载 Agent...")}</div>
             ) : filteredAgents.length === 0 ? (
               <div className="p-4 text-xs text-gray-500 dark:text-gray-400 text-center">
-                {searchTerm ? "未找到 Agent" : "没有可用的 Agent"}
+                {searchTerm ? t("未找到 Agent") : t("没有可用的 Agent")}
               </div>
             ) : (
               filteredAgents.map((agent) => {
@@ -142,13 +165,13 @@ export function AgentSelector({ selectedAgent, onSelect, disabled }: AgentSelect
                         <span className="font-medium truncate">{agent.name}</span>
                         {agent.builtIn && (
                           <span className="px-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-[10px] rounded">
-                            built-in
+                            {t("内置")}
                           </span>
                         )}
                       </div>
-                      {agent.description && (
+                      {agentDescription(agent) && (
                         <span className="text-[10px] text-gray-500 dark:text-gray-400 line-clamp-2">
-                          {agent.description}
+                          {agentDescription(agent)}
                         </span>
                       )}
                     </div>

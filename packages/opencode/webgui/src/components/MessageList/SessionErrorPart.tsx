@@ -1,3 +1,4 @@
+import { t } from "../../lib/i18n"
 import { useSession } from "../../state/SessionContext"
 import { useCallback } from "react"
 import { useCustomApi } from "../../state/IdeBridgeContext"
@@ -40,7 +41,7 @@ export function SessionErrorPart({ part }: SessionErrorPartProps) {
           </div>
           <div>
             <div className="text-[10px] uppercase font-bold tracking-wider text-red-600 dark:text-red-400 mb-0.5">
-              会话错误
+              {t("会话错误")}
             </div>
             <div className="text-sm text-red-700 dark:text-red-300">
               {part.message}

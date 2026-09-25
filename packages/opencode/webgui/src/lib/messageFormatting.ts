@@ -1,3 +1,4 @@
+import { t } from "./i18n"
 /**
  * Message formatting and rendering utilities
  * Module-level functions for formatting timestamps and rendering message parts
@@ -14,7 +15,7 @@ export function formatTimestamp(timestamp: number): string {
   const diffHours = Math.floor(diffMs / 3600000)
   const diffDays = Math.floor(diffMs / 86400000)
 
-  if (diffMins < 1) return "刚刚"
+  if (diffMins < 1) return t("刚刚")
   if (diffMins < 60) return `${diffMins}m ago`
   if (diffHours < 24) return `${diffHours}h ago`
   if (diffDays < 7) return `${diffDays}d ago`

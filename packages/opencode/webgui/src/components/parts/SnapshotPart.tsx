@@ -1,3 +1,4 @@
+import { t } from "../../lib/i18n"
 import { useState } from "react"
 
 interface SnapshotPartProps {
@@ -32,7 +33,7 @@ export function SnapshotPart({ part }: SnapshotPartProps) {
           />
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
-        <span className="text-xs font-medium text-purple-700 dark:text-purple-300 flex-1">快照已创建</span>
+        <span className="text-xs font-medium text-purple-700 dark:text-purple-300 flex-1">{t("快照已创建")}</span>
         <svg
           viewBox="0 0 24 24"
           className={`w-3 h-3 text-purple-600 dark:text-purple-400 transition-transform duration-150 ${isExpanded ? "rotate-90" : ""}`}
@@ -51,7 +52,7 @@ export function SnapshotPart({ part }: SnapshotPartProps) {
         <div className="border-t border-purple-200 dark:border-purple-800 bg-white dark:bg-gray-950">
           <div className="px-3 py-2">
             <div className="text-[10px] uppercase font-semibold text-gray-500 dark:text-gray-400 mb-1.5">
-              快照 ID
+              {t("快照 ID")}
             </div>
             <div className="text-xs font-mono text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 rounded px-2 py-1">
               {part.snapshot}

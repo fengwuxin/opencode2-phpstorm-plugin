@@ -1,3 +1,4 @@
+import { t } from "../../lib/i18n"
 import { type NodeKey } from "lexical"
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
 import { type AttachmentMetadata } from "./AttachmentNode"
@@ -77,8 +78,8 @@ export function AttachmentComponent({ nodeKey, metadata }: AttachmentComponentPr
       <button
         onClick={handleRemove}
         className="ml-0.5 hover:bg-blue-200 dark:hover:bg-blue-800/50 rounded p-0.5"
-        title="移除附件"
-        data-tip="移除附件"
+        title={t("移除附件")}
+        data-tip={t("移除附件")}
       >
         <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

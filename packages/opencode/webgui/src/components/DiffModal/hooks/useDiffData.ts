@@ -1,3 +1,4 @@
+import { t } from "../../../lib/i18n"
 import { useEffect, useState } from "react"
 import { sdk } from "../../../lib/api/sdkClient"
 import type { FileDiff } from "@opencode-ai/sdk/client"
@@ -27,14 +28,14 @@ export function useDiffData(sessionID: string, messageID: string, isOpen: boolea
           const errorMessage =
             typeof response.error === "object" && "message" in response.error
               ? String(response.error.message)
-              : "未知错误"
-          setError("加载差异失败：" + errorMessage)
+              : t("未知错误")
+          setError(t("加载差异失败：") + errorMessage)
         } else if (response.data) {
           setDiffs(response.data)
         }
       } catch (err) {
         if (!controller.signal.aborted) {
-          setError("加载差异失败：" + String(err))
+          setError(t("加载差异失败：") + String(err))
         }
       } finally {
         if (!controller.signal.aborted) {

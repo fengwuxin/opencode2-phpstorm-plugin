@@ -1,3 +1,4 @@
+import { t } from "../lib/i18n"
 import { useEffect, useMemo, useState } from "react"
 import type { Provider } from "@opencode-ai/sdk/client"
 import { isModelVisible, type ModelVisibility } from "../lib/model-visibility"
@@ -47,9 +48,9 @@ export function ManageModels({
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
       <ModalHeader onClose={onClose}>
-        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">管理模型</h3>
+        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">{t("管理模型")}</h3>
         <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-          默认显示所有模型；取消勾选即可从列表中隐藏。
+          {t("默认显示所有模型；取消勾选即可从列表中隐藏。")}
         </p>
       </ModalHeader>
       <ModalBody>
@@ -57,14 +58,14 @@ export function ManageModels({
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="搜索模型..."
+          placeholder={t("搜索模型...")}
           className="w-full px-2 py-1 text-xs bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           autoFocus
         />
 
         <div className="mt-2 max-h-[55vh] overflow-y-auto border border-gray-100 dark:border-gray-800 rounded">
           {groups.length === 0 ? (
-            <div className="p-4 text-xs text-gray-500 dark:text-gray-400 text-center">未找到模型</div>
+            <div className="p-4 text-xs text-gray-500 dark:text-gray-400 text-center">{t("未找到模型")}</div>
           ) : (
             groups.map(({ provider, models }) => (
               <div key={provider.id} className="border-b border-gray-100 dark:border-gray-800 last:border-0">

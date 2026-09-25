@@ -1,3 +1,4 @@
+import { t } from "../../../../lib/i18n"
 import { cn } from "../../../../utils/classNames"
 import type { QuestionInfo } from "@opencode-ai/sdk/v2/client"
 
@@ -172,7 +173,7 @@ export function QuestionOptions({
                         isCustomSelected ? "text-blue-700 dark:text-blue-300" : "text-gray-800 dark:text-gray-200"
                       )}
                     >
-                      输入你的回答
+                      {t("输入你的回答")}
                     </span>
                     {!isMultiple && isCustomSelected && customInput && (
                       <span className="text-green-600 dark:text-green-400 text-xs">✓</span>
@@ -191,12 +192,12 @@ export function QuestionOptions({
                   onChange={(e) => onCustomInputChange(e.target.value)}
                   onKeyDown={handleKeyDown}
                   onBlur={onFinishEditing}
-                  placeholder="输入你的回答..."
+                  placeholder={t("输入你的回答...")}
                   className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none"
                   rows={2}
                 />
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                  按 Enter 确认，Esc 取消
+                  {t("按 Enter 确认，Esc 取消")}
                 </p>
               </div>
             )}

@@ -1,3 +1,4 @@
+import { t } from "../../lib/i18n"
 import { useEffect, useState } from "react"
 import { sdk } from "../../lib/api/sdkClient"
 import { ConfirmModal } from "../ConfirmModal"
@@ -139,7 +140,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         setApiKeys({})
       }
 
-      setSuccessMessage("设置已保存")
+      setSuccessMessage(t("设置已保存"))
       markProvidersDirty()
       setTimeout(() => {
         setSuccessMessage(null)
@@ -172,7 +173,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             )}
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
-                <div className="text-gray-500 dark:text-gray-400">加载设置...</div>
+                <div className="text-gray-500 dark:text-gray-400">{t("加载设置...")}</div>
               </div>
             ) : error ? (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded p-3 text-sm text-red-800 dark:text-red-200">
@@ -219,10 +220,10 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         isOpen={showCloseConfirm}
         onClose={() => setShowCloseConfirm(false)}
         onConfirm={forceClose}
-        title="未保存的修改"
-        message="有未保存的修改，确定关闭而不保存吗？"
-        confirmText="放弃修改"
-        cancelText="继续编辑"
+        title={t("未保存的修改")}
+        message={t("有未保存的修改，确定关闭而不保存吗？")}
+        confirmText={t("放弃修改")}
+        cancelText={t("继续编辑")}
         variant="warning"
       />
     </>

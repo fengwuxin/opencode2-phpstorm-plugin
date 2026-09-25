@@ -1,3 +1,4 @@
+import { t } from "../../../lib/i18n"
 import { useState, useCallback, useEffect } from "react"
 import { $getRoot, $createParagraphNode, $createTextNode, type LexicalEditor } from "lexical"
 import { sdk } from "../../../lib/api/sdkClient"
@@ -66,7 +67,7 @@ export function useMessageInput({
 
       if (isUnknownCommand) {
         showToast(`Unknown command "/${commandName}". Sending as regular message.`, {
-          title: "未知命令",
+          title: t("未知命令"),
           variant: "warning",
           duration: 4000,
         })
@@ -75,7 +76,7 @@ export function useMessageInput({
       const parts = shouldRunCommand ? [] : extractMessageParts()
 
       if (!shouldRunCommand && parts.length === 0) {
-        throw new Error("消息内容为空")
+        throw new Error(t("消息内容为空"))
       }
 
       let actualSessionID = sessionID
@@ -83,7 +84,7 @@ export function useMessageInput({
         console.log("[MessageInput] Materializing virtual session before sending message...")
         const realSession = await materializeSession()
         if (!realSession) {
-          throw new Error("创建会话失败")
+          throw new Error(t("创建会话失败"))
         }
         actualSessionID = realSession.id
         console.log("[MessageInput] Virtual session materialized:", actualSessionID)
@@ -132,7 +133,7 @@ export function useMessageInput({
             typeof response.error.data === "object" &&
             "message" in response.error.data
               ? String(response.error.data.message)
-              : "执行命令失败"
+              : t("执行命令失败")
           throw new Error(errorMsg)
         }
       } else {
@@ -165,19 +166,19 @@ export function useMessageInput({
             typeof response.error.data === "object" &&
             "message" in response.error.data
               ? String(response.error.data.message)
-              : "发送消息失败"
+              : t("发送消息失败")
           throw new Error(errorMsg)
         }
       }
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("发送消息失败")
+      const error = err instanceof Error ? err : new Error(t("发送消息失败"))
       console.error("[MessageInput] Failed to send message:", error)
 
       // Restore failed message for retry
       setLastFailedMessage(savedMessage)
 
       showToast(error.message, {
-        title: "发送消息失败",
+        title: t("发送消息失败"),
         variant: "error",
         duration: 8000,
       })
@@ -232,10 +233,10 @@ export function useMessageInput({
         editor.focus()
       }, 0)
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("中止会话失败")
+      const error = err instanceof Error ? err : new Error(t("中止会话失败"))
       console.error("[MessageInput] Failed to abort session:", error)
       showToast(error.message, {
-        title: "中止失败",
+        title: t("中止失败"),
         variant: "error",
         duration: 6000,
       })
@@ -246,8 +247,8 @@ export function useMessageInput({
     async (closeModal: () => void) => {
       if (!sessionID) return
       if (sessionID.startsWith("virtual-")) {
-        showToast("无法压缩虚拟会话，请先发送一条消息创建会话。", {
-          title: "无法压缩",
+        showToast(t("无法压缩虚拟会话，请先发送一条消息创建会话。"), {
+          title: t("无法压缩"),
           variant: "warning",
           duration: 6000,
         })
@@ -255,8 +256,8 @@ export function useMessageInput({
         return
       }
       if (!selectedProviderId || !selectedModelId) {
-        showToast("压缩会话前请先选择模型。", {
-          title: "请先选择模型",
+        showToast(t("压缩会话前请先选择模型。"), {
+          title: t("请先选择模型"),
           variant: "warning",
           duration: 6000,
         })
@@ -267,8 +268,8 @@ export function useMessageInput({
       closeModal()
 
       try {
-        showToast("会话压缩已开始，完成后会通知你。", {
-          title: "正在压缩会话",
+        showToast(t("会话压缩已开始，完成后会通知你。"), {
+          title: t("正在压缩会话"),
           variant: "info",
           duration: 5000,
         })
@@ -289,18 +290,18 @@ export function useMessageInput({
           const msg =
             errorData && typeof errorData === "object" && errorData !== null && "message" in errorData
               ? String((errorData as any).message)
-              : "压缩会话失败"
+              : t("压缩会话失败")
           showToast(msg, {
-            title: "压缩失败",
+            title: t("压缩失败"),
             variant: "error",
             duration: 8000,
           })
         }
       } catch (err) {
-        const error = err instanceof Error ? err : new Error("压缩会话失败")
+        const error = err instanceof Error ? err : new Error(t("压缩会话失败"))
         console.error("[MessageInput] Failed to compact session:", error)
         showToast(error.message, {
-          title: "压缩失败",
+          title: t("压缩失败"),
           variant: "error",
           duration: 8000,
         })

@@ -1,3 +1,4 @@
+import { t } from "../lib/i18n"
 import { useState, useEffect, useCallback, useRef } from "react"
 import { sdk } from "../lib/api/sdkClient"
 import fuzzysort from "fuzzysort"
@@ -123,7 +124,7 @@ export function useMentionSearch(query: string): UseMentionSearchResult {
           if (openedSet.size > 0) {
             items.push({
               id: "opened:all",
-              metadata: { type: "file", display: "所有打开的文件" },
+              metadata: { type: "file", display: t("所有打开的文件") },
               score: 0,
               special: "all-opened",
             })
@@ -162,7 +163,7 @@ export function useMentionSearch(query: string): UseMentionSearchResult {
         setResults(finalResults)
       } catch (err) {
         if (signal.aborted) return
-        const errorObj = err instanceof Error ? err : new Error("搜索提及失败")
+        const errorObj = err instanceof Error ? err : new Error(t("搜索提及失败"))
         setError(errorObj)
         console.error("[useMentionSearch] Search failed:", errorObj)
       } finally {

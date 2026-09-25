@@ -1,3 +1,4 @@
+import { t } from "../../lib/i18n"
 import { useState } from "react"
 import { formatK, formatKM, formatCost } from "./utils"
 
@@ -31,8 +32,8 @@ export function UsageDisplay({ usage }: UsageDisplayProps) {
       <button
         onClick={() => setShowDetails((v) => !v)}
         className="flex items-center gap-1.5 group whitespace-nowrap overflow-hidden"
-        title="查看用量详情"
-        data-tip="查看用量详情"
+        title={t("查看用量详情")}
+        data-tip={t("查看用量详情")}
       >
         <div className="w-[80px] h-2.5 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden relative">
           <div className={`${color} h-3`} style={{ width: `${pct}%` }} />
@@ -51,29 +52,29 @@ export function UsageDisplay({ usage }: UsageDisplayProps) {
         <div className="absolute top-full left-0 mt-1 w-64 z-50 overflow-hidden rounded-lg border border-gray-200 bg-white p-2 text-xs text-gray-900 shadow-lg dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
           <div className="max-h-[calc(100vh-200px)] overflow-y-auto py-1">
             <div className="flex items-center justify-between py-0.5">
-              <span className="text-gray-700 dark:text-gray-300">已用上下文</span>
+              <span className="text-gray-700 dark:text-gray-300">{t("已用上下文")}</span>
               <span className="tabular-nums">
                 {formatK(usage.contextUsed)}/{formatK(usage.contextLimit)}
               </span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span className="text-gray-700 dark:text-gray-300">输入 token</span>
+              <span className="text-gray-700 dark:text-gray-300">{t("输入 token")}</span>
               <span className="tabular-nums">{formatK(usage.breakdown.input)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span className="text-gray-700 dark:text-gray-300">缓存写入</span>
+              <span className="text-gray-700 dark:text-gray-300">{t("缓存写入")}</span>
               <span className="tabular-nums">{formatK(usage.breakdown.cacheWrite)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span className="text-gray-700 dark:text-gray-300">缓存读取</span>
+              <span className="text-gray-700 dark:text-gray-300">{t("缓存读取")}</span>
               <span className="tabular-nums">{formatK(usage.breakdown.cacheRead)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span className="text-gray-700 dark:text-gray-300">输出 token</span>
+              <span className="text-gray-700 dark:text-gray-300">{t("输出 token")}</span>
               <span className="tabular-nums">{formatK(usage.breakdown.output)}</span>
             </div>
             <div className="flex items-center justify-between py-0.5">
-              <span className="text-gray-700 dark:text-gray-300">思考 token</span>
+              <span className="text-gray-700 dark:text-gray-300">{t("思考 token")}</span>
               <span className="tabular-nums">{formatK(usage.breakdown.reasoning)}</span>
             </div>
           </div>

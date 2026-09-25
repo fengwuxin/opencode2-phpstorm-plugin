@@ -1,3 +1,4 @@
+import { t } from "./i18n"
 export function getMimeTypeFromExtension(ext: string): string {
   const map: Record<string, string> = {
     ".jpg": "image/jpeg",
@@ -22,7 +23,7 @@ export async function fileToDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = () => resolve(reader.result as string)
-    reader.onerror = () => reject(new Error("读取文件失败"))
+    reader.onerror = () => reject(new Error(t("读取文件失败")))
     reader.readAsDataURL(file)
   })
 }

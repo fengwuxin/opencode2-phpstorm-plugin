@@ -1,3 +1,4 @@
+import { t } from "../lib/i18n"
 import { useCallback } from "react"
 import { ideBridge } from "../lib/ideBridge"
 import { useProject } from "../state/ProjectContext"
@@ -121,7 +122,7 @@ export function useOpenFile() {
     async (target: OpenFileTarget) => {
       const absolutePath = resolveAbsolutePath(target)
       if (!absolutePath) {
-        showToast("无法打开文件：路径不可用", {
+        showToast(t("无法打开文件：路径不可用"), {
           title: "IDE Bridge",
           variant: "error",
         })
@@ -134,7 +135,7 @@ export function useOpenFile() {
         await ideBridge.request("openFile", payload)
       } catch (error) {
         console.error("[useOpenFile] Failed to open file", error)
-        showToast("在 IDE 中打开文件失败", {
+        showToast(t("在 IDE 中打开文件失败"), {
           title: "IDE Bridge",
           variant: "error",
         })

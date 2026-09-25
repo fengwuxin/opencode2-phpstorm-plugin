@@ -1,3 +1,4 @@
+import { t } from "../lib/i18n"
 import { useState, useEffect, useRef } from "react"
 import type { Session } from "@opencode-ai/sdk/client"
 
@@ -39,8 +40,8 @@ export function CommandPalette({
   const commands: Command[] = [
     {
       id: "new-session",
-      label: "新建会话",
-      description: "创建新会话",
+      label: t("新建会话"),
+      description: t("创建新会话"),
       icon: "➕",
       action: () => {
         onNewSession()
@@ -51,7 +52,7 @@ export function CommandPalette({
     {
       id: "settings",
       label: "Settings",
-      description: "打开设置面板",
+      description: t("打开设置面板"),
       icon: "⚙️",
       action: () => {
         onOpenSettings()
@@ -61,8 +62,8 @@ export function CommandPalette({
     },
     {
       id: "help",
-      label: "快捷键",
-      description: "显示所有快捷键",
+      label: t("快捷键"),
+      description: t("显示所有快捷键"),
       icon: "❓",
       action: () => {
         onShowHelp()
@@ -172,10 +173,10 @@ export function CommandPalette({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="输入命令或搜索会话..."
+            placeholder={t("输入命令或搜索会话...")}
             className="w-full border-0 bg-transparent text-base text-gray-900 placeholder-gray-500 outline-none dark:text-gray-100 dark:placeholder-gray-400"
             id="command-palette-title"
-            aria-label="搜索命令和会话"
+            aria-label={t("搜索命令和会话")}
           />
         </div>
 
@@ -187,7 +188,7 @@ export function CommandPalette({
             Object.entries(commandsByCategory).map(([category, cmds]) => (
               <div key={category}>
                 <div className="bg-gray-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-                  {category === "Action" ? "操作" : "最近会话"}
+                  {category === "Action" ? t("操作") : t("最近会话")}
                 </div>
                 {cmds.map((cmd) => (
                   <button

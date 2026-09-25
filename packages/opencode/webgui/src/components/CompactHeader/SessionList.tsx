@@ -1,3 +1,4 @@
+import { t } from "../../lib/i18n"
 import type { Session } from "@opencode-ai/sdk/client"
 import { SessionItem } from "./SessionItem"
 
@@ -51,7 +52,7 @@ export function SessionList({
   if (filteredSessions.length === 0) {
     return (
       <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 text-center">
-        {sessions.length === 0 ? "还没有会话" : "没有匹配的会话"}
+        {sessions.length === 0 ? t("还没有会话") : t("没有匹配的会话")}
       </div>
     )
   }

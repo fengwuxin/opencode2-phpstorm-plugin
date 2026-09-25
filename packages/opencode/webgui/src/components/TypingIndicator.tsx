@@ -1,3 +1,4 @@
+import { t } from "../lib/i18n"
 import { useEffect, useState } from "react"
 import { useSession } from "../state/SessionContext"
 
@@ -58,7 +59,7 @@ export function TypingIndicator({ visible }: TypingIndicatorProps) {
     <div className="my-1 space-y-1 min-h-[1rem]">
       {visible && (
         <button className="relative inline-flex items-center gap-0.5 pr-4 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-          <span className="leading-none">生成中</span>
+          <span className="leading-none">{t("生成中")}</span>
           <div className="flex gap-0.5">
             <div
               className="w-0.5 h-0.5 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce"

@@ -1,3 +1,4 @@
+import { t } from "../../lib/i18n"
 import { useMemo } from "react"
 import type { Provider } from "@opencode-ai/sdk/client"
 import type { SetSettingsFormData, SettingsFormData } from "./types"
@@ -30,7 +31,7 @@ export function ModelsTab({ formData, setFormData, providers }: ModelsTabProps) 
         className="modern-input w-full font-mono text-sm text-gray-900 dark:text-gray-100"
       >
         <option className="bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100" value="">
-          （未设置）
+          {t("（未设置）")}
         </option>
         {value && !known && (
           <option className="bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100" value={value}>
@@ -61,19 +62,19 @@ export function ModelsTab({ formData, setFormData, providers }: ModelsTabProps) 
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">默认模型</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("默认模型")}</label>
         {modelSelect(formData.model, (model) => setFormData({ ...formData, model }))}
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">新会话默认使用的模型</p>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{t("新会话默认使用的模型")}</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">标题模型</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("标题模型")}</label>
         {modelSelect(formData.small_model, (small_model) => setFormData({ ...formData, small_model }))}
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">用于生成标题等轻量任务</p>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{t("用于生成标题等轻量任务")}</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">启用的 Provider</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("启用的 Provider")}</label>
         <div className="space-y-2">
           {providers.map((provider) => {
             const disabled = formData.disabled_providers || []
@@ -97,11 +98,11 @@ export function ModelsTab({ formData, setFormData, providers }: ModelsTabProps) 
             )
           })}
           {providers.length === 0 && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 italic">未找到 Provider。</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 italic">{t("未找到 Provider。")}</p>
           )}
         </div>
         <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          默认启用所有 Provider；取消勾选即禁用并隐藏其模型。
+          {t("默认启用所有 Provider；取消勾选即禁用并隐藏其模型。")}
         </p>
       </div>
     </div>

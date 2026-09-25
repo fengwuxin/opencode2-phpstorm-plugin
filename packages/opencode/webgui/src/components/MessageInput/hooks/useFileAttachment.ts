@@ -1,3 +1,4 @@
+import { t } from "../../../lib/i18n"
 import { useCallback, useRef } from "react"
 import { $getSelection, $isRangeSelection, type LexicalEditor } from "lexical"
 import { $createAttachmentNode } from "../../attachment/AttachmentNode"
@@ -29,7 +30,7 @@ export function useFileAttachment(editor: LexicalEditor) {
 
         if (!isSupportedAttachmentType(mime)) {
           showToast(`File type not supported: ${file.name}`, {
-            title: "不支持的文件类型",
+            title: t("不支持的文件类型"),
             variant: "error",
             duration: 5000,
           })
@@ -58,7 +59,7 @@ export function useFileAttachment(editor: LexicalEditor) {
           })
         } catch {
           showToast(`Failed to read file: ${file.name}`, {
-            title: "文件读取失败",
+            title: t("文件读取失败"),
             variant: "error",
             duration: 5000,
           })

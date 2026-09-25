@@ -1,3 +1,4 @@
+import { t } from "../../../../lib/i18n"
 import { useState } from "react"
 import { sdk } from "../../../../lib/api/sdkClient"
 
@@ -54,7 +55,7 @@ export function useProviderManagement({
       setApiKeys(newApiKeys)
     } catch (e) {
       console.error("Failed to remove provider", e)
-      alert("移除 Provider 失败")
+      alert(t("移除 Provider 失败"))
     } finally {
       setIsDeleting(false)
       setProviderToDelete(null)

@@ -1,3 +1,4 @@
+import { t } from "../../../lib/i18n"
 import type { Todo } from "./utils"
 
 interface TodoToolProps {
@@ -10,7 +11,7 @@ export function TodoTool({ output }: TodoToolProps) {
     if (!Array.isArray(todos)) {
       return (
         <div className="px-3 py-1.5 border-b border-gray-100 dark:border-gray-800">
-          <div className="text-[10px] uppercase font-semibold text-gray-500 dark:text-gray-400 mb-1">输出</div>
+          <div className="text-[10px] uppercase font-semibold text-gray-500 dark:text-gray-400 mb-1">{t("输出")}</div>
           <div className="text-xs bg-white dark:bg-gray-900 rounded p-1.5 overflow-x-auto max-h-60 overflow-y-auto">
             <pre className="font-mono text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{output}</pre>
           </div>
@@ -20,7 +21,7 @@ export function TodoTool({ output }: TodoToolProps) {
 
     return (
       <div className="px-3 py-1.5 border-b border-gray-100 dark:border-gray-800">
-        <div className="text-[10px] uppercase font-semibold text-gray-500 dark:text-gray-400 mb-1">输出</div>
+        <div className="text-[10px] uppercase font-semibold text-gray-500 dark:text-gray-400 mb-1">{t("输出")}</div>
         <div className="text-xs bg-white dark:bg-gray-900 rounded p-1.5 overflow-x-auto max-h-60 overflow-y-auto">
           <div className="space-y-1.5">
             {todos.map((todo: Todo, index: number) => (
@@ -51,7 +52,7 @@ export function TodoTool({ output }: TodoToolProps) {
   } catch {
     return (
       <div className="px-3 py-1.5 border-b border-gray-100 dark:border-gray-800">
-        <div className="text-[10px] uppercase font-semibold text-gray-500 dark:text-gray-400 mb-1">输出</div>
+        <div className="text-[10px] uppercase font-semibold text-gray-500 dark:text-gray-400 mb-1">{t("输出")}</div>
         <div className="text-xs bg-white dark:bg-gray-900 rounded p-1.5 overflow-x-auto max-h-60 overflow-y-auto">
           <pre className="font-mono text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{output}</pre>
         </div>

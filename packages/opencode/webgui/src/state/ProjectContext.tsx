@@ -1,3 +1,4 @@
+import { t } from "../lib/i18n"
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react"
 import { sdk, setServerDirectory } from "../lib/api/sdkClient"
 import { eventEmitter } from "../lib/api/events"
@@ -48,7 +49,7 @@ export function ProjectProvider({ children }: ProjectProviderProps) {
         throw new Error(
           typeof response.error === "object" && response.error && "message" in response.error
             ? String(response.error.message)
-            : "获取项目失败",
+            : t("获取项目失败"),
         )
       }
 
@@ -64,7 +65,7 @@ export function ProjectProvider({ children }: ProjectProviderProps) {
         setServerDirectory(pathResult.data.directory)
       }
     } catch (err) {
-      setError(err instanceof Error ? err : new Error("获取项目失败"))
+      setError(err instanceof Error ? err : new Error(t("获取项目失败")))
       console.error("Failed to fetch project:", err)
     } finally {
       setIsLoading(false)

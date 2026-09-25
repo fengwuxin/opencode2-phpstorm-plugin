@@ -1,3 +1,4 @@
+import { t } from "../lib/i18n"
 import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { sdk } from "../lib/api/sdkClient"
 import { eventEmitter } from "../lib/api/events"
@@ -29,7 +30,7 @@ function StarIcon({ filled, onClick }: { filled: boolean; onClick: (e: React.Mou
     <button
       onClick={onClick}
       className="flex-shrink-0 p-0.5 hover:scale-110 transition-transform"
-      title={filled ? "取消收藏" : "添加收藏"}
+      title={filled ? t("取消收藏") : t("添加收藏")}
     >
       <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill={filled ? "#eab308" : "none"} stroke={filled ? "#eab308" : "currentColor"} strokeWidth={1.5}>
         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -164,10 +165,10 @@ export function ModelSelector({ selectedProviderId, selectedModelId, onSelect, d
   const getCurrentDisplay = () => {
     const pid = selectedProviderId || defaultIds.provider
     const mid = selectedModelId || defaultIds.model
-    if (!pid || !mid) return "选择模型"
+    if (!pid || !mid) return t("选择模型")
     const provider = providers.find((p) => p.id === pid)
-    if (!provider) return "选择模型"
-    return provider.models[mid]?.name || "选择模型"
+    if (!provider) return t("选择模型")
+    return provider.models[mid]?.name || t("选择模型")
   }
 
   const handleSelect = async (providerID: string, modelID: string) => {
@@ -286,8 +287,8 @@ export function ModelSelector({ selectedProviderId, selectedModelId, onSelect, d
         onClick={toggle}
         disabled={disabled || isLoading}
         className="h-6 px-2 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-        title="选择模型"
-        data-tip="选择模型"
+        title={t("选择模型")}
+        data-tip={t("选择模型")}
       >
         {getCurrentDisplay()}
         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -302,7 +303,7 @@ export function ModelSelector({ selectedProviderId, selectedModelId, onSelect, d
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="搜索模型..."
+              placeholder={t("搜索模型...")}
               className="w-full px-2 py-1 text-xs bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               autoFocus
             />
@@ -310,9 +311,9 @@ export function ModelSelector({ selectedProviderId, selectedModelId, onSelect, d
 
           <div className="overflow-y-auto flex-1">
             {isLoading ? (
-              <div className="p-4 text-xs text-gray-500 dark:text-gray-400 text-center">加载模型...</div>
+              <div className="p-4 text-xs text-gray-500 dark:text-gray-400 text-center">{t("加载模型...")}</div>
             ) : providers.length === 0 ? (
-              <div className="p-4 text-xs text-gray-500 dark:text-gray-400 text-center">未配置 Provider</div>
+              <div className="p-4 text-xs text-gray-500 dark:text-gray-400 text-center">{t("未配置 Provider")}</div>
             ) : (
               <>
                 {/* Favorites group */}
@@ -371,7 +372,7 @@ export function ModelSelector({ selectedProviderId, selectedModelId, onSelect, d
 
                 {visible.length === 0 && (
                   <div className="p-4 text-xs text-gray-500 dark:text-gray-400 text-center">
-                    没有显示的模型，可在「管理模型」中开启。
+                    {t("没有显示的模型，可在「管理模型」中开启。")}
                   </div>
                 )}
               </>
@@ -386,7 +387,7 @@ export function ModelSelector({ selectedProviderId, selectedModelId, onSelect, d
               }}
               className="w-full px-3 py-1.5 text-xs text-left text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              管理模型...
+              {t("管理模型...")}
             </button>
           </div>
         </div>

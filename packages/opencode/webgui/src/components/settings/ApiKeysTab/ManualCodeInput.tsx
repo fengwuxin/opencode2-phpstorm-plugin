@@ -1,3 +1,4 @@
+import { t } from "../../../lib/i18n"
 interface ManualCodeInputProps {
   value: string
   onValueChange: (value: string) => void
@@ -12,7 +13,7 @@ export function ManualCodeInput({ value, onValueChange, onSubmit, onCancel }: Ma
         type="text"
         value={value}
         onChange={(e) => onValueChange(e.target.value)}
-        placeholder="粘贴授权码"
+        placeholder={t("粘贴授权码")}
         className="flex-1 px-2 py-1.5 border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xs"
       />
       <button

@@ -1,3 +1,4 @@
+import { t } from "../lib/i18n"
 import { Component, type ReactNode, type ErrorInfo } from "react"
 
 interface ErrorBoundaryProps {
@@ -103,9 +104,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
               {/* Error content */}
               <div className="flex-1 min-w-0">
-                <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">出错了</h1>
+                <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">{t("出错了")}</h1>
                 <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
-                  应用发生意外错误。
+                  {t("应用发生意外错误。")}
                 </p>
 
                 {/* Error details */}
@@ -124,7 +125,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 {this.state.errorInfo?.componentStack && import.meta.env.DEV && (
                   <details className="mb-4">
                     <summary className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer hover:text-gray-900 dark:hover:text-gray-100">
-                      组件堆栈
+                      {t("组件堆栈")}
                     </summary>
                     <pre className="mt-2 text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 p-2 rounded overflow-x-auto whitespace-pre-wrap">
                       {this.state.errorInfo.componentStack}
@@ -138,13 +139,13 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                     onClick={this.reset}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded transition-colors"
                   >
-                    重试
+                    {t("重试")}
                   </button>
                   <button
                     onClick={() => window.location.reload()}
                     className="px-4 py-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm font-medium rounded transition-colors"
                   >
-                    重新加载页面
+                    {t("重新加载页面")}
                   </button>
                 </div>
               </div>

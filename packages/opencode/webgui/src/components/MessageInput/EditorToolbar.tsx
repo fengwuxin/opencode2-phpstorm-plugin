@@ -1,3 +1,4 @@
+import { t } from "../../lib/i18n"
 import { useEffect } from "react"
 import { ModelSelector } from "../ModelSelector"
 import { AgentSelector } from "../AgentSelector"
@@ -71,8 +72,8 @@ export function EditorToolbar({
           <button
             onClick={onRetry}
             className="h-6 px-2 flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950 rounded border border-red-200 dark:border-red-800"
-            title="恢复失败的消息"
-            data-tip="恢复失败的消息"
+            title={t("恢复失败的消息")}
+            data-tip={t("恢复失败的消息")}
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -104,8 +105,8 @@ export function EditorToolbar({
           onClick={onFileSelect}
           size="sm"
           disabled={isDisabled}
-          aria-label="添加文件"
-          title="添加文件"
+          aria-label={t("添加文件")}
+          title={t("添加文件")}
           icon={
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path

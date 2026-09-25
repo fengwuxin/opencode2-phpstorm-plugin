@@ -1,3 +1,4 @@
+import { t } from "../../lib/i18n"
 import type { ReactNode } from "react"
 import { useEffect } from "react"
 
@@ -110,7 +111,7 @@ export function ModalHeader({ children, onClose, className = "" }: ModalHeaderPr
         <button
           onClick={onClose}
           className="ml-4 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded transition-colors"
-          aria-label="关闭弹窗"
+          aria-label={t("关闭弹窗")}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
