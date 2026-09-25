@@ -1,3 +1,4 @@
+import { useMemo } from "react"
 import type { Provider } from "@opencode-ai/sdk/client"
 import type { SetSettingsFormData, SettingsFormData } from "./types"
 
@@ -8,32 +9,53 @@ interface ModelsTabProps {
 }
 
 export function ModelsTab({ formData, setFormData, providers }: ModelsTabProps) {
+  const groups = useMemo(
+    () =>
+      providers
+        .map((provider) => ({
+          id: provider.id,
+          name: provider.name ?? provider.id,
+          models: Object.values(provider.models).sort((a, b) => a.name.localeCompare(b.name)),
+        }))
+        .filter((group) => group.models.length > 0),
+    [providers],
+  )
+
+  const modelSelect = (value: string | undefined, onChange: (value: string | undefined) => void) => {
+    const known = groups.some((group) => group.models.some((model) => `${group.id}/${model.id}` === value))
+    return (
+      <select
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value || undefined)}
+        className="modern-input w-full font-mono text-sm"
+      >
+        <option value="">（未设置）</option>
+        {value && !known && <option value={value}>{value}</option>}
+        {groups.map((group) => (
+          <optgroup key={group.id} label={group.name}>
+            {group.models.map((model) => (
+              <option key={model.id} value={`${group.id}/${model.id}`}>
+                {model.name}
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+    )
+  }
+
   return (
     <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">默认模型</label>
-        <input
-          type="text"
-          value={formData.model || ""}
-          onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-          placeholder="例如 anthropic/claude-sonnet-4-5"
-          className="modern-input w-full font-mono text-sm"
-        />
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          格式：provider/model（例如 anthropic/claude-sonnet-4-5）
-        </p>
+        {modelSelect(formData.model, (model) => setFormData({ ...formData, model }))}
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">新会话默认使用的模型</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">小模型</label>
-        <input
-          type="text"
-          value={formData.small_model || ""}
-          onChange={(e) => setFormData({ ...formData, small_model: e.target.value })}
-          placeholder="例如 anthropic/claude-haiku-3-5"
-          className="modern-input w-full font-mono text-sm"
-        />
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">用于生成标题等任务</p>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">标题模型</label>
+        {modelSelect(formData.small_model, (small_model) => setFormData({ ...formData, small_model }))}
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">用于生成标题等轻量任务</p>
       </div>
 
       <div>
