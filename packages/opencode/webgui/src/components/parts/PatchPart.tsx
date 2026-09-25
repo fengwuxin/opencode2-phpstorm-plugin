@@ -107,7 +107,7 @@ export function PatchPart({ part, sessionID, messageID }: PatchPartProps) {
             {/* File list */}
             <div className="px-3 py-2">
               <div className="text-[10px] uppercase font-semibold text-gray-500 dark:text-gray-400 mb-1.5">
-                Modified Files
+                修改的文件
               </div>
               <div className="space-y-1">
                 {files.map((entry) => (
@@ -151,7 +151,7 @@ export function PatchPart({ part, sessionID, messageID }: PatchPartProps) {
               </div>
             </div>
 
-            {/* View Diff button */}
+            {/* 查看差异 button */}
             <div className="px-3 py-2 border-t border-amber-200 dark:border-amber-800">
               <button
                 onClick={(e) => {
@@ -174,7 +174,7 @@ export function PatchPart({ part, sessionID, messageID }: PatchPartProps) {
                     d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                   />
                 </svg>
-                View Diff
+                查看差异
               </button>
             </div>
           </div>

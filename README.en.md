@@ -5,7 +5,7 @@
 
 它为你当前打开的项目启动 `opencode serve`，并把聊天界面嵌进工具窗口，另外提供了一些 IDE 集成能力。
 
-[English](README.md) | [简体中文](README.zh.md)
+[简体中文](README.md) | [English](README.en.md)
 
 ## 功能
 

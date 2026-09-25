@@ -159,8 +159,8 @@ export function SessionItem({
                   <button
                     onClick={handleLinkClick}
                     className="p-1 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
-                    title="Open share link"
-                    data-tip="Open share link"
+                    title="打开分享链接"
+                    data-tip="打开分享链接"
                   >
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
@@ -177,8 +177,8 @@ export function SessionItem({
                   onClick={onToggleShare}
                   disabled={isSharing}
                   className="p-1 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-50"
-                  title={isShared ? "Unshare session" : "Share session"}
-                  data-tip={isShared ? "Unshare session" : "Share session"}
+                  title={isShared ? "取消分享" : "分享会话"}
+                  data-tip={isShared ? "取消分享" : "分享会话"}
                 >
                   {isShared ? (
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -204,8 +204,8 @@ export function SessionItem({
                 <button
                   onClick={onEditStart}
                   className="p-1 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
-                  title="Edit title"
-                  data-tip="Edit title"
+                  title="编辑标题"
+                  data-tip="编辑标题"
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -220,8 +220,8 @@ export function SessionItem({
                 <button
                   onClick={onDeleteStart}
                   className="p-1 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400"
-                  title="Delete session"
-                  data-tip="Delete session"
+                  title="删除会话"
+                  data-tip="删除会话"
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path

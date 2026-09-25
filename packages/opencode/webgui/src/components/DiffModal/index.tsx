@@ -67,7 +67,7 @@ export function DiffModal({ isOpen, onClose, sessionID, messageID, patchHash }: 
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100 mb-2"></div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Loading diff...</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">加载差异...</p>
               </div>
             </div>
           )}
@@ -109,7 +109,7 @@ export function DiffModal({ isOpen, onClose, sessionID, messageID, patchHash }: 
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
-                <p className="text-sm text-gray-600 dark:text-gray-400">No changes found</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">没有改动</p>
               </div>
             </div>
           )}

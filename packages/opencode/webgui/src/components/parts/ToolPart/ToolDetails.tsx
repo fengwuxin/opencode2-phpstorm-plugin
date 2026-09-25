@@ -21,7 +21,7 @@ export function ToolDetails({ input, metadata }: ToolDetailsProps) {
         onClick={() => setShowDetails(!showDetails)}
         className="w-full px-3 py-1.5 flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
       >
-        <span className="font-medium">Details</span>
+        <span className="font-medium">详情</span>
         <svg
           viewBox="0 0 24 24"
           className={`w-3 h-3 transition-transform duration-150 ${showDetails ? "rotate-90" : ""}`}
@@ -40,7 +40,7 @@ export function ToolDetails({ input, metadata }: ToolDetailsProps) {
           {/* Input arguments */}
           {hasInput && (
             <div className="px-3 py-1.5 border-b border-gray-100 dark:border-gray-800">
-              <div className="text-[10px] uppercase font-semibold text-gray-500 dark:text-gray-400 mb-1">Input</div>
+              <div className="text-[10px] uppercase font-semibold text-gray-500 dark:text-gray-400 mb-1">输入</div>
               <div className="text-xs bg-white dark:bg-gray-900 rounded p-1.5 overflow-x-auto">
                 <pre className="font-mono text-gray-700 dark:text-gray-300">{JSON.stringify(input, null, 2)}</pre>
               </div>

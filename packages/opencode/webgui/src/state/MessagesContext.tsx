@@ -57,9 +57,9 @@ interface MessagesProviderProps {
 }
 
 function sessionErrorText(error: unknown): string {
-  if (!error) return "An error occurred in the session"
+  if (!error) return "会话发生错误"
   if (typeof error === "string") return error
-  if (typeof error !== "object") return "An error occurred in the session"
+  if (typeof error !== "object") return "会话发生错误"
 
   const data = (error as { data?: { message?: unknown }; message?: unknown }).data
   const dataMessage = data && typeof data.message === "string" ? data.message : undefined
@@ -68,7 +68,7 @@ function sessionErrorText(error: unknown): string {
   const msg = (error as { message?: unknown }).message
   if (typeof msg === "string" && msg.length > 0) return msg
 
-  return "An error occurred in the session"
+  return "会话发生错误"
 }
 
 function sessionErrorKey(error: unknown): string | undefined {

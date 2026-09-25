@@ -419,10 +419,10 @@ const MessageInputInner = forwardRef<
         isOpen={isCompactConfirmOpen}
         onClose={() => setIsCompactConfirmOpen(false)}
         onConfirm={handleCompactWithModal}
-        title="Compact session history"
-        message="This will summarize earlier parts of the conversation to save context. Recent messages will be kept, but long-term details may be lost. Proceed?"
-        confirmText="Compact"
-        cancelText="Cancel"
+        title="压缩会话历史"
+        message="这会总结对话的较早内容以节省上下文；最近的消息会保留，但更早的细节可能丢失。继续？"
+        confirmText="压缩"
+        cancelText="取消"
         variant="warning"
         isLoading={isCompacting}
       />

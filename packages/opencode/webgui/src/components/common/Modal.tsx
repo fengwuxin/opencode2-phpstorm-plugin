@@ -33,14 +33,14 @@ const sizeClasses: Record<string, string> = {
  * ```tsx
  * <Modal isOpen={isOpen} onClose={handleClose} size="md">
  *   <ModalHeader onClose={handleClose}>
- *     <h3>Confirm Action</h3>
+ *     <h3>确认操作</h3>
  *   </ModalHeader>
  *   <ModalBody>
  *     <p>Are you sure?</p>
  *   </ModalBody>
  *   <ModalFooter>
- *     <Button onClick={handleClose}>Cancel</Button>
- *     <Button variant="danger">Confirm</Button>
+ *     <Button onClick={handleClose}>取消</Button>
+ *     <Button variant="danger">确认</Button>
  *   </ModalFooter>
  * </Modal>
  * ```
@@ -110,7 +110,7 @@ export function ModalHeader({ children, onClose, className = "" }: ModalHeaderPr
         <button
           onClick={onClose}
           className="ml-4 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded transition-colors"
-          aria-label="Close modal"
+          aria-label="关闭弹窗"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

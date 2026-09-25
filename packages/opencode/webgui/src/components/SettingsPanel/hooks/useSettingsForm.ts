@@ -41,7 +41,7 @@ export function useSettingsForm(isOpen: boolean, customApi?: boolean) {
         const configResponse = await sdk.config.get()
 
         if (configResponse.error) {
-          throw new Error("Failed to load config")
+          throw new Error("加载配置失败")
         }
 
         if (configResponse.data) {
@@ -60,7 +60,7 @@ export function useSettingsForm(isOpen: boolean, customApi?: boolean) {
         // Fetch providers
         const providersRes = await sdk.config.providers()
         if (providersRes.error) {
-          throw new Error("Failed to load providers")
+          throw new Error("加载 Provider 失败")
         }
         if (providersRes.data) {
           setProviders(providersRes.data.providers.sort((a, b) => a.name.localeCompare(b.name)))

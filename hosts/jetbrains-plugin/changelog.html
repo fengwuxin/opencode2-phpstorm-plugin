@@ -1,260 +1,243 @@
-<h2>OpenCode UX+ (fengwuxin) JetBrains Plugin Changelog</h2>
+<h2>OpenCode UX+（fengwuxin）JetBrains 插件更新日志</h2>
+
+<h3>26.9.2509</h3>
+<ul>
+  <li>界面默认中文：聊天界面、设置面板、弹窗、提示与错误信息全部中文化</li>
+  <li>IDE 侧文案中文化：工具窗口启动提示、设置页「OpenCode 插件」、右键菜单动作</li>
+  <li>README 默认中文（README.md），英文版移至 README.en.md</li>
+  <li>更新日志改为中文</li>
+</ul>
 
 <h3>26.9.2508</h3>
 <ul>
-  <li>Removed the Share Session button (opencode v2 has no sharing API, so it did nothing)</li>
-  <li>Markdown rendering now uses the official opencode theme colors: lavender headings, orange bold text, green inline code, peach links and colored list markers</li>
-  <li>Per-message costs below $0.01 show more decimals instead of rounding to $0.00</li>
+  <li>移除会话分享按钮（opencode v2 没有分享接口，按钮没有实际作用）</li>
+  <li>Markdown 渲染改用 opencode 官方主题配色：淡紫色标题、橙色加粗、绿色行内代码、桃色链接和彩色列表符号</li>
+  <li>单条消息费用低于 $0.01 时显示更多小数位，不再四舍五入成 $0.00</li>
 </ul>
 
 <h3>26.9.2507</h3>
 <ul>
-  <li>Model picker no longer syncs with the opencode desktop app; the plugin owns its model list</li>
-  <li>All models of enabled providers are listed by default; "Manage models…" hides individual models</li>
-  <li>Removed the SQLite dependency and the desktop-client state reader from the plugin</li>
-  <li>Message input placeholder falls back to "Hello owner" when no username is configured</li>
+  <li>模型列表不再与 opencode 桌面客户端同步，改由插件自己维护</li>
+  <li>默认列出已启用 provider 的全部模型；用「Manage models…」隐藏个别模型</li>
+  <li>移除插件里的 SQLite 依赖和桌面客户端状态读取代码</li>
+  <li>未配置用户名时，输入框问候语回退为「Hello owner」</li>
 </ul>
 
 <h3>26.9.2506</h3>
 <ul>
-  <li>Message input placeholder now greets the configured user ("Hello &lt;username&gt;")</li>
+  <li>输入框提示语改为问候配置里的用户名（「Hello &lt;username&gt;」）</li>
 </ul>
 
 <h3>26.9.2505</h3>
 <ul>
-  <li>Settings → Models: the enabled-provider checkboxes now keep the saved state (the server exposes disabled providers as <code>experimental.policies</code>, both config shapes are read)</li>
-  <li>Model picker: favorites/recent entries from disabled or unavailable providers are no longer listed</li>
-  <li>Reasoning effort (thinking depth) keeps working after saving settings: the provider list is no longer overwritten by the empty response the backend returns while reloading, and it retries until ready</li>
+  <li>设置 → Models：启用 provider 的勾选状态现在能正确保存（服务端会把 <code>disabled_providers</code> 规范化成 <code>experimental.policies</code>，两种格式都读取）</li>
+  <li>模型列表：已禁用或不可用 provider 的收藏/最近记录不再显示</li>
+  <li>思考深度（reasoning effort）在保存设置后保持可用：后端重载时返回的空列表不再覆盖已有数据，并会自动重试</li>
 </ul>
 
 <h3>26.9.2504</h3>
 <ul>
-  <li>Settings → Models: the list now contains every available/connected provider (plus currently disabled ones), so a disabled provider can be enabled again</li>
-  <li>Models of disabled providers no longer appear in the model picker; the picker also filters by the effective config so changes apply without restarting the server</li>
-  <li>Removed the "(Enter to send)" hint from the message input placeholder</li>
+  <li>设置 → Models：列表展示所有可用/已连接的 provider（含当前被禁用的），可以重新勾选启用</li>
+  <li>被禁用 provider 的模型不再出现在模型列表中；插件同时按生效配置过滤，改完设置无需等后端重启</li>
+  <li>去掉输入框里的「(Enter to send)」提示</li>
 </ul>
 
 <h3>26.9.2503</h3>
 <ul>
-  <li>Settings → Models: providers are now enabled by default ("Enabled Providers"); uncheck one to disable it</li>
-  <li>Message input: Enter sends the message, Cmd/Ctrl+Enter (or Shift+Enter) inserts a new line</li>
-  <li>Message input starts two lines high</li>
-  <li>Enter still lets the @ mention / command popovers handle the key while they are open</li>
+  <li>设置 → Models：「Disabled Providers」改为「Enabled Providers」，默认全部勾选，取消勾选表示禁用</li>
+  <li>消息输入：Enter 发送，Cmd/Ctrl+Enter（或 Shift+Enter）换行</li>
+  <li>输入框默认高度改为两行</li>
+  <li>@ 提及 / 命令弹窗打开时，Enter 仍由弹窗处理</li>
 </ul>
 
 <h3>26.9.2502</h3>
 <ul>
-  <li>Fix reading the desktop client's model visibility inside the IDE (SQLite driver is now loaded through its DataSource, which works in the plugin classloader)</li>
-  <li>Model picker retries while the opencode backend is still warming up instead of staying empty</li>
+  <li>修复在 IDE 内读取桌面客户端模型可见性失败的问题（改用 SQLite 驱动的 DataSource，兼容插件类加载器）</li>
+  <li>模型列表在后端预热期间自动重试，不再显示为空</li>
 </ul>
 
 <h3>26.9.2501</h3>
 <ul>
-  <li>Model picker now mirrors the opencode desktop client: only the models enabled in its Manage models settings are shown</li>
-  <li>Model visibility is read from the desktop client's local state (SQLite, read-only); changes appear the next time the picker opens</li>
-  <li>Without a desktop client, the picker falls back to "newest model per family from the last six months" with a local Manage models dialog</li>
-  <li>Models disabled in the opencode configuration are skipped, and release dates are read from the v2 model catalog</li>
+  <li>模型选择器跟随 opencode 桌面客户端：只显示其「Manage models」里启用的模型</li>
+  <li>可见性从桌面客户端本地状态读取（SQLite，只读），每次打开下拉都会刷新</li>
+  <li>没有桌面客户端时，回退为「每个 family 最新 + 6 个月内」规则，并提供本地 Manage models 开关</li>
+  <li>跳过配置中禁用的模型，并读取 v2 模型目录的发布时间</li>
 </ul>
 
 <h3>26.9.2404</h3>
 <ul>
-  <li>Plugin icon: the opencode logo (opencode.png at the repository root, shipped as a vector <code>pluginIcon.svg</code>)</li>
+  <li>插件图标：使用 opencode logo（仓库根目录的 opencode.png，以矢量 <code>pluginIcon.svg</code> 形式提供）</li>
 </ul>
 
 <h3>26.9.2403</h3>
 <ul>
-  <li>Pasting images works again: inside the IDE the clipboard is read by the plugin, because JetBrains' embedded browser does not always expose clipboard images to the page</li>
+  <li>修复粘贴图片：在 IDE 内通过插件读取剪贴板，因为 JetBrains 内嵌浏览器不总是把剪贴板图片暴露给页面</li>
 </ul>
 
 <h3>26.9.2402</h3>
 <ul>
-  <li>Settings: saving works again — changes are written to the global <code>opencode.json(c)</code>, since the opencode v2 server has no config write API</li>
-  <li>Settings: failed saves show the reason in the panel instead of silently doing nothing</li>
-  <li>Settings: config fields now use the opencode v2 names (<code>update</code>, <code>snapshots</code>, <code>plugins</code>) so the current values are displayed correctly</li>
+  <li>设置：保存功能恢复——由于 opencode v2 服务端没有配置写入接口，改动会写入全局 <code>opencode.json(c)</code></li>
+  <li>设置：保存失败时在面板中显示原因，不再静默失败</li>
+  <li>设置：配置字段改用 opencode v2 的名称（<code>update</code>、<code>snapshots</code>、<code>plugins</code>），当前值显示正确</li>
 </ul>
 
 <h3>26.9.2401</h3>
 <ul>
-  <li>Fix the reasoning effort selector offering "0 / 1 / 2" instead of the model variants (opencode v2 returns variants as an array)</li>
-  <li>Reset a stored reasoning variant when the selected model does not offer it</li>
+  <li>修复思考深度选择器显示「0 / 1 / 2」而不是模型变体的问题（opencode v2 以数组形式返回 variants）</li>
+  <li>当所选模型不支持已保存的变体时自动重置</li>
 </ul>
 
 <h3>26.9.24</h3>
 <ul>
-  <li>Show sent user messages again (opencode v2 delivers them through the inbox event)</li>
-  <li>Scope the session list to the current project</li>
-  <li>Plugin id, name and vendor are now fengwuxin</li>
+  <li>恢复显示用户发送的消息（opencode v2 通过 inbox 事件下发）</li>
+  <li>会话列表限定为当前项目</li>
+  <li>插件 id、名称和 vendor 改为 fengwuxin</li>
 </ul>
 
 <h3>26.9.23</h3>
 <ul>
-  <li>opencode v2 support (v2 only, v1 is no longer supported)</li>
-  <li>Runs the locally installed <code>opencode serve</code> and connects the IDE tool window to its web UI</li>
-  <li>Handles the opencode v2 HTTP basic auth automatically (password is injected on launch)</li>
-  <li>New setting: path to the opencode executable (auto detected when empty)</li>
-  <li>Removed bundled v1 backend binaries and the v1 REST/ideBridge coupling</li>
-  <li>"Add to context" / drag and drop fall back to copying the path to the clipboard</li>
+  <li>支持 opencode v2（仅 v2，不再支持 v1）</li>
+  <li>运行本机安装的 <code>opencode serve</code>，并把 IDE 工具窗口连接到它的 Web UI</li>
+  <li>自动处理 opencode v2 的 HTTP Basic 认证（启动时注入随机密码）</li>
+  <li>新增设置项：opencode 可执行文件路径（留空自动探测）</li>
+  <li>移除内置的 v1 后端二进制和 v1 REST/ideBridge 耦合</li>
+  <li>「添加到上下文」/ 拖拽在不可用时回退为复制路径到剪贴板</li>
 </ul>
 
 <h3>26.5.13</h3>
 <ul>
-  <li>Fix reconnect issue after token refresh</li>
-  <li>Fix connection initialization race condition</li>
-  <li>Updated OpenCode to v1.14.48</li>
+  <li>修复 token 刷新后的重连问题</li>
+  <li>修复连接初始化的竞态条件</li>
+  <li>更新 OpenCode 至 v1.14.48</li>
 </ul>
 
 <h3>26.2.27</h3>
 <ul>
-  <li>Add theme persistence</li>
-  <li>Fix unknown command bug reported by qinze113</li>
-  <li>OpenCode was updated to 1.2.15</li>
+  <li>增加主题持久化</li>
+  <li>修复 qinze113 反馈的未知命令问题</li>
+  <li>OpenCode 更新至 1.2.15</li>
 </ul>
 
 <h3>26.2.15</h3>
 <ul>
-  <li>Update OpenCode to v1.2.1</li>
-  <li>
-    Release new variant of plugin with GUI only, without packaged OpenCode
-    binaries, uses OpenCode from PATH or
-    OPENCODE_BIN
-  </li>
+  <li>更新 OpenCode 至 v1.2.1</li>
+  <li>发布 GUI-only 变体：不打包 OpenCode 二进制，使用 PATH 或 OPENCODE_BIN 中的 opencode</li>
 </ul>
 
 <h3>26.2.8</h3>
 <ul>
-  <li>Favorites models</li>
-  <li>Improved resource extraction to use deterministic paths and cleanup stale
-    temp files
-  </li>
+  <li>收藏模型</li>
+  <li>改进资源解压：使用确定性路径并清理过期临时文件</li>
 </ul>
 
 <h3>26.2.7</h3>
 <ul>
-  <li>Add command execution support with / command prefix</li>
-  <li>Enhance terminal widget content retrieval for compatibility with 2025.3+
-  </li>
-  <li>Changed communication between UI &lt;-&gt; IDE to HTTP + SSE</li>
+  <li>支持 / 前缀命令执行</li>
+  <li>增强终端内容读取，兼容 2025.3+</li>
+  <li>UI 与 IDE 之间改用 HTTP + SSE 通信</li>
 </ul>
 
 <h3>26.2.1</h3>
 <ul>
-  <li>Improved positioning of reference popup (@ action)</li>
-  <li>Updated OpenCode to v1.1.48</li>
+  <li>改进引用弹窗（@ 操作）的定位</li>
+  <li>更新 OpenCode 至 v1.1.48</li>
 </ul>
 
 <h3>26.1.27</h3>
 <ul>
-  <li>apply_patch tool fallback count for Changed Files panel</li>
+  <li>Changed Files 面板的 apply_patch 工具回退计数</li>
 </ul>
 
 <h3>26.1.24</h3>
 <ul>
-  <li>Share / Unshare session</li>
-  <li>Added button"Copy to clipboard" message content</li>
-  <li>Removed rendering internal message "patch" - thanks to caiqy</li>
-  <li>Files changed panel now provide stats from OpenCode server - thanks to
-    caiqy
-  </li>
-  <li>Improved availability of "Retry" button for failed session</li>
-  <li>Updated OpenCode to v1.1.34</li>
+  <li>会话分享 / 取消分享</li>
+  <li>新增「复制消息内容到剪贴板」按钮</li>
+  <li>不再渲染内部消息「patch」——感谢 caiqy</li>
+  <li>Files changed 面板改为使用 OpenCode 服务端统计——感谢 caiqy</li>
+  <li>改进失败会话的「重试」按钮可用性</li>
+  <li>更新 OpenCode 至 v1.1.34</li>
 </ul>
 
 <h3>26.1.17</h3>
 <ul>
-  <li>Added support for "Question" tool</li>
-  <li>Added model "variants" - reasoning effort</li>
-  <li>Fixed Agents modes list</li>
-  <li>Fixed some models name on Recent list</li>
-  <li>Updated OpenCode to v1.1.24</li>
+  <li>支持「Question」工具</li>
+  <li>新增模型变体（reasoning effort）</li>
+  <li>修复 Agents 模式列表</li>
+  <li>修复 Recent 列表里部分模型名称</li>
+  <li>更新 OpenCode 至 v1.1.24</li>
 </ul>
 
 <h3>26.1.11</h3>
 <ul>
-  <li>Session errors now display in the chat instead of toast</li>
-  <li>Session Retry: Added retry functionality for failed sessions</li>
-  <li>Updated OpenCode to v1.1.11</li>
+  <li>会话错误改为显示在聊天中，而不是 toast</li>
+  <li>会话重试：为失败会话增加重试功能</li>
+  <li>更新 OpenCode 至 v1.1.11</li>
 </ul>
 
 <h3>26.1.5</h3>
 <ul>
-  <li>Updated OpenCode to v1.1.2</li>
+  <li>更新 OpenCode 至 v1.1.2</li>
 </ul>
 
 <h3>26.1.2</h3>
 <ul>
-  <li>OAuth Instructions: Support for provider-specific instructions during
-    OAuth flow
-  </li>
-  <li>Token Usage Stats: Display token usage breakdown and cost in a popover for
-    assistant messages
-  </li>
-  <li>Updated OpenCode to v1.0.223</li>
+  <li>OAuth 指引：支持在 OAuth 流程中显示 provider 特有的说明</li>
+  <li>Token 用量统计：在助手消息弹层中显示 token 明细和费用</li>
+  <li>更新 OpenCode 至 v1.0.223</li>
 </ul>
 
 <h3>25.12.29</h3>
 <ul>
-  <li>Updated OpenCode to v1.0.207</li>
+  <li>更新 OpenCode 至 v1.0.207</li>
 </ul>
 
 <h3>25.12.21</h3>
 <ul>
-  <li>Updated OpenCode to v1.0.184</li>
+  <li>更新 OpenCode 至 v1.0.184</li>
 </ul>
 
 <h3>25.12.16</h3>
 <ul>
-  <li>Updated OpenCode to v1.0.163</li>
+  <li>更新 OpenCode 至 v1.0.163</li>
 </ul>
 
 <h3>25.12.5</h3>
 <ul>
-  <li>Auto refresh files in IDE on edit/write</li>
-  <li>New panel with all modified files in session</li>
-  <li>New panel with all TODOs in session</li>
-  <li>Fixed placement of Model/Agent selector</li>
-  <li>Updated OpenCode to v1.0.133</li>
+  <li>在 IDE 中编辑/写入文件后自动刷新</li>
+  <li>新增会话中所有改动文件的面板</li>
+  <li>新增会话中所有 TODO 的面板</li>
+  <li>修复 Model/Agent 选择器的位置</li>
+  <li>更新 OpenCode 至 v1.0.133</li>
 </ul>
 
 <h3>25.11.30</h3>
 <ul>
-  <li>Updated OpenCode to v1.0.121</li>
-  <li>Fixed working directory as server start directory, not git root</li>
-  <li>Fixed clicking on referenced file not working in Intellij IDEA 2024.x</li>
-  <li>Fixed web view hang on html url click in Intellij IDEA 2025.x</li>
+  <li>更新 OpenCode 至 v1.0.121</li>
+  <li>修复工作目录：使用服务启动目录而不是 git 根目录</li>
+  <li>修复 IntelliJ IDEA 2024.x 中点击引用文件无效的问题</li>
+  <li>修复 IntelliJ IDEA 2025.x 中点击 HTML 链接导致 Web 视图卡住的问题</li>
 </ul>
 
 <h3>25.11.24</h3>
 <ul>
-  <li>Fixed multi-project bug with drag&drop and "Add to context"</li>
-  <li>UI improvements</li>
+  <li>修复多项目下拖拽和「添加到上下文」的问题</li>
+  <li>UI 优化</li>
 </ul>
 
 <h3>25.11.20</h3>
 <ul>
-  <li>Providers can be configured from Settings panel - can be added/removed,
-    also OAuth
-  </li>
-  <li>Fixed context size bug when session what aborted</li>
-  <li>Fix session error toasts and display session state messages</li>
-  <li>Updated OpenCode to v1.0.80</li>
+  <li>可在设置面板配置 provider：添加/移除，支持 OAuth</li>
+  <li>修复会话中断后上下文大小的问题</li>
+  <li>修复会话错误 toast，并显示会话状态消息</li>
+  <li>更新 OpenCode 至 v1.0.80</li>
 </ul>
 
 <h3>25.11.19</h3>
 <ul>
-  <li>Updated OpenCode to v1.0.78</li>
+  <li>更新 OpenCode 至 v1.0.78</li>
 </ul>
 
 <h3>25.11.18</h3>
 <ul>
-  <li>First release of the OpenCode JetBrains plugin, based on OpenCode
-    v1.0.68
-  </li>
+  <li>OpenCode JetBrains 插件首个版本，基于 OpenCode v1.0.68</li>
 </ul>
-
-<h3>25.11.18</h3>
-<ul>
-  <li>First release of the OpenCode JetBrains plugin, based on OpenCode
-    v1.0.68
-  </li>
-</ul>
-

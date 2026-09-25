@@ -53,9 +53,9 @@ const CompactHeader = forwardRef<
           if (currentSession?.id === sessionId) {
             setCurrentSession(res.data)
           }
-          toast.showToast("Session unshared", { variant: "success" })
+          toast.showToast("已取消会话分享", { variant: "success" })
         } else {
-          toast.showToast("Failed to unshare session", { variant: "error" })
+          toast.showToast("取消分享失败", { variant: "error" })
         }
       } else {
         const res = await sdk.session.share({ path: { id: sessionId } })
@@ -67,10 +67,10 @@ const CompactHeader = forwardRef<
           }
           if (res.data.share?.url) {
             await navigator.clipboard.writeText(res.data.share.url)
-            toast.showToast("Share URL copied to clipboard", { variant: "success" })
+            toast.showToast("分享链接已复制到剪贴板", { variant: "success" })
           }
         } else {
-          toast.showToast("Failed to share session", { variant: "error" })
+          toast.showToast("分享会话失败", { variant: "error" })
         }
       }
       setSharingSessionId(null)
@@ -136,7 +136,7 @@ const CompactHeader = forwardRef<
             title={currentTitle}
             data-tip={currentTitle}
           >
-            <span>{currentSession ? truncatedTitle : "No Session"}</span>
+            <span>{currentSession ? truncatedTitle : "无会话"}</span>
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
@@ -197,14 +197,14 @@ const CompactHeader = forwardRef<
         isOpen={!!actions.deleteConfirm}
         onClose={actions.handleDeleteCancel}
         onConfirm={handleDeleteConfirm}
-        title={actions.deleteConfirm === "bulk" ? "Delete Sessions" : "Delete Session"}
+        title={actions.deleteConfirm === "bulk" ? "删除会话" : "删除会话"}
         message={
           actions.deleteConfirm === "bulk"
-            ? `Are you sure you want to delete ${dropdown.selectedSessions.size} session${dropdown.selectedSessions.size > 1 ? "s" : ""}? This action cannot be undone.`
-            : "Are you sure you want to delete this session? This action cannot be undone."
+            ? `确定删除选中的 ${dropdown.selectedSessions.size} 个会话？此操作不可撤销。`
+            : "确定删除此会话？此操作不可撤销。"
         }
-        confirmText="Delete"
-        cancelText="Cancel"
+        confirmText="删除"
+        cancelText="取消"
         variant="danger"
         isLoading={actions.isDeleting}
       />

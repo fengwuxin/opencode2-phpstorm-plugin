@@ -24,7 +24,7 @@ export function SettingsFooter({
       </div>
       <div className="flex gap-2">
         <Button variant="secondary" onClick={onCancel} disabled={isSaving}>
-          Cancel
+          取消
         </Button>
         <Button
           variant="primary"
@@ -32,7 +32,7 @@ export function SettingsFooter({
           disabled={isSaving || isLoading || !hasUnsavedChanges}
           loading={isSaving}
         >
-          Save Changes
+          保存修改
         </Button>
       </div>
     </div>

@@ -29,7 +29,7 @@ export function useFileAttachment(editor: LexicalEditor) {
 
         if (!isSupportedAttachmentType(mime)) {
           showToast(`File type not supported: ${file.name}`, {
-            title: "Unsupported file type",
+            title: "不支持的文件类型",
             variant: "error",
             duration: 5000,
           })
@@ -58,7 +58,7 @@ export function useFileAttachment(editor: LexicalEditor) {
           })
         } catch {
           showToast(`Failed to read file: ${file.name}`, {
-            title: "File read error",
+            title: "文件读取失败",
             variant: "error",
             duration: 5000,
           })

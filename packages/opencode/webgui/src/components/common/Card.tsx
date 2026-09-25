@@ -32,7 +32,7 @@ const paddingClasses: Record<string, string> = {
  *     <p>Content goes here</p>
  *   </CardBody>
  *   <CardFooter>
- *     <button>Action</button>
+ *     <button>操作</button>
  *   </CardFooter>
  * </Card>
  * ```

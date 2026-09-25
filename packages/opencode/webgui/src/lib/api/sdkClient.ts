@@ -51,7 +51,7 @@ export const sdk = {
       if (!ideBridge.isInstalled())
         return {
           data: null as Config | null,
-          error: { message: "Saving settings requires the IDE plugin" },
+          error: { message: "保存设置需要 IDE 插件" },
         }
       try {
         const patch = options?.body ?? {}
@@ -68,7 +68,7 @@ export const sdk = {
       } catch (error) {
         return {
           data: null as Config | null,
-          error: { message: error instanceof Error ? error.message : "Unknown error" },
+          error: { message: error instanceof Error ? error.message : "未知错误" },
         }
       }
     },
@@ -81,20 +81,20 @@ export const sdk = {
         return { data: (res.payload ?? emptyPreferences) as ModelPreferences, error: null as { message: string } | null }
       } catch (error) {
         return {
-          error: { message: error instanceof Error ? error.message : "Unknown error" },
+          error: { message: error instanceof Error ? error.message : "未知错误" },
           data: null as ModelPreferences | null,
         }
       }
     },
     update: async (options: { body: Partial<ModelPreferences> }) => {
       if (!ideBridge.isInstalled())
-        return { data: null as ModelPreferences | null, error: { message: "IdeBridge not available" } }
+        return { data: null as ModelPreferences | null, error: { message: "IDE 桥接不可用" } }
       try {
         const res = await ideBridge.request("model.update", options.body)
         return { data: (res.payload ?? emptyPreferences) as ModelPreferences, error: null as { message: string } | null }
       } catch (error) {
         return {
-          error: { message: error instanceof Error ? error.message : "Unknown error" },
+          error: { message: error instanceof Error ? error.message : "未知错误" },
           data: null as ModelPreferences | null,
         }
       }
@@ -108,20 +108,20 @@ export const sdk = {
         return { data: (res.payload ?? {}) as AnyRecord, error: null as { message: string } | null }
       } catch (error) {
         return {
-          error: { message: error instanceof Error ? error.message : "Unknown error" },
+          error: { message: error instanceof Error ? error.message : "未知错误" },
           data: null as AnyRecord | null,
         }
       }
     },
     update: async (options: { body: AnyRecord }) => {
       if (!ideBridge.isInstalled())
-        return { data: null as AnyRecord | null, error: { message: "IdeBridge not available" } }
+        return { data: null as AnyRecord | null, error: { message: "IDE 桥接不可用" } }
       try {
         const res = await ideBridge.request("kv.update", options.body)
         return { data: (res.payload ?? {}) as AnyRecord, error: null as { message: string } | null }
       } catch (error) {
         return {
-          error: { message: error instanceof Error ? error.message : "Unknown error" },
+          error: { message: error instanceof Error ? error.message : "未知错误" },
           data: null as AnyRecord | null,
         }
       }

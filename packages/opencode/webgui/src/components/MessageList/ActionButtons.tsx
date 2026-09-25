@@ -102,9 +102,9 @@ export function ActionButtons({ onFork, onRevert, revertBusy, tokens, cost, isUs
               onClick={handleCopy}
               size="sm"
               className="p-0.5"
-              aria-label={copied ? "Copied to clipboard" : "Copy to clipboard"}
-              title={copied ? "Copied!" : "Copy to clipboard"}
-              data-tip={copied ? "Copied!" : "Copy to clipboard"}
+              aria-label={copied ? "已复制到剪贴板" : "复制到剪贴板"}
+              title={copied ? "已复制！" : "复制到剪贴板"}
+              data-tip={copied ? "已复制！" : "复制到剪贴板"}
               icon={
                 copied ? (
                   <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,9 +129,9 @@ export function ActionButtons({ onFork, onRevert, revertBusy, tokens, cost, isUs
               onClick={onFork}
               size="sm"
               className="p-0.5"
-              aria-label="Fork session at this message"
-              title="Fork session at this message"
-              data-tip="Fork session at this message"
+              aria-label="从这条消息创建会话分支"
+              title="从这条消息创建会话分支"
+              data-tip="从这条消息创建会话分支"
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -150,9 +150,9 @@ export function ActionButtons({ onFork, onRevert, revertBusy, tokens, cost, isUs
               size="sm"
               className="p-0.5 hover:text-red-600 dark:hover:text-red-400"
               disabled={revertBusy}
-              aria-label="Undo from this message (revert)"
-              title="Undo from this message (revert)"
-              data-tip="Undo from this message (revert)"
+              aria-label="从此消息回退"
+              title="从此消息回退"
+              data-tip="从此消息回退"
               icon={
                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path

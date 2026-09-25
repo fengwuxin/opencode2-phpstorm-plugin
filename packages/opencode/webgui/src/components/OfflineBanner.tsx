@@ -26,8 +26,8 @@ const STATE_CONFIGS: Record<"disconnected" | "error", StateConfig> = {
     textColor: "text-yellow-900 dark:text-yellow-100",
     subtextColor: "text-yellow-700 dark:text-yellow-300",
     buttonColor: "bg-yellow-600 hover:bg-yellow-700 text-white",
-    title: "Disconnected",
-    message: "Connection to the server was lost. Reconnecting...",
+    title: "未连接",
+    message: "与服务器的连接已断开，正在重连...",
     icon: (
       <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
@@ -46,8 +46,8 @@ const STATE_CONFIGS: Record<"disconnected" | "error", StateConfig> = {
     textColor: "text-red-900 dark:text-red-100",
     subtextColor: "text-red-700 dark:text-red-300",
     buttonColor: "bg-red-600 hover:bg-red-700 text-white",
-    title: "Connection Error",
-    message: "Failed to connect to the OpenCode server. Retrying...",
+    title: "连接错误",
+    message: "连接 OpenCode 服务失败，正在重试...",
     icon: (
       <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
@@ -91,7 +91,7 @@ export function OfflineBanner({ connectionState, onRetry }: OfflineBannerProps) 
           onClick={onRetry}
           className={`px-3 py-1 text-sm font-medium rounded transition-colors ${config.buttonColor}`}
         >
-          Retry Now
+          立即重试
         </button>
       )}
     </div>

@@ -83,23 +83,23 @@ export function VersionGate({ children }: { children: ReactNode }) {
         <div className="max-w-md w-full text-center space-y-6">
           <div className="text-5xl">⚠️</div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Incorrect OpenCode Version
+            OpenCode 版本不兼容
           </h1>
           <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-            The installed OpenCode server version is incompatible with this plugin.
+            已安装的 OpenCode 服务版本与此插件不兼容。
           </p>
           <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-4 space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-500 dark:text-gray-400">Minimum required</span>
+              <span className="text-gray-500 dark:text-gray-400">最低要求</span>
               <span className="font-mono font-semibold text-gray-900 dark:text-gray-100">{state.required}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500 dark:text-gray-400">Currently installed</span>
+              <span className="text-gray-500 dark:text-gray-400">当前已安装</span>
               <span className="font-mono font-semibold text-red-600 dark:text-red-400">{state.installed}</span>
             </div>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Please update OpenCode to version <span className="font-mono font-semibold">{state.required}</span> or
+            请将 OpenCode 更新到版本 <span className="font-mono font-semibold">{state.required}</span> or
             later to continue.
           </p>
         </div>

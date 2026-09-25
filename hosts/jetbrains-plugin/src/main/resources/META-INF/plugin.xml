@@ -11,7 +11,7 @@
     <toolWindow id="OpenCode" factoryClass="paviko.opencode.ui.ChatToolWindowFactory" anchor="right" canCloseContent="true" icon="/icons/opencodeToolWindow.svg"/>
     <applicationConfigurable parentId="tools" instance="paviko.opencode.settings.OpenCodeConfigurable"
                            id="paviko.opencode.settings.OpenCodeConfigurable"
-                           displayName="OpenCode Plug"/>
+                           displayName="OpenCode 插件"/>
     <applicationService serviceImplementation="paviko.opencode.settings.OpenCodeSettings"/>
     <notificationGroup id="paviko.opencode.notifications" displayType="BALLOON"/>
   </extensions>
@@ -19,19 +19,19 @@
   <actions>
     <action id="paviko.opencode.actions.ProjectAddToContextAction"
             class="paviko.opencode.actions.ProjectAddToContextAction"
-            text="OpenCode: Add to context">
+            text="OpenCode: 添加到上下文">
       <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
     </action>
 
     <action id="paviko.opencode.actions.ProjectPastePathAction"
             class="paviko.opencode.actions.ProjectPastePathAction"
-            text="OpenCode: paste path">
+            text="OpenCode: 粘贴路径">
       <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
     </action>
 
     <action id="paviko.opencode.actions.EditorAddToContextAction"
             class="paviko.opencode.actions.EditorAddToContextAction"
-            text="OpenCode: Add to context">
+            text="OpenCode: 添加到上下文">
       <add-to-group group-id="EditorPopupMenu" anchor="last"/>
       <add-to-group group-id="EditorTabPopupMenu" anchor="last"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl COMMA"/>
@@ -41,7 +41,7 @@
 
     <action id="paviko.opencode.actions.EditorAddLinesToContextAction"
             class="paviko.opencode.actions.EditorAddLinesToContextAction"
-            text="OpenCode: Add lines to context">
+            text="OpenCode: 添加选中行到上下文">
       <add-to-group group-id="EditorPopupMenu" anchor="last"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift COMMA"/>
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="meta shift BACK_SLASH"/>

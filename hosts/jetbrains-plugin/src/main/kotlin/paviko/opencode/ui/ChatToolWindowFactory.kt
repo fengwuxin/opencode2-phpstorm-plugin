@@ -68,7 +68,7 @@ class ChatToolWindowFactory : ToolWindowFactory, DumbAware {
 
         if (!JBCefApp.isSupported()) {
             val notSupported = JPanel(BorderLayout()).apply {
-                add(JLabel("JCEF not supported on this platform"), BorderLayout.CENTER)
+                add(JLabel("当前平台不支持 JCEF"), BorderLayout.CENTER)
             }
             mainPanel.add(notSupported, BorderLayout.CENTER)
             return
@@ -92,7 +92,7 @@ class ChatToolWindowFactory : ToolWindowFactory, DumbAware {
 
         // Placeholder center until browser loads
         mainPanel.add(JPanel(BorderLayout()).apply {
-            add(JLabel("Starting backend..."), BorderLayout.CENTER)
+            add(JLabel("正在启动后端..."), BorderLayout.CENTER)
         }, BorderLayout.CENTER)
         // Add collapsible logs at the bottom
         mainPanel.add(hideableLogs, BorderLayout.SOUTH)
@@ -141,8 +141,8 @@ class ChatToolWindowFactory : ToolWindowFactory, DumbAware {
                 showError(
                     mainPanel,
                     hideableLogs,
-                    "Backend connection timeout.<br/>Make sure opencode v2 is installed and check the logs below.<br/>" +
-                        "The executable path can be set in Settings | Tools | OpenCode Plug."
+                    "后端连接超时。<br/>请确认已安装 opencode v2，并查看下方日志。<br/>" +
+                        "可执行文件路径可在 设置 | 工具 | OpenCode 插件 中配置。"
                 )
             }
             try { procRef.get()?.destroy() } catch (_: Throwable) {}
@@ -161,7 +161,7 @@ class ChatToolWindowFactory : ToolWindowFactory, DumbAware {
             } catch (e: Exception) {
                 logger.error("Failed to launch backend", e)
                 SwingUtilities.invokeLater {
-                    showError(mainPanel, hideableLogs, "Failed to start backend:<br/>${e.message}<br/><br/>Check logs for details.")
+                    showError(mainPanel, hideableLogs, "启动后端失败：<br/>${e.message}<br/><br/>详情请查看日志。")
                 }
                 timeoutFuture.cancel(false)
                 return@execute
@@ -206,7 +206,7 @@ class ChatToolWindowFactory : ToolWindowFactory, DumbAware {
                                 showError(
                                     mainPanel,
                                     hideableLogs,
-                                    "Failed to connect to the opencode backend:<br/>${e.message}<br/><br/>Check logs for details."
+                                    "连接 opencode 后端失败：<br/>${e.message}<br/><br/>详情请查看日志。"
                                 )
                             }
                             timeoutFuture.cancel(false)
@@ -215,7 +215,7 @@ class ChatToolWindowFactory : ToolWindowFactory, DumbAware {
                 } catch (e: Exception) {
                     logger.error("Error reading backend output", e)
                     SwingUtilities.invokeLater {
-                        showError(mainPanel, hideableLogs, "Backend communication error:<br/>${e.message}")
+                        showError(mainPanel, hideableLogs, "后端通信错误：<br/>${e.message}")
                     }
                 } finally {
                     try { reader.close() } catch (_: Throwable) {}
@@ -270,7 +270,7 @@ class ChatToolWindowFactory : ToolWindowFactory, DumbAware {
             browser.loadURL(buildUiUrl(project, toolWindow, browser, serverUrl, password))
         } catch (e: Exception) {
             logger.error("Failed to create browser component", e)
-            showError(mainPanel, hideableLogs, "Failed to create browser:<br/>${e.message}")
+            showError(mainPanel, hideableLogs, "创建浏览器组件失败：<br/>${e.message}")
         }
     }
 

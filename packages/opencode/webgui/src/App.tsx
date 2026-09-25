@@ -238,7 +238,7 @@ function AppInner({ connectionState }: { connectionState: ConnectionState }) {
   useEffect(() => {
     if (error) {
       showToast(error.message, {
-        title: "Error",
+        title: "错误",
         variant: "error",
         duration: 8000,
       })
@@ -316,7 +316,7 @@ function AppContent() {
 
       if (event.type === "server.connected") {
         console.log("[App] Successfully connected to OpenCode server")
-        showToast("Connected to OpenCode server", { variant: "success", duration: 3000 })
+        showToast("已连接到 OpenCode 服务", { variant: "success", duration: 3000 })
       }
 
       // Handle session.idle events to show/hide typing indicator
@@ -339,8 +339,8 @@ function AppContent() {
         const { sessionID } = event.properties
         if (currentSession?.id === sessionID) {
           console.log("[App] Session compacted:", sessionID)
-          showToast("Session history has been compacted to save space", {
-            title: "Session Compacted",
+          showToast("会话历史已压缩以节省空间", {
+            title: "会话已压缩",
             variant: "info",
             duration: 5000,
           })

@@ -39,8 +39,8 @@ export function CommandPalette({
   const commands: Command[] = [
     {
       id: "new-session",
-      label: "New Session",
-      description: "Create a new conversation",
+      label: "新建会话",
+      description: "创建新会话",
       icon: "➕",
       action: () => {
         onNewSession()
@@ -51,7 +51,7 @@ export function CommandPalette({
     {
       id: "settings",
       label: "Settings",
-      description: "Open settings panel",
+      description: "打开设置面板",
       icon: "⚙️",
       action: () => {
         onOpenSettings()
@@ -61,8 +61,8 @@ export function CommandPalette({
     },
     {
       id: "help",
-      label: "Keyboard Shortcuts",
-      description: "Show all keyboard shortcuts",
+      label: "快捷键",
+      description: "显示所有快捷键",
       icon: "❓",
       action: () => {
         onShowHelp()
@@ -172,10 +172,10 @@ export function CommandPalette({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Type a command or search sessions..."
+            placeholder="输入命令或搜索会话..."
             className="w-full border-0 bg-transparent text-base text-gray-900 placeholder-gray-500 outline-none dark:text-gray-100 dark:placeholder-gray-400"
             id="command-palette-title"
-            aria-label="Search commands and sessions"
+            aria-label="搜索命令和会话"
           />
         </div>
 
@@ -187,7 +187,7 @@ export function CommandPalette({
             Object.entries(commandsByCategory).map(([category, cmds]) => (
               <div key={category}>
                 <div className="bg-gray-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-                  {category === "Action" ? "Actions" : "Recent Sessions"}
+                  {category === "Action" ? "操作" : "最近会话"}
                 </div>
                 {cmds.map((cmd) => (
                   <button

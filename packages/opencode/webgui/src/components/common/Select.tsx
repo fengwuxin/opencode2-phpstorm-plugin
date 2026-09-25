@@ -56,9 +56,9 @@ const sizeClasses: Record<SelectSize, string> = {
  * ]
  *
  * <Select
- *   label="Choose an option"
+ *   label="请选择"
  *   options={options}
- *   placeholder="Select one..."
+ *   placeholder="请选择..."
  *   error={errors.selection}
  * />
  * ```

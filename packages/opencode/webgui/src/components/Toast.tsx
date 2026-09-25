@@ -130,7 +130,7 @@ export function ToastComponent({ toast, onDismiss }: ToastProps) {
         <button
           onClick={() => onDismiss(toast.id)}
           className="flex-shrink-0 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-          aria-label="Dismiss"
+          aria-label="忽略"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

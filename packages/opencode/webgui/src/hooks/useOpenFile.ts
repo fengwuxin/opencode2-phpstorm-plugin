@@ -121,7 +121,7 @@ export function useOpenFile() {
     async (target: OpenFileTarget) => {
       const absolutePath = resolveAbsolutePath(target)
       if (!absolutePath) {
-        showToast("Cannot open file: path is unavailable", {
+        showToast("无法打开文件：路径不可用", {
           title: "IDE Bridge",
           variant: "error",
         })
@@ -134,7 +134,7 @@ export function useOpenFile() {
         await ideBridge.request("openFile", payload)
       } catch (error) {
         console.error("[useOpenFile] Failed to open file", error)
-        showToast("Failed to open file in IDE", {
+        showToast("在 IDE 中打开文件失败", {
           title: "IDE Bridge",
           variant: "error",
         })

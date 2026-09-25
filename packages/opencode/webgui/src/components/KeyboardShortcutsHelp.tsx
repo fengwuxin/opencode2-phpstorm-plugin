@@ -8,12 +8,17 @@ interface KeyboardShortcutsHelpProps {
 
 export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelpProps) {
   const categories = Array.from(new Set(KEYBOARD_SHORTCUTS.map((s) => s.category)))
+  const categoryLabels: Record<string, string> = {
+    General: "通用",
+    Messages: "消息",
+    Navigation: "导航",
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
       <ModalHeader onClose={onClose}>
         <h2 id="shortcuts-help-title" className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-          Keyboard Shortcuts
+          快捷键
         </h2>
       </ModalHeader>
 
@@ -25,7 +30,7 @@ export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelp
             return (
               <div key={category}>
                 <h3 className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  {category}
+                  {categoryLabels[category] ?? category}
                 </h3>
                 <div className="space-y-2">
                   {categoryShortcuts.map((shortcut, idx) => (
@@ -55,11 +60,11 @@ export function KeyboardShortcutsHelp({ isOpen, onClose }: KeyboardShortcutsHelp
         {/* Footer note */}
         <div className="mt-4 rounded border border-blue-200 bg-blue-50 p-2 dark:border-blue-900 dark:bg-blue-950/30">
           <p className="text-sm text-blue-800 dark:text-blue-200">
-            <strong>Tip:</strong> Use{" "}
+            <strong>提示：</strong>随时按{" "}
             <kbd className="rounded border border-blue-300 bg-white px-1.5 py-0.5 text-xs font-semibold dark:border-blue-700 dark:bg-blue-900">
               ?
             </kbd>{" "}
-            to quickly access this help dialog anytime.
+            可以打开这个帮助对话框。
           </p>
         </div>
       </ModalBody>

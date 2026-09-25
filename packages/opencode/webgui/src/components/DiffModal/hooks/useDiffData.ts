@@ -27,14 +27,14 @@ export function useDiffData(sessionID: string, messageID: string, isOpen: boolea
           const errorMessage =
             typeof response.error === "object" && "message" in response.error
               ? String(response.error.message)
-              : "Unknown error"
-          setError("Failed to load diff: " + errorMessage)
+              : "未知错误"
+          setError("加载差异失败：" + errorMessage)
         } else if (response.data) {
           setDiffs(response.data)
         }
       } catch (err) {
         if (!controller.signal.aborted) {
-          setError("Failed to load diff: " + String(err))
+          setError("加载差异失败：" + String(err))
         }
       } finally {
         if (!controller.signal.aborted) {

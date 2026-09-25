@@ -24,7 +24,7 @@ class OpenCodeConfigurable : Configurable {
     private val settings = OpenCodeSettings.getInstance()
     private val logger = Logger.getInstance(OpenCodeConfigurable::class.java)
 
-    override fun getDisplayName(): String = "OpenCode Plug"
+    override fun getDisplayName(): String = "OpenCode 插件"
 
     override fun createComponent(): JComponent? {
         try {
@@ -43,10 +43,10 @@ class OpenCodeConfigurable : Configurable {
 
             // Build the form
             mainPanel = FormBuilder.createFormBuilder()
-                .addLabeledComponent(JBLabel("opencode executable:"), executablePathField!!, 1, false)
-                .addComponentToRightColumn(JBLabel("Leave empty to auto detect (homebrew, nvm, bun, PATH)."))
-                .addLabeledComponent(JBLabel("Additional serve args:"), customCommandField!!, 1, false)
-                .addComponentToRightColumn(JBLabel("Extra arguments appended to \"opencode serve\"."))
+                .addLabeledComponent(JBLabel("opencode 可执行文件："), executablePathField!!, 1, false)
+                .addComponentToRightColumn(JBLabel("留空自动探测（homebrew、nvm、bun、PATH）。"))
+                .addLabeledComponent(JBLabel("额外的 serve 参数："), customCommandField!!, 1, false)
+                .addComponentToRightColumn(JBLabel("追加到 “opencode serve” 的额外参数。"))
                 .addComponent(commandErrorLabel!!)
                 .addComponentFillVertically(JPanel(), 0)
                 .panel
@@ -55,7 +55,7 @@ class OpenCodeConfigurable : Configurable {
         } catch (e: Exception) {
             logger.error("Failed to create settings UI component", e)
             return JPanel().apply {
-                add(JBLabel("Error creating settings panel. Check logs for details."))
+                add(JBLabel("创建设置面板失败，请查看日志。"))
             }
         }
     }
@@ -83,7 +83,7 @@ class OpenCodeConfigurable : Configurable {
         val command = customCommandField?.text?.trim() ?: ""
         // Command can be empty (uses default), but warn about suspicious patterns
         if (command.isNotEmpty() && (command.contains("&&") || command.contains("||") || command.contains(";"))) {
-            commandErrorLabel?.text = "Warning: Command contains shell operators that may not work as expected"
+            commandErrorLabel?.text = "警告：命令包含 shell 操作符，可能无法按预期工作"
             commandErrorLabel?.isVisible = true
             return true // Still valid, just a warning
         } else {
@@ -103,7 +103,7 @@ class OpenCodeConfigurable : Configurable {
         try {
             // Validate all fields before applying
             if (!validateCommand()) {
-                throw ConfigurationException("Invalid command configuration.")
+                throw ConfigurationException("命令配置无效。")
             }
 
             val state = settings.state
@@ -128,7 +128,7 @@ class OpenCodeConfigurable : Configurable {
             throw e
         } catch (e: Exception) {
             logger.error("Unexpected error applying settings", e)
-            throw ConfigurationException("Failed to apply settings: ${e.message}")
+            throw ConfigurationException("应用设置失败：${e.message}")
         }
     }
 

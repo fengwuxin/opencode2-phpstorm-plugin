@@ -110,7 +110,7 @@ export function useMentionSearch(query: string): UseMentionSearchResult {
             score: r.score,
           }))
         } else {
-          // no query: order = current (bold), "All opened files", then others
+          // no query: order = current (bold), "所有打开的文件", then others
           const items: MentionResult[] = []
           if (current) {
             items.push({
@@ -123,7 +123,7 @@ export function useMentionSearch(query: string): UseMentionSearchResult {
           if (openedSet.size > 0) {
             items.push({
               id: "opened:all",
-              metadata: { type: "file", display: "All opened files" },
+              metadata: { type: "file", display: "所有打开的文件" },
               score: 0,
               special: "all-opened",
             })
@@ -162,7 +162,7 @@ export function useMentionSearch(query: string): UseMentionSearchResult {
         setResults(finalResults)
       } catch (err) {
         if (signal.aborted) return
-        const errorObj = err instanceof Error ? err : new Error("Failed to search mentions")
+        const errorObj = err instanceof Error ? err : new Error("搜索提及失败")
         setError(errorObj)
         console.error("[useMentionSearch] Search failed:", errorObj)
       } finally {

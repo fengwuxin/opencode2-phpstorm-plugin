@@ -15,7 +15,7 @@ export function ConfirmTab({ questions, answers, onSubmit, onDismiss, isLoading 
   return (
     <div className="px-3 py-2">
       {/* Review header */}
-      <div className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-3">Review your answers</div>
+      <div className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-3">确认你的回答</div>
 
       {/* Summary of answers */}
       <div className="space-y-2 mb-4">
@@ -56,7 +56,7 @@ export function ConfirmTab({ questions, answers, onSubmit, onDismiss, isLoading 
               : "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
           )}
         >
-          {isLoading ? "Submitting..." : "Submit"}
+          {isLoading ? "提交中..." : "Submit"}
         </button>
         <button
           onClick={onDismiss}
@@ -70,7 +70,7 @@ export function ConfirmTab({ questions, answers, onSubmit, onDismiss, isLoading 
       {/* Help text */}
       {!allAnswered && (
         <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
-          Please answer all questions before submitting.
+          提交前请先回答所有问题。
         </p>
       )}
     </div>

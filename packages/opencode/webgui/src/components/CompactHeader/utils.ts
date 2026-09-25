@@ -9,8 +9,8 @@ export const CONNECTION_COLORS: Record<string, string> = {
 }
 
 export const CONNECTION_TOOLTIPS: Record<string, string> = {
-  connecting: "Connecting...",
-  connected: "Connected",
-  disconnected: "Disconnected",
-  error: "Connection Error",
+  connecting: "连接中...",
+  connected: "已连接",
+  disconnected: "未连接",
+  error: "连接错误",
 }

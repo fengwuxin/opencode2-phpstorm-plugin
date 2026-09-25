@@ -63,7 +63,7 @@ export function CommandPopover({ query, position, onSelect, onClose, onRepositio
         data-command-popover
       >
         <div className="px-2 py-1 text-xs text-gray-500 dark:text-gray-400">
-          {query ? "No commands found" : "Type to search commands..."}
+          {query ? "未找到命令" : "输入以搜索命令..."}
         </div>
       </div>
     )
@@ -78,7 +78,7 @@ export function CommandPopover({ query, position, onSelect, onClose, onRepositio
     >
       <div ref={listRef} className="max-h-64 overflow-y-auto" style={{ maxWidth: "calc(100vw - 16px)" }}>
         {isLoading && results.length === 0 ? (
-          <div className="px-2 py-1 text-xs text-gray-500 dark:text-gray-400">Loading commands...</div>
+          <div className="px-2 py-1 text-xs text-gray-500 dark:text-gray-400">加载命令...</div>
         ) : (
           <div className="py-0.5">
             {results.map((result, index) => (

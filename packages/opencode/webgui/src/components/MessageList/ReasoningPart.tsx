@@ -8,7 +8,7 @@ interface ReasoningPartProps {
 }
 
 export function ReasoningPart({ part, durationMs }: ReasoningPartProps) {
-  const label = durationMs !== undefined ? `Thought for ${Math.max(1, Math.floor(durationMs / 1000))}s` : "Thinking..."
+  const label = durationMs !== undefined ? `Thought for ${Math.max(1, Math.floor(durationMs / 1000))}s` : "思考中..."
 
   return (
     <CollapsiblePart

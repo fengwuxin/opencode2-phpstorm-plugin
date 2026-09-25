@@ -18,8 +18,8 @@ export function ConfirmModal({
   onConfirm,
   title,
   message,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
+  confirmText = "确认",
+  cancelText = "取消",
   variant = "danger",
   isLoading = false,
 }: ConfirmModalProps) {

@@ -23,8 +23,8 @@ export function ActionButtons({
       <IconButton
         onClick={toggleTheme}
         size="md"
-        aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
-        title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+        aria-label={theme === "light" ? "切换到深色模式" : "切换到浅色模式"}
+        title={theme === "light" ? "切换到深色模式" : "切换到浅色模式"}
         icon={
           theme === "light" ? (
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,8 +52,8 @@ export function ActionButtons({
       <IconButton
         onClick={onOpenCommandPalette}
         size="md"
-        aria-label="Command Palette"
-        title="Command Palette (Cmd/Ctrl+K)"
+        aria-label="命令面板"
+        title="命令面板 (Cmd/Ctrl+K)"
         icon={
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -71,7 +71,7 @@ export function ActionButtons({
         onClick={onOpenSettings}
         size="md"
         aria-label="Settings"
-        title="Settings (Cmd/Ctrl+,)"
+        title="设置 (Cmd/Ctrl+,)"
         icon={
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -92,8 +92,8 @@ export function ActionButtons({
         onClick={onNewSession}
         disabled={isCreatingSession}
         className="w-5 h-5 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-        title="New Session (Cmd/Ctrl+N)"
-        data-tip="New Session (Cmd/Ctrl+N)"
+        title="新建会话 (Cmd/Ctrl+N)"
+        data-tip="新建会话 (Cmd/Ctrl+N)"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

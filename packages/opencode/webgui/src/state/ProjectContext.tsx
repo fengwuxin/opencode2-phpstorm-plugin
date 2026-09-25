@@ -48,7 +48,7 @@ export function ProjectProvider({ children }: ProjectProviderProps) {
         throw new Error(
           typeof response.error === "object" && response.error && "message" in response.error
             ? String(response.error.message)
-            : "Failed to fetch project",
+            : "获取项目失败",
         )
       }
 
@@ -64,7 +64,7 @@ export function ProjectProvider({ children }: ProjectProviderProps) {
         setServerDirectory(pathResult.data.directory)
       }
     } catch (err) {
-      setError(err instanceof Error ? err : new Error("Failed to fetch project"))
+      setError(err instanceof Error ? err : new Error("获取项目失败"))
       console.error("Failed to fetch project:", err)
     } finally {
       setIsLoading(false)

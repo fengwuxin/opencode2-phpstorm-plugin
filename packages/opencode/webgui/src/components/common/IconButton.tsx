@@ -37,7 +37,7 @@ const iconSizeClasses: Record<IconButtonSize, string> = {
  * <IconButton
  *   size="md"
  *   icon={<XMarkIcon />}
- *   aria-label="Close dialog"
+ *   aria-label="关闭对话框"
  *   onClick={handleClose}
  * />
  * ```

@@ -78,7 +78,7 @@ export function SessionDropdown({
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Search sessions..."
+            placeholder="搜索会话..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             onKeyDown={onSearchKeyDown}
@@ -91,8 +91,8 @@ export function SessionDropdown({
                 ? "bg-blue-500 text-white border-blue-500"
                 : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
             }`}
-            title={isSelectMode ? "Cancel selection" : "Select multiple sessions"}
-            data-tip={isSelectMode ? "Cancel selection" : "Select multiple sessions"}
+            title={isSelectMode ? "取消选择" : "多选会话"}
+            data-tip={isSelectMode ? "取消选择" : "多选会话"}
           >
             {isSelectMode ? (
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

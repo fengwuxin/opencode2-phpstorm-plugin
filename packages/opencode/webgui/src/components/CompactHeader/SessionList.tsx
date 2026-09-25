@@ -51,7 +51,7 @@ export function SessionList({
   if (filteredSessions.length === 0) {
     return (
       <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 text-center">
-        {sessions.length === 0 ? "No sessions yet" : "No matching sessions"}
+        {sessions.length === 0 ? "还没有会话" : "没有匹配的会话"}
       </div>
     )
   }

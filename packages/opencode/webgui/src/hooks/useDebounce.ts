@@ -108,7 +108,7 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
  *   onBlur={() => flush()} // Execute immediately on blur
  * />
  * <button onClick={cancel}>Cancel Search</button>
- * {isPending && <span>Searching...</span>}
+ * {isPending && <span>搜索中...</span>}
  * ```
  */
 export function useDebouncedCallbackAdvanced<T extends (...args: any[]) => any>(callback: T, delay: number = 300) {

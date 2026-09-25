@@ -475,7 +475,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
         const errorMsg =
           errorData && typeof errorData === "object" && errorData !== null && "message" in errorData
             ? String(errorData.message)
-            : "Failed to load sessions"
+            : "加载会话列表失败"
         console.error("[SessionContext] Failed to load sessions:", errorMsg)
         setError(new Error(errorMsg))
         setIsLoading(false)
@@ -493,7 +493,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
 
       setIsLoading(false)
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Failed to load sessions"
+      const errorMsg = err instanceof Error ? err.message : "加载会话列表失败"
       console.error("[SessionContext] Failed to load sessions:", errorMsg)
       setError(new Error(errorMsg))
       setIsLoading(false)
@@ -530,7 +530,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
           typeof response.error.data === "object" &&
           "message" in response.error.data
             ? String(response.error.data.message)
-            : "Failed to create session"
+            : "创建会话失败"
         console.error("[SessionContext] Failed to create session:", errorMsg)
         setError(new Error(errorMsg))
         setIsCreating(false)
@@ -549,11 +549,11 @@ export function SessionProvider({ children }: SessionProviderProps) {
         return response.data
       }
 
-      setError(new Error("No session data returned"))
+      setError(new Error("未返回会话数据"))
       setIsCreating(false)
       return null
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Failed to create session"
+      const errorMsg = err instanceof Error ? err.message : "创建会话失败"
       console.error("[SessionContext] Failed to create session:", errorMsg)
       setError(new Error(errorMsg))
       setIsCreating(false)
@@ -617,7 +617,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
           setIsVirtualSession(false)
         }
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : "Failed to switch session"
+        const errorMsg = err instanceof Error ? err.message : "切换会话失败"
         console.error("[SessionContext] Failed to switch session:", errorMsg)
         setError(new Error(errorMsg))
       }
@@ -645,7 +645,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
             typeof response.error.data === "object" &&
             "message" in response.error.data
               ? String(response.error.data.message)
-              : "Failed to update session"
+              : "更新会话失败"
           console.error("[SessionContext] Failed to update session:", errorMsg)
           setError(new Error(errorMsg))
           return false
@@ -663,7 +663,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
 
         return false
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : "Failed to update session"
+        const errorMsg = err instanceof Error ? err.message : "更新会话失败"
         console.error("[SessionContext] Failed to update session:", errorMsg)
         setError(new Error(errorMsg))
         return false
@@ -691,7 +691,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
             typeof response.error.data === "object" &&
             "message" in response.error.data
               ? String(response.error.data.message)
-              : "Failed to delete session"
+              : "删除会话失败"
           console.error("[SessionContext] Failed to delete session:", errorMsg)
           setError(new Error(errorMsg))
           return false
@@ -709,7 +709,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
 
         return true
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : "Failed to delete session"
+        const errorMsg = err instanceof Error ? err.message : "删除会话失败"
         console.error("[SessionContext] Failed to delete session:", errorMsg)
         setError(new Error(errorMsg))
         return false
@@ -736,7 +736,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
         const errorMsg =
           errorData && typeof errorData === "object" && errorData !== null && "message" in errorData
             ? String(errorData.message)
-            : "Failed to fork session"
+            : "创建会话分支失败"
         console.error("[SessionContext] Failed to fork session:", errorMsg)
         setError(new Error(errorMsg))
         return null
@@ -755,7 +755,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
 
       return null
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Failed to fork session"
+      const errorMsg = err instanceof Error ? err.message : "创建会话分支失败"
       console.error("[SessionContext] Failed to fork session:", errorMsg)
       setError(new Error(errorMsg))
       return null
@@ -787,7 +787,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
           const errorMsg =
             errorData && typeof errorData === "object" && errorData !== null && "message" in errorData
               ? String((errorData as any).message)
-              : "Failed to revert session"
+              : "回退会话失败"
           console.error("[SessionContext] Failed to revert session:", errorMsg)
           setError(new Error(errorMsg))
           return null
@@ -798,7 +798,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
         }
         return null
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : "Failed to revert session"
+        const errorMsg = err instanceof Error ? err.message : "回退会话失败"
         console.error("[SessionContext] Failed to revert session:", errorMsg)
         setError(new Error(errorMsg))
         return null
@@ -823,7 +823,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
           const errorMsg =
             errorData && typeof errorData === "object" && errorData !== null && "message" in errorData
               ? String((errorData as any).message)
-              : "Failed to restore messages"
+              : "恢复消息失败"
           console.error("[SessionContext] Failed to unrevert session:", errorMsg)
           setError(new Error(errorMsg))
           return null
@@ -834,7 +834,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
         }
         return null
       } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : "Failed to restore messages"
+        const errorMsg = err instanceof Error ? err.message : "恢复消息失败"
         console.error("[SessionContext] Failed to unrevert session:", errorMsg)
         setError(new Error(errorMsg))
         return null
@@ -887,7 +887,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
     try {
       await sdk.session.retry({ path: { sessionID: sessionId } })
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Failed to retry session"
+      const errorMsg = err instanceof Error ? err.message : "重试会话失败"
       console.error("[SessionContext] Failed to retry session:", errorMsg)
       setError(new Error(errorMsg))
       setIsIdle(true)

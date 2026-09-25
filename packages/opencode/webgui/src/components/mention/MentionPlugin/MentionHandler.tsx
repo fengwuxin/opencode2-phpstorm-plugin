@@ -36,7 +36,7 @@ export function useMentionHandler(
           const textNode = node as TextNode
           textNode.setTextContent(newText)
 
-          if (metadata.display === "All opened files") {
+          if (metadata.display === "所有打开的文件") {
             const nodes: Array<TextNode | ReturnType<typeof $createMentionNode>> = []
             for (const p of openedFiles) {
               if (!p) continue
