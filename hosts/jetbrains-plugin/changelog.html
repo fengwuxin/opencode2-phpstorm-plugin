@@ -2,164 +2,18 @@
 
 <h3>26.9.2518</h3>
 <ul>
-  <li>插件名称改为 <b>OpenCode GUI Only</b>，插件 ID 改为 <code>fengwuxin.opencode-gui-only</code>，作者保持 <b>fengwuxin</b>（因 ID 变化，旧版需要先卸载再安装本版）</li>
-  <li>插件图标：外轮廓采用超椭圆（小米风格），内部保留 opencode 原有图形</li>
-  <li>工具窗口图标：改为实心 opencode 图形剪影，并提供浅色/深色主题两套图标，侧边栏更醒目</li>
-</ul>
-
-<h3>26.9.2517</h3>
-<ul>
-  <li>插件更名为 <b>OpenCode UX</b>，作者改为 <b>wuxin</b>（插件 ID 不变，可直接覆盖升级）</li>
-  <li>新图标：采用圆润的超椭圆（squircle）造型，搭配圆角终端标记</li>
-</ul>
-
-<h3>26.9.2516</h3>
-<ul>
-  <li>插件更名为 <b>OpenCode Studio</b>（插件 ID 不变，可直接覆盖升级）</li>
-  <li>README 与插件描述同步更新</li>
-</ul>
-
-<h3>26.9.2515</h3>
-<ul>
-  <li>修复「标题模型」保存后回显为（未设置）：opencode v2 会把 <code>small_model</code> 规范化为 <code>agents.title.model</code>，现在两种形式都能读取</li>
-  <li>默认模型回显优先使用配置里的值，而不是服务端默认值</li>
-  <li>Agent 描述中文化（build / plan / general），下拉里不再出现英文说明</li>
-  <li>设置 → 通用 新增「界面语言」切换（中文 / English，默认中文，立即生效）</li>
-  <li>全部界面文案接入中英词典，英文模式下完整可用</li>
-</ul>
-
-<h3>26.9.2514</h3>
-<ul>
-  <li>空状态文案改为「我准备好啦 / 说句话，我就开工啦～」</li>
-  <li>用量浮层（token 明细）改为实色背景与更亮的标签颜色，深色主题下更清晰</li>
-</ul>
-
-<h3>26.9.2513</h3>
-<ul>
-  <li>启动页：文案改为「正在启动……」，文字水平垂直居中；「后端日志」标题中文化</li>
-  <li>修复深色主题下模型下拉列表选项看不清的问题（显式设置 select/option/optgroup 颜色）</li>
-  <li>「启用快照」默认显示为开启，与 opencode 默认行为一致</li>
-</ul>
-
-<h3>26.9.2512</h3>
-<ul>
-  <li>设置 → 模型：「默认模型」「标题模型」改为下拉选择，按 Provider 分组列出可用模型，可留空表示不设置</li>
-  <li>「小模型」标题改为「标题模型」</li>
-</ul>
-
-<h3>26.9.2511</h3>
-<ul>
-  <li>版本检查增加 5 秒兜底：IDE bridge 握手事件丢失时不再让整个界面空白</li>
-</ul>
-
-<h3>26.9.2510</h3>
-<ul>
-  <li>修复思考深度 / 模型列表偶发一直转圈的问题：IDE bridge 请求增加 10 秒超时，不再无限等待</li>
-  <li>模型目录（HTTP）与用户偏好（bridge）解耦加载，bridge 慢不会阻塞模型列表</li>
-  <li>会话上下文在 kv / 配置都取不到模型时，回退到本地记录的模型，思考深度随之恢复</li>
-  <li>移除「分享模式」设置项（opencode v2 没有分享接口，该设置无效）</li>
-</ul>
-
-<h3>26.9.2509</h3>
-<ul>
-  <li>界面默认中文：聊天界面、设置面板、弹窗、提示与错误信息全部中文化</li>
-  <li>IDE 侧文案中文化：工具窗口启动提示、设置页「OpenCode 插件」、右键菜单动作</li>
-  <li>README 默认中文（README.md），英文版移至 README.en.md</li>
-  <li>更新日志改为中文</li>
-</ul>
-
-<h3>26.9.2508</h3>
-<ul>
-  <li>移除会话分享按钮（opencode v2 没有分享接口，按钮没有实际作用）</li>
-  <li>Markdown 渲染改用 opencode 官方主题配色：淡紫色标题、橙色加粗、绿色行内代码、桃色链接和彩色列表符号</li>
-  <li>单条消息费用低于 $0.01 时显示更多小数位，不再四舍五入成 $0.00</li>
-</ul>
-
-<h3>26.9.2507</h3>
-<ul>
-  <li>模型列表不再与 opencode 桌面客户端同步，改由插件自己维护</li>
-  <li>默认列出已启用 provider 的全部模型；用「Manage models…」隐藏个别模型</li>
-  <li>移除插件里的 SQLite 依赖和桌面客户端状态读取代码</li>
-  <li>未配置用户名时，输入框问候语回退为「Hello owner」</li>
-</ul>
-
-<h3>26.9.2506</h3>
-<ul>
-  <li>输入框提示语改为问候配置里的用户名（「Hello &lt;username&gt;」）</li>
-</ul>
-
-<h3>26.9.2505</h3>
-<ul>
-  <li>设置 → Models：启用 provider 的勾选状态现在能正确保存（服务端会把 <code>disabled_providers</code> 规范化成 <code>experimental.policies</code>，两种格式都读取）</li>
-  <li>模型列表：已禁用或不可用 provider 的收藏/最近记录不再显示</li>
-  <li>思考深度（reasoning effort）在保存设置后保持可用：后端重载时返回的空列表不再覆盖已有数据，并会自动重试</li>
-</ul>
-
-<h3>26.9.2504</h3>
-<ul>
-  <li>设置 → Models：列表展示所有可用/已连接的 provider（含当前被禁用的），可以重新勾选启用</li>
-  <li>被禁用 provider 的模型不再出现在模型列表中；插件同时按生效配置过滤，改完设置无需等后端重启</li>
-  <li>去掉输入框里的「(Enter to send)」提示</li>
-</ul>
-
-<h3>26.9.2503</h3>
-<ul>
-  <li>设置 → Models：「Disabled Providers」改为「Enabled Providers」，默认全部勾选，取消勾选表示禁用</li>
-  <li>消息输入：Enter 发送，Cmd/Ctrl+Enter（或 Shift+Enter）换行</li>
-  <li>输入框默认高度改为两行</li>
-  <li>@ 提及 / 命令弹窗打开时，Enter 仍由弹窗处理</li>
-</ul>
-
-<h3>26.9.2502</h3>
-<ul>
-  <li>修复在 IDE 内读取桌面客户端模型可见性失败的问题（改用 SQLite 驱动的 DataSource，兼容插件类加载器）</li>
-  <li>模型列表在后端预热期间自动重试，不再显示为空</li>
-</ul>
-
-<h3>26.9.2501</h3>
-<ul>
-  <li>模型选择器跟随 opencode 桌面客户端：只显示其「Manage models」里启用的模型</li>
-  <li>可见性从桌面客户端本地状态读取（SQLite，只读），每次打开下拉都会刷新</li>
-  <li>没有桌面客户端时，回退为「每个 family 最新 + 6 个月内」规则，并提供本地 Manage models 开关</li>
-  <li>跳过配置中禁用的模型，并读取 v2 模型目录的发布时间</li>
-</ul>
-
-<h3>26.9.2404</h3>
-<ul>
-  <li>插件图标：使用 opencode logo（仓库根目录的 opencode.png，以矢量 <code>pluginIcon.svg</code> 形式提供）</li>
-</ul>
-
-<h3>26.9.2403</h3>
-<ul>
-  <li>修复粘贴图片：在 IDE 内通过插件读取剪贴板，因为 JetBrains 内嵌浏览器不总是把剪贴板图片暴露给页面</li>
-</ul>
-
-<h3>26.9.2402</h3>
-<ul>
-  <li>设置：保存功能恢复——由于 opencode v2 服务端没有配置写入接口，改动会写入全局 <code>opencode.json(c)</code></li>
-  <li>设置：保存失败时在面板中显示原因，不再静默失败</li>
-  <li>设置：配置字段改用 opencode v2 的名称（<code>update</code>、<code>snapshots</code>、<code>plugins</code>），当前值显示正确</li>
-</ul>
-
-<h3>26.9.2401</h3>
-<ul>
-  <li>修复思考深度选择器显示「0 / 1 / 2」而不是模型变体的问题（opencode v2 以数组形式返回 variants）</li>
-  <li>当所选模型不支持已保存的变体时自动重置</li>
+  <li>插件更名 <b>OpenCode GUI Only</b>，作者 fengwuxin；插件 ID 变更，旧版需先卸载再安装</li>
+  <li>新图标：超椭圆外轮廓 + opencode 原有图形；工具窗口为实心 opencode 剪影（浅色/深色主题两套）</li>
+  <li>界面中英文可切换（默认中文），深色主题下的控件、浮层与下拉配色全面适配</li>
+  <li>设置：默认模型 / 标题模型改为下拉选择；Provider 可勾选启用；快照默认开启</li>
+  <li>模型列表：默认展示启用 Provider 的全部模型，可单独隐藏；不再与桌面客户端同步</li>
+  <li>输入框：Enter 发送、Cmd/Ctrl+Enter 换行，默认两行高度，问候语显示配置的用户名</li>
+  <li>稳定性：修复思考深度偶发不可用、标题模型保存后不回显、模型列表加载中断等问题</li>
 </ul>
 
 <h3>26.9.24</h3>
 <ul>
-  <li>恢复显示用户发送的消息（opencode v2 通过 inbox 事件下发）</li>
-  <li>会话列表限定为当前项目</li>
-  <li>插件 id、名称和 vendor 改为 fengwuxin</li>
-</ul>
-
-<h3>26.9.23</h3>
-<ul>
-  <li>支持 opencode v2（仅 v2，不再支持 v1）</li>
-  <li>运行本机安装的 <code>opencode serve</code>，并把 IDE 工具窗口连接到它的 Web UI</li>
-  <li>自动处理 opencode v2 的 HTTP Basic 认证（启动时注入随机密码）</li>
-  <li>新增设置项：opencode 可执行文件路径（留空自动探测）</li>
-  <li>移除内置的 v1 后端二进制和 v1 REST/ideBridge 耦合</li>
-  <li>「添加到上下文」/ 拖拽在不可用时回退为复制路径到剪贴板</li>
+  <li>首个 opencode v2 版本：运行本机安装的 <code>opencode serve</code>，把聊天界面嵌入 IDE 工具窗口</li>
+  <li>自动处理 HTTP Basic 认证；新增 opencode 可执行文件路径设置；不再内置后端二进制</li>
+  <li>早期修复：设置保存与字段对齐 v2、推理变体选择、会话列表按项目过滤、粘贴图片、插件图标</li>
 </ul>
