@@ -52,20 +52,6 @@ export function GeneralTab({ formData, setFormData }: GeneralTabProps) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">分享模式</label>
-        <select
-          value={formData.share || "manual"}
-          onChange={(e) => setFormData({ ...formData, share: e.target.value as "manual" | "auto" | "disabled" })}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="manual">手动</option>
-          <option value="auto">自动</option>
-          <option value="disabled">禁用</option>
-        </select>
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">控制会话分享行为</p>
-      </div>
-
-      <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">工作目录</label>
         <div className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded bg-gray-50 dark:bg-gray-900 text-xs font-mono text-gray-900 dark:text-gray-100 truncate">
           {worktree ?? "Unknown"}

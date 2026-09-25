@@ -69,8 +69,14 @@ export function VersionGate({ children }: { children: ReactNode }) {
     const listener = () => { check() }
     window.addEventListener("opencode:idebridge-connected", listener, { once: true })
 
+    // Safety net: never block the whole UI on the IDE bridge handshake.
+    const fallback = window.setTimeout(() => {
+      if (!ideBridge.minVersion && !cancelled) setState({ status: "ok" })
+    }, 5000)
+
     return () => {
       cancelled = true
+      window.clearTimeout(fallback)
       window.removeEventListener("opencode:idebridge-connected", listener)
     }
   }, [])
@@ -99,8 +105,7 @@ export function VersionGate({ children }: { children: ReactNode }) {
             </div>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            请将 OpenCode 更新到版本 <span className="font-mono font-semibold">{state.required}</span> or
-            later to continue.
+            请将 OpenCode 更新到版本 <span className="font-mono font-semibold">{state.required}</span> 或更高版本以继续。
           </p>
         </div>
       </div>

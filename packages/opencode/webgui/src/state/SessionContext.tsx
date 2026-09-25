@@ -214,6 +214,13 @@ export function SessionProvider({ children }: SessionProviderProps) {
         }
       }
 
+      // Last resort: restore the selection this panel used before, so a slow or
+      // unavailable IDE bridge does not leave the model/variant pickers empty.
+      if (!providerId || !modelId) {
+        providerId = localStorage.getItem("opencode_selected_provider") ?? undefined
+        modelId = localStorage.getItem("opencode_selected_model") ?? undefined
+      }
+
       if (providerId && modelId) {
         setSelectedProviderId(providerId)
         setSelectedModelId(modelId)

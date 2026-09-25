@@ -58,18 +58,20 @@ export function ModelSelector({ selectedProviderId, selectedModelId, onSelect, d
   )
 
   const reload = useCallback(async () => {
-    const [provRes, modelRes] = await Promise.all([sdk.config.providers(), sdk.model.get()])
+    // Provider data comes over HTTP and preferences over the IDE bridge; load them
+    // independently so a slow bridge request cannot block the model list.
+    const providersPromise = sdk.config.providers()
+    const prefsPromise = sdk.model.get()
 
+    const provRes = await providersPromise
     if (provRes.error) {
       console.error("[ModelSelector] Failed to load providers:", provRes.error)
-      return
-    }
-
-    if (provRes.data) {
+    } else if (provRes.data) {
       setProviders(provRes.data.providers)
       setDefaultIds(provRes.data.default)
     }
 
+    const modelRes = await prefsPromise
     if (modelRes.data) {
       setRecent(modelRes.data.recent.slice(0, MAX_RECENT))
       setFavorite(modelRes.data.favorite)

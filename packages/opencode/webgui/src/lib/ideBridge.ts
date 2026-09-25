@@ -222,7 +222,7 @@ class IdeBridge {
     }, delay)
   }
 
-  request<T = any>(type: string, payload?: any): Promise<Message & { result?: T }> {
+  request<T = any>(type: string, payload?: any, timeoutMs = 10000): Promise<Message & { result?: T }> {
     return new Promise((resolve, reject) => {
       if (!this.isInstalled()) {
         reject(new Error("[ideBridge] Bridge not installed"))
@@ -230,7 +230,21 @@ class IdeBridge {
       }
       try {
         const id = String(Date.now()) + Math.random().toString(36).slice(2)
-        this.pending.set(id, { resolve, reject })
+        const timer = setTimeout(() => {
+          if (this.pending.delete(id)) {
+            reject(new Error(`[ideBridge] Request timed out: ${type}`))
+          }
+        }, timeoutMs)
+        this.pending.set(id, {
+          resolve: (msg) => {
+            clearTimeout(timer)
+            resolve(msg)
+          },
+          reject: (error) => {
+            clearTimeout(timer)
+            reject(error)
+          },
+        })
         this.send({ id, type, payload, timestamp: Date.now() })
       } catch (e) {
         reject(e)

@@ -28,7 +28,6 @@ const CONFIG_FIELDS = [
   "username",
   "update",
   "snapshots",
-  "share",
   "watcher",
   "plugins",
   "model",
