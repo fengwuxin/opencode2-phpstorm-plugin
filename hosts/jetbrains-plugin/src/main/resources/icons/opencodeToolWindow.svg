@@ -1,6 +1,9 @@
 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Tool window icon: rounded terminal mark matching the OpenCode GUI Only logo. -->
-  <rect x="2.1" y="2.4" width="11.8" height="11.2" rx="3.2" stroke="#6C7079" stroke-width="1.5" />
-  <path d="M5.4 6.2L7.5 8.3L5.4 10.4" stroke="#6C7079" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-  <path d="M8.8 10.5H10.9" stroke="#6C7079" stroke-width="1.5" stroke-linecap="round" />
+  <!-- Tool window icon: opencode mark silhouette (monochrome). -->
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M2.9 1.5H13.1V14.5H2.9V1.5ZM5.35 4.15H10.65V12.07H5.35V4.15Z"
+    fill="#6C7079"
+  />
 </svg>
