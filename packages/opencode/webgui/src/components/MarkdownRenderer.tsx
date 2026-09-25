@@ -10,14 +10,22 @@ interface MarkdownRendererProps {
   children: string
 }
 
-// Common className patterns for consistency and maintainability
+// Colors follow the official "opencode" theme (dark: lavender headings, orange bold,
+// green inline code, peach links) so rendered messages match the CLI.
 const styles = {
-  text: "text-gray-900 dark:text-gray-100",
-  textMuted: "text-gray-800 dark:text-gray-200",
-  textDim: "text-gray-600 dark:text-gray-400",
+  text: "text-[#1a1a1a] dark:text-[#eeeeee]",
+  textMuted: "text-[#1a1a1a] dark:text-[#eeeeee]",
+  textDim: "text-[#8a8a8a] dark:text-[#808080]",
   border: "border-gray-300 dark:border-gray-700",
   bg: "bg-gray-50 dark:bg-gray-800/50",
   bgAlt: "bg-gray-100 dark:bg-gray-800",
+  heading: "text-[#d68c27] dark:text-[#9d7cd8]",
+  strong: "text-[#d68c27] dark:text-[#f5a742]",
+  emph: "text-[#b0851f] dark:text-[#e5c07b]",
+  link: "text-[#3b7dd8] dark:text-[#fab283]",
+  listItem: "marker:text-[#3b7dd8] dark:marker:text-[#fab283]",
+  listEnumeration: "marker:text-[#318795] dark:marker:text-[#56b6c2]",
+  rule: "border-[#8a8a8a] dark:border-[#808080]",
 }
 
 // Custom components for styled markdown elements
@@ -100,23 +108,25 @@ type MarkdownCodeProps = ComponentPropsWithoutRef<"code"> &
 
 const markdownComponents: Partial<Components> = {
   // Headings with proper hierarchy
-  h1: ({ children }) => <h1 className={`text-2xl font-bold mb-2 mt-3 ${styles.text}`}>{children}</h1>,
-  h2: ({ children }) => <h2 className={`text-xl font-bold mb-1.5 mt-2.5 ${styles.text}`}>{children}</h2>,
-  h3: ({ children }) => <h3 className={`text-lg font-bold mb-1.5 mt-2 ${styles.text}`}>{children}</h3>,
-  h4: ({ children }) => <h4 className={`text-base font-bold mb-1 mt-1.5 ${styles.text}`}>{children}</h4>,
-  h5: ({ children }) => <h5 className={`text-sm font-bold mb-1 mt-1.5 ${styles.text}`}>{children}</h5>,
-  h6: ({ children }) => <h6 className={`text-xs font-bold mb-1 mt-1.5 ${styles.text}`}>{children}</h6>,
+  h1: ({ children }) => <h1 className={`text-2xl font-bold mb-2 mt-3 ${styles.heading}`}>{children}</h1>,
+  h2: ({ children }) => <h2 className={`text-xl font-bold mb-1.5 mt-2.5 ${styles.heading}`}>{children}</h2>,
+  h3: ({ children }) => <h3 className={`text-lg font-bold mb-1.5 mt-2 ${styles.heading}`}>{children}</h3>,
+  h4: ({ children }) => <h4 className={`text-base font-bold mb-1 mt-1.5 ${styles.heading}`}>{children}</h4>,
+  h5: ({ children }) => <h5 className={`text-sm font-bold mb-1 mt-1.5 ${styles.heading}`}>{children}</h5>,
+  h6: ({ children }) => <h6 className={`text-xs font-bold mb-1 mt-1.5 ${styles.heading}`}>{children}</h6>,
 
-  // Lists with proper indentation
-  ul: ({ children }) => <ul className={`list-disc list-inside mb-1.5 space-y-0.5 ${styles.text}`}>{children}</ul>,
-  ol: ({ children }) => <ol className={`list-decimal list-inside mb-1.5 space-y-0.5 ${styles.text}`}>{children}</ol>,
+  // Lists with proper indentation (markers use the CLI list colors)
+  ul: ({ children }) => (
+    <ul className={`list-disc list-inside mb-1.5 space-y-0.5 ${styles.text} ${styles.listItem}`}>{children}</ul>
+  ),
+  ol: ({ children }) => (
+    <ol className={`list-decimal list-inside mb-1.5 space-y-0.5 ${styles.text} ${styles.listEnumeration}`}>{children}</ol>
+  ),
   li: ({ children }) => <li className={`ml-4 ${styles.text}`}>{children}</li>,
 
   // Blockquotes with left border
   blockquote: ({ children }) => (
-    <blockquote
-      className={`border-l-4 border-gray-300 dark:border-gray-600 pl-4 my-3 ${styles.bg} py-2 italic ${styles.textMuted}`}
-    >
+    <blockquote className={`border-l-4 border-gray-300 dark:border-gray-600 pl-4 my-3 ${styles.bg} py-2 italic ${styles.emph}`}>
       {children}
     </blockquote>
   ),
@@ -163,7 +173,7 @@ const markdownComponents: Partial<Components> = {
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-blue-600 dark:text-blue-400 hover:underline"
+        className={`${styles.link} hover:underline`}
         onClick={handleClick}
       >
         {children}
@@ -190,13 +200,13 @@ const markdownComponents: Partial<Components> = {
   ),
 
   // Horizontal rule
-  hr: () => <hr className={`my-4 border-t ${styles.border}`} />,
+  hr: () => <hr className={`my-4 border-t ${styles.rule}`} />,
 
   // Strong (bold)
-  strong: ({ children }) => <strong className={`font-bold ${styles.text}`}>{children}</strong>,
+  strong: ({ children }) => <strong className={`font-bold ${styles.strong}`}>{children}</strong>,
 
   // Emphasis (italic)
-  em: ({ children }) => <em className={`italic ${styles.text}`}>{children}</em>,
+  em: ({ children }) => <em className={`italic ${styles.emph}`}>{children}</em>,
 
   // Delete (strikethrough) - from GFM
   del: ({ children }) => <del className={`line-through ${styles.textDim}`}>{children}</del>,

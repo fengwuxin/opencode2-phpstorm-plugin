@@ -12,9 +12,10 @@ interface EditorContentProps {
   contentEditableRef: React.RefObject<HTMLDivElement | null>
   containerRef: React.RefObject<HTMLDivElement | null>
   onEditorChange: (editorState: EditorState) => void
+  placeholder: string
 }
 
-export function EditorContent({ contentEditableRef, containerRef, onEditorChange }: EditorContentProps) {
+export function EditorContent({ contentEditableRef, containerRef, onEditorChange, placeholder }: EditorContentProps) {
   return (
     <div className="px-2 pt-1.5 pb-1">
       <div ref={containerRef} className="relative modern-input bg-white dark:bg-gray-900">
@@ -23,12 +24,12 @@ export function EditorContent({ contentEditableRef, containerRef, onEditorChange
             // @ts-expect-error React 19 type compatibility
             <ContentEditable
               ref={contentEditableRef}
-              className="px-2 py-1.5 text-sm text-gray-900 dark:text-gray-100 focus:outline-none min-h-[32px] max-h-[400px] overflow-y-auto"
+              className="px-2 py-1.5 text-sm text-gray-900 dark:text-gray-100 focus:outline-none min-h-[52px] max-h-[400px] overflow-y-auto"
               style={{ caretColor: "auto" }}
-              aria-placeholder="Ask anything (Cmd/Ctrl+Enter to send)"
+              aria-placeholder={placeholder}
               placeholder={
                 <div className="absolute top-1.5 left-2 text-sm text-gray-400 dark:text-gray-500 pointer-events-none">
-                  Ask anything (Cmd/Ctrl+Enter to send)
+                  {placeholder}
                 </div>
               }
             />

@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { sdk } from "../lib/api/sdkClient"
 import { eventEmitter } from "../lib/api/events"
+import { visibleProviders, visibilityMap, type ModelVisibility } from "../lib/model-visibility"
 import type { Provider } from "@opencode-ai/sdk/client"
 import { useDropdown } from "../hooks/useDropdown"
+import { ManageModels } from "./ManageModels"
 
 interface ModelSelectorProps {
   selectedProviderId?: string
@@ -17,6 +19,10 @@ interface ModelEntry {
 }
 
 const MAX_RECENT = 10
+
+function isModelAvailable(providers: Provider[], providerID: string, modelID: string) {
+  return providers.some((provider) => provider.id === providerID && provider.models[modelID] !== undefined)
+}
 
 function StarIcon({ filled, onClick }: { filled: boolean; onClick: (e: React.MouseEvent) => void }) {
   return (
@@ -39,37 +45,48 @@ export function ModelSelector({ selectedProviderId, selectedModelId, onSelect, d
   const [isLoading, setIsLoading] = useState(true)
   const [recent, setRecent] = useState<ModelEntry[]>([])
   const [favorite, setFavorite] = useState<ModelEntry[]>([])
+  const [visibility, setVisibility] = useState<ModelVisibility[]>([])
+  const [isManageOpen, setIsManageOpen] = useState(false)
+  const retryAttempts = useRef(0)
+
+  const visibilityByKey = useMemo(() => visibilityMap(visibility), [visibility])
+  const visible = useMemo(() => visibleProviders(providers, visibilityByKey), [providers, visibilityByKey])
 
   const isFavorite = useCallback(
     (providerID: string, modelID: string) => favorite.some((f) => f.providerID === providerID && f.modelID === modelID),
     [favorite],
   )
 
+  const reload = useCallback(async () => {
+    const [provRes, modelRes] = await Promise.all([sdk.config.providers(), sdk.model.get()])
+
+    if (provRes.error) {
+      console.error("[ModelSelector] Failed to load providers:", provRes.error)
+      return
+    }
+
+    if (provRes.data) {
+      setProviders(provRes.data.providers)
+      setDefaultIds(provRes.data.default)
+    }
+
+    if (modelRes.data) {
+      setRecent(modelRes.data.recent.slice(0, MAX_RECENT))
+      setFavorite(modelRes.data.favorite)
+      setVisibility(Array.isArray(modelRes.data.user) ? modelRes.data.user : [])
+    }
+  }, [])
+
   const load = useCallback(async () => {
     setIsLoading(true)
     try {
-      const [provRes, modelRes] = await Promise.all([sdk.config.providers(), sdk.model.get()])
-
-      if (provRes.error) {
-        console.error("[ModelSelector] Failed to load providers:", provRes.error)
-        return
-      }
-
-      if (provRes.data) {
-        setProviders(provRes.data.providers)
-        setDefaultIds(provRes.data.default)
-      }
-
-      if (modelRes.data) {
-        setRecent(modelRes.data.recent.slice(0, MAX_RECENT))
-        setFavorite(modelRes.data.favorite)
-      }
+      await reload()
     } catch (err) {
       console.error("[ModelSelector] Failed to load:", err)
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [reload])
 
   useEffect(() => {
     let active = true
@@ -90,6 +107,57 @@ export function ModelSelector({ selectedProviderId, selectedModelId, onSelect, d
       unsubscribe()
     }
   }, [load])
+
+  // The backend can be warming up when the panel opens and briefly report no
+  // providers; retry a few times instead of leaving the picker empty.
+  useEffect(() => {
+    if (isLoading || providers.length > 0) {
+      retryAttempts.current = 0
+      return
+    }
+    if (retryAttempts.current >= 15) return
+    retryAttempts.current += 1
+    const timer = window.setTimeout(() => void load(), 2000)
+    return () => window.clearTimeout(timer)
+  }, [isLoading, providers.length, load])
+
+  // Refresh providers and visibility whenever the picker opens so settings changes
+  // (enabled providers) apply without reloading the panel.
+  useEffect(() => {
+    if (!isOpen) return
+    void reload()
+  }, [isOpen, reload])
+
+  const persistVisibility = useCallback((next: ModelVisibility[]) => {
+    setVisibility(next)
+    sdk.model.update({ body: { user: next } }).catch((err) =>
+      console.error("[ModelSelector] Failed to update model visibility:", err),
+    )
+  }, [])
+
+  const toggleModel = useCallback(
+    (providerID: string, modelID: string, show: boolean) => {
+      // Visible is the default, so only hidden models need an entry.
+      const next = visibility.filter((item) => item.providerID !== providerID || item.modelID !== modelID)
+      if (!show) next.push({ providerID, modelID, visibility: "hide" })
+      persistVisibility(next)
+    },
+    [visibility, persistVisibility],
+  )
+
+  const toggleProvider = useCallback(
+    (provider: Provider, show: boolean) => {
+      const modelIDs = new Set(Object.keys(provider.models))
+      const next = visibility.filter((item) => item.providerID !== provider.id || !modelIDs.has(item.modelID))
+      if (!show) {
+        for (const modelID of modelIDs) {
+          next.push({ providerID: provider.id, modelID, visibility: "hide" })
+        }
+      }
+      persistVisibility(next)
+    },
+    [visibility, persistVisibility],
+  )
 
   const getCurrentDisplay = () => {
     const pid = selectedProviderId || defaultIds.provider
@@ -137,9 +205,12 @@ export function ModelSelector({ selectedProviderId, selectedModelId, onSelect, d
   }
 
   const filteredFavorites = () => {
-    if (!searchTerm) return favorite
+    // Entries from providers that are disabled or no longer available are dropped,
+    // matching the desktop client which only renders known provider/model pairs.
+    const list = favorite.filter((f) => isModelAvailable(providers, f.providerID, f.modelID))
+    if (!searchTerm) return list
     const q = searchTerm.toLowerCase()
-    return favorite.filter((f) => {
+    return list.filter((f) => {
       const provider = providers.find((p) => p.id === f.providerID)
       const name = provider?.models[f.modelID]?.name || f.modelID
       return name.toLowerCase().includes(q) || f.providerID.toLowerCase().includes(q)
@@ -147,7 +218,9 @@ export function ModelSelector({ selectedProviderId, selectedModelId, onSelect, d
   }
 
   const filteredRecent = () => {
-    const list = recent.filter((r) => !isFavorite(r.providerID, r.modelID))
+    const list = recent.filter(
+      (r) => !isFavorite(r.providerID, r.modelID) && isModelAvailable(providers, r.providerID, r.modelID),
+    )
     if (!searchTerm) return list
     const q = searchTerm.toLowerCase()
     return list.filter((r) => {
@@ -261,7 +334,7 @@ export function ModelSelector({ selectedProviderId, selectedModelId, onSelect, d
                 )}
 
                 {/* Provider groups */}
-                {providers.map((provider) => {
+                {visible.map((provider) => {
                   const filtered = filterModels(provider)
                   if (filtered.length === 0) return null
 
@@ -293,11 +366,38 @@ export function ModelSelector({ selectedProviderId, selectedModelId, onSelect, d
                     </div>
                   )
                 })}
+
+                {visible.length === 0 && (
+                  <div className="p-4 text-xs text-gray-500 dark:text-gray-400 text-center">
+                    No models shown. Use "Manage models" to enable some.
+                  </div>
+                )}
               </>
             )}
           </div>
+
+          <div className="border-t border-gray-200 dark:border-gray-700">
+            <button
+              onClick={() => {
+                close()
+                setIsManageOpen(true)
+              }}
+              className="w-full px-3 py-1.5 text-xs text-left text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              Manage models...
+            </button>
+          </div>
         </div>
       )}
+
+      <ManageModels
+        isOpen={isManageOpen}
+        providers={providers}
+        visibility={visibilityByKey}
+        onToggle={toggleModel}
+        onToggleProvider={toggleProvider}
+        onClose={() => setIsManageOpen(false)}
+      />
     </div>
   )
 }

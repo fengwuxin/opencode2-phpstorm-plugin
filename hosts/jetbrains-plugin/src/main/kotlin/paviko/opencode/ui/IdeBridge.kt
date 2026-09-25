@@ -341,28 +341,26 @@ object IdeBridge {
                 }
 
                 "model.get" -> {
+                    fun blank() = JsonObject().apply {
+                        add("recent", JsonArray())
+                        add("favorite", JsonArray())
+                        add("variant", JsonObject())
+                        add("user", JsonArray())
+                    }
                     val file = File(statePath, "model.json")
                     val data = try {
-                        if (file.exists()) {
+                        if (!file.exists()) blank()
+                        else {
                             val raw = gson.fromJson(file.readText(), JsonObject::class.java) ?: JsonObject()
                             JsonObject().apply {
                                 add("recent", if (raw.has("recent") && raw.get("recent").isJsonArray) raw.getAsJsonArray("recent") else JsonArray())
                                 add("favorite", if (raw.has("favorite") && raw.get("favorite").isJsonArray) raw.getAsJsonArray("favorite") else JsonArray())
                                 add("variant", if (raw.has("variant") && raw.get("variant").isJsonObject) raw.getAsJsonObject("variant") else JsonObject())
-                            }
-                        } else {
-                            JsonObject().apply {
-                                add("recent", JsonArray())
-                                add("favorite", JsonArray())
-                                add("variant", JsonObject())
+                                add("user", if (raw.has("user") && raw.get("user").isJsonArray) raw.getAsJsonArray("user") else JsonArray())
                             }
                         }
                     } catch (_: Throwable) {
-                        JsonObject().apply {
-                            add("recent", JsonArray())
-                            add("favorite", JsonArray())
-                            add("variant", JsonObject())
-                        }
+                        blank()
                     }
                     replyWithPayload(session, id, data)
                 }
@@ -376,8 +374,10 @@ object IdeBridge {
                     if (!existing.has("recent") || !existing.get("recent").isJsonArray) existing.add("recent", JsonArray())
                     if (!existing.has("favorite") || !existing.get("favorite").isJsonArray) existing.add("favorite", JsonArray())
                     if (!existing.has("variant") || !existing.get("variant").isJsonObject) existing.add("variant", JsonObject())
+                    if (!existing.has("user") || !existing.get("user").isJsonArray) existing.add("user", JsonArray())
                     if (payload?.has("recent") == true) existing.add("recent", payload.get("recent"))
                     if (payload?.has("favorite") == true) existing.add("favorite", payload.get("favorite"))
+                    if (payload?.has("user") == true) existing.add("user", payload.get("user"))
                     if (payload?.has("variant") == true) {
                         val current = existing.getAsJsonObject("variant")
                         payload.getAsJsonObject("variant").entrySet().forEach { (k, v) -> current.add(k, v) }

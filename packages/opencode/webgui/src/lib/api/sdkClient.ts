@@ -9,6 +9,7 @@
 import { ideBridge } from "../ideBridge"
 import { apiBase, setRequestDirectory } from "./v2/client"
 import { v2Api } from "./v2/facade"
+import type { ModelVisibility } from "../model-visibility"
 import { applyEdits, modify, parse as parseJsonc } from "jsonc-parser"
 import type { Config } from "@opencode-ai/sdk/client"
 
@@ -29,9 +30,11 @@ interface ModelPreferences {
   recent: ModelEntry[]
   favorite: ModelEntry[]
   variant?: Record<string, string>
+  /** Explicit hide/show overrides for the model picker. */
+  user?: ModelVisibility[]
 }
 
-const emptyPreferences: ModelPreferences = { recent: [], favorite: [], variant: {} }
+const emptyPreferences: ModelPreferences = { recent: [], favorite: [], variant: {}, user: [] }
 
 type AnyRecord = Record<string, any>
 

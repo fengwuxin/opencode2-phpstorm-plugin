@@ -59,10 +59,18 @@ export const KEYBOARD_SHORTCUTS: ShortcutDefinition[] = [
   // Messages
   {
     id: "send-message",
-    keys: ["Cmd/Ctrl", "Enter"],
+    keys: ["Enter"],
     description: "Send message",
     category: "Messages",
     handler: "onSendMessage",
+    key: "Enter",
+  },
+  {
+    id: "new-line",
+    keys: ["Cmd/Ctrl/Shift", "Enter"],
+    description: "Insert a new line",
+    category: "Messages",
+    handler: "onInsertNewLine",
     modKey: true,
     key: "Enter",
   },

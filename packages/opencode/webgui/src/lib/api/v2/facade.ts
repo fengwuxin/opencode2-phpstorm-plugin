@@ -7,6 +7,7 @@
  */
 
 import type { Agent, Command, Config, FileDiff, Provider, Session } from "@opencode-ai/sdk/client"
+import { disabledProviderIds } from "../../provider-config"
 import { apiData, apiFetch, getRequestDirectory, jsonInit, setRequestDirectory } from "./client"
 import {
   projectAgent,
@@ -281,13 +282,19 @@ export const configApi = {
 
   providers: () =>
     wrap<{ providers: Provider[]; default: Record<string, string> }>(async (): Promise<{ providers: Provider[]; default: Record<string, string> }> => {
-      const [providers, models, defaults] = await Promise.all([
+      const [providers, models, defaults, documents] = await Promise.all([
         apiData<V2Provider[]>("/api/provider"),
         apiData<V2Model[]>("/api/model").catch(() => [] as V2Model[]),
         apiData<{ id?: string; providerID?: string } | null>("/api/model/default").catch(() => null),
+        apiData<unknown[]>("/api/config").catch(() => [] as unknown[]),
       ])
 
-      const projected = providers.map((provider) => projectProvider(provider, models))
+      // The server already hides disabled providers, but filtering here keeps the picker
+      // correct while the server is still reloading after a settings change.
+      const denied = new Set(disabledProviderIds(projectConfig(documents) as Record<string, unknown>))
+      const projected = providers
+        .filter((provider) => !denied.has(provider.id))
+        .map((provider) => projectProvider(provider, models))
       return {
         providers: projected,
         default: defaults?.id && defaults?.providerID ? { provider: defaults.providerID, model: defaults.id } : {},

@@ -63,11 +63,10 @@ export function useKeyboardShortcuts({
         const keyMatch = e.key === shortcut.key
 
         if (modKeyMatch && shiftKeyMatch && keyMatch) {
-          e.preventDefault()
           const handler = handlers[shortcut.handler as keyof ShortcutHandlers]
-          if (handler) {
-            handler()
-          }
+          if (!handler) continue
+          e.preventDefault()
+          handler()
           return
         }
       }

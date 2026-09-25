@@ -28,7 +28,7 @@ export function CodeBlock({ language, value, inline = false }: CodeBlockProps) {
   // Keep this inline-only branch before style computation so future edits do not regress the inline layout
   if (inline) {
     return (
-      <code className="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-1.5 py-0.5 rounded text-sm font-mono">
+      <code className="text-[#3d9a57] dark:text-[#7fd88f] px-1 py-0.5 rounded text-sm font-mono">
         {value}
       </code>
     )

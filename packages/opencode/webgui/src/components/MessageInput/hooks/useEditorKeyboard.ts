@@ -1,6 +1,7 @@
 import { useEffect } from "react"
-import { KEY_ENTER_COMMAND, COMMAND_PRIORITY_HIGH, type LexicalEditor } from "lexical"
+import { KEY_ENTER_COMMAND, INSERT_LINE_BREAK_COMMAND, COMMAND_PRIORITY_HIGH, type LexicalEditor } from "lexical"
 import { insertPlainWithMentionsImpl } from "../utils"
+import { isEditorPopupOpen } from "../../../lib/editorPopup"
 
 interface UseEditorKeyboardOptions {
   editor: LexicalEditor
@@ -10,17 +11,21 @@ interface UseEditorKeyboardOptions {
 }
 
 export function useEditorKeyboard({ editor, contentEditableRef, parseWithRange, onSubmit }: UseEditorKeyboardOptions) {
-  // Register Cmd/Ctrl+Enter command
+  // Enter sends the message; Cmd/Ctrl+Enter (or Shift+Enter) inserts a new line.
   useEffect(() => {
     return editor.registerCommand(
       KEY_ENTER_COMMAND,
       (event) => {
-        if ((event?.metaKey || event?.ctrlKey) && event.key === "Enter") {
-          event?.preventDefault()
-          onSubmit()
+        if (isEditorPopupOpen()) return false
+        if (event?.isComposing) return false
+        if (event?.metaKey || event?.ctrlKey || event?.shiftKey) {
+          event.preventDefault()
+          editor.dispatchCommand(INSERT_LINE_BREAK_COMMAND, false)
           return true
         }
-        return false
+        event?.preventDefault()
+        onSubmit()
+        return true
       },
       COMMAND_PRIORITY_HIGH,
     )

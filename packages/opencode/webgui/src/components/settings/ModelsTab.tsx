@@ -5,12 +5,9 @@ interface ModelsTabProps {
   formData: SettingsFormData
   setFormData: SetSettingsFormData
   providers: Provider[]
-  configuredProviders: string[]
 }
 
-export function ModelsTab({ formData, setFormData, providers, configuredProviders }: ModelsTabProps) {
-  const displayedProviders = providers.filter((p) => configuredProviders.includes(p.id))
-
+export function ModelsTab({ formData, setFormData, providers }: ModelsTabProps) {
   return (
     <div className="space-y-4">
       <div>
@@ -40,30 +37,36 @@ export function ModelsTab({ formData, setFormData, providers, configuredProvider
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Disabled Providers</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Enabled Providers</label>
         <div className="space-y-2">
-          {displayedProviders.map((provider) => (
-            <label key={provider.id} className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={formData.disabled_providers?.includes(provider.id) ?? false}
-                onChange={(e) => {
-                  const current = formData.disabled_providers || []
-                  if (e.target.checked) {
-                    setFormData({ ...formData, disabled_providers: [...current, provider.id] })
-                  } else {
-                    setFormData({ ...formData, disabled_providers: current.filter((id) => id !== provider.id) })
-                  }
-                }}
-                className="rounded border-gray-300 dark:border-gray-700"
-              />
-              <span className="text-sm text-gray-700 dark:text-gray-300">{provider.name}</span>
-            </label>
-          ))}
-          {displayedProviders.length === 0 && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 italic">No configured providers found.</p>
+          {providers.map((provider) => {
+            const disabled = formData.disabled_providers || []
+            return (
+              <label key={provider.id} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={!disabled.includes(provider.id)}
+                  onChange={(e) => {
+                    const current = formData.disabled_providers || []
+                    if (e.target.checked) {
+                      setFormData({ ...formData, disabled_providers: current.filter((id) => id !== provider.id) })
+                    } else {
+                      setFormData({ ...formData, disabled_providers: [...current, provider.id] })
+                    }
+                  }}
+                  className="rounded border-gray-300 dark:border-gray-700"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">{provider.name}</span>
+              </label>
+            )
+          })}
+          {providers.length === 0 && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 italic">No providers found.</p>
           )}
         </div>
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          All providers are enabled by default; uncheck one to disable it and hide its models.
+        </p>
       </div>
     </div>
   )

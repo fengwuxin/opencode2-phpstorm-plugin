@@ -34,37 +34,7 @@ const CompactHeader = forwardRef<
   const toast = useToast()
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [isSharing, setIsSharing] = useState(false)
   const [sharingSessionId, setSharingSessionId] = useState<string | null>(null)
-
-  const isShared = !!currentSession?.share?.url
-
-  const handleToggleShare = useCallback(async () => {
-    if (!currentSession || currentSession.id.startsWith("virtual-")) return
-
-    setIsSharing(true)
-    if (isShared) {
-      const res = await sdk.session.unshare({ path: { id: currentSession.id } })
-      if (res.data) {
-        setCurrentSession(res.data)
-        toast.showToast("Session unshared", { variant: "success" })
-      } else {
-        toast.showToast("Failed to unshare session", { variant: "error" })
-      }
-    } else {
-      const res = await sdk.session.share({ path: { id: currentSession.id } })
-      if (res.data) {
-        setCurrentSession(res.data)
-        if (res.data.share?.url) {
-          await navigator.clipboard.writeText(res.data.share.url)
-          toast.showToast("Share URL copied to clipboard", { variant: "success" })
-        }
-      } else {
-        toast.showToast("Failed to share session", { variant: "error" })
-      }
-    }
-    setIsSharing(false)
-  }, [currentSession, isShared, setCurrentSession, toast])
 
   const handleToggleShareSession = useCallback(
     async (sessionId: string, e: React.MouseEvent) => {
@@ -218,9 +188,6 @@ const CompactHeader = forwardRef<
             onOpenSettings={() => setIsSettingsOpen(true)}
             onNewSession={onNewSession}
             isCreatingSession={isCreatingSession}
-            isShared={isShared}
-            isSharing={isSharing}
-            onToggleShare={handleToggleShare}
           />
         </div>
       </header>

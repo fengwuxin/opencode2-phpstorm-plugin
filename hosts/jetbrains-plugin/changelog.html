@@ -1,5 +1,61 @@
 <h2>OpenCode UX+ (fengwuxin) JetBrains Plugin Changelog</h2>
 
+<h3>26.9.2508</h3>
+<ul>
+  <li>Removed the Share Session button (opencode v2 has no sharing API, so it did nothing)</li>
+  <li>Markdown rendering now uses the official opencode theme colors: lavender headings, orange bold text, green inline code, peach links and colored list markers</li>
+  <li>Per-message costs below $0.01 show more decimals instead of rounding to $0.00</li>
+</ul>
+
+<h3>26.9.2507</h3>
+<ul>
+  <li>Model picker no longer syncs with the opencode desktop app; the plugin owns its model list</li>
+  <li>All models of enabled providers are listed by default; "Manage models…" hides individual models</li>
+  <li>Removed the SQLite dependency and the desktop-client state reader from the plugin</li>
+  <li>Message input placeholder falls back to "Hello owner" when no username is configured</li>
+</ul>
+
+<h3>26.9.2506</h3>
+<ul>
+  <li>Message input placeholder now greets the configured user ("Hello &lt;username&gt;")</li>
+</ul>
+
+<h3>26.9.2505</h3>
+<ul>
+  <li>Settings → Models: the enabled-provider checkboxes now keep the saved state (the server exposes disabled providers as <code>experimental.policies</code>, both config shapes are read)</li>
+  <li>Model picker: favorites/recent entries from disabled or unavailable providers are no longer listed</li>
+  <li>Reasoning effort (thinking depth) keeps working after saving settings: the provider list is no longer overwritten by the empty response the backend returns while reloading, and it retries until ready</li>
+</ul>
+
+<h3>26.9.2504</h3>
+<ul>
+  <li>Settings → Models: the list now contains every available/connected provider (plus currently disabled ones), so a disabled provider can be enabled again</li>
+  <li>Models of disabled providers no longer appear in the model picker; the picker also filters by the effective config so changes apply without restarting the server</li>
+  <li>Removed the "(Enter to send)" hint from the message input placeholder</li>
+</ul>
+
+<h3>26.9.2503</h3>
+<ul>
+  <li>Settings → Models: providers are now enabled by default ("Enabled Providers"); uncheck one to disable it</li>
+  <li>Message input: Enter sends the message, Cmd/Ctrl+Enter (or Shift+Enter) inserts a new line</li>
+  <li>Message input starts two lines high</li>
+  <li>Enter still lets the @ mention / command popovers handle the key while they are open</li>
+</ul>
+
+<h3>26.9.2502</h3>
+<ul>
+  <li>Fix reading the desktop client's model visibility inside the IDE (SQLite driver is now loaded through its DataSource, which works in the plugin classloader)</li>
+  <li>Model picker retries while the opencode backend is still warming up instead of staying empty</li>
+</ul>
+
+<h3>26.9.2501</h3>
+<ul>
+  <li>Model picker now mirrors the opencode desktop client: only the models enabled in its Manage models settings are shown</li>
+  <li>Model visibility is read from the desktop client's local state (SQLite, read-only); changes appear the next time the picker opens</li>
+  <li>Without a desktop client, the picker falls back to "newest model per family from the last six months" with a local Manage models dialog</li>
+  <li>Models disabled in the opencode configuration are skipped, and release dates are read from the v2 model catalog</li>
+</ul>
+
 <h3>26.9.2404</h3>
 <ul>
   <li>Plugin icon: the opencode logo (opencode.png at the repository root, shipped as a vector <code>pluginIcon.svg</code>)</li>

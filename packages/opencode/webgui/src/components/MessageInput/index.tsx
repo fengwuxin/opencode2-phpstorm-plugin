@@ -80,6 +80,7 @@ const MessageInputInner = forwardRef<
 
   // Providers state for variants computation
   const [providers, setProviders] = useState<Provider[]>([])
+  const [username, setUsername] = useState<string | undefined>(undefined)
 
   const [isRestoring, setIsRestoring] = useState(false)
   const restored = useRef(false)
@@ -254,46 +255,69 @@ const MessageInputInner = forwardRef<
     editor.setEditable(!isSending)
   }, [editor, isSending])
 
-  // Load providers for variant computation
+  // Load providers for variant computation. The server can briefly report an empty
+  // list while it reloads (e.g. right after saving settings), so the last good list
+  // is kept and an empty response is retried instead of clobbering the variants.
+  const providerRetry = useRef(0)
+
+  const reloadProviders = useCallback(async () => {
+    try {
+      const response = await sdk.config.providers()
+      if (response.data && response.data.providers.length > 0) {
+        setProviders(response.data.providers)
+      }
+    } catch (err) {
+      console.error("[MessageInput] Failed to load providers:", err)
+    }
+  }, [])
+
   useEffect(() => {
     let active = true
 
-    async function loadProviders() {
-      try {
-        const response = await sdk.config.providers()
-        if (!active) return
-        if (response.data) {
-          setProviders(response.data.providers)
-        }
-      } catch (err) {
-        console.error("[MessageInput] Failed to load providers:", err)
-      }
-    }
-
-    void loadProviders()
+    void reloadProviders()
     const unsubscribe = eventEmitter.on("server.connected", () => {
       if (!active) return
-      void loadProviders()
+      void reloadProviders()
     })
 
     return () => {
       active = false
       unsubscribe()
     }
-  }, [])
+  }, [reloadProviders])
+
+  // Retry while no providers are known yet (backend warmup/reload).
+  useEffect(() => {
+    if (providers.length > 0) {
+      providerRetry.current = 0
+      return
+    }
+    if (providerRetry.current >= 15) return
+    providerRetry.current += 1
+    const timer = window.setTimeout(() => void reloadProviders(), 2000)
+    return () => window.clearTimeout(timer)
+  }, [providers.length, reloadProviders])
 
   // Update model selector when providers change
   useEffect(() => {
     if (!providersDirty) return
     setModelSelectorKey((value) => value + 1)
-    // Reload providers when dirty
-    sdk.config.providers().then((response) => {
-      if (response.data) {
-        setProviders(response.data.providers)
-      }
-    })
+    void reloadProviders()
     clearProvidersDirty()
-  }, [providersDirty, clearProvidersDirty])
+  }, [providersDirty, clearProvidersDirty, reloadProviders])
+
+  // Greeting placeholder uses the configured username when present.
+  useEffect(() => {
+    let active = true
+    void sdk.config.get().then((response) => {
+      if (!active || !response.data) return
+      const name = (response.data as { username?: unknown }).username
+      if (typeof name === "string" && name.trim()) setUsername(name.trim())
+    })
+    return () => {
+      active = false
+    }
+  }, [])
 
   const currentModelInfo = useMemo(() => {
     if (!selectedProviderId || !selectedModelId) {
@@ -363,6 +387,7 @@ const MessageInputInner = forwardRef<
           contentEditableRef={contentEditableRef}
           containerRef={containerRef}
           onEditorChange={handleEditorChange}
+          placeholder={`Hello ${username ?? "owner"}`}
         />
         <EditorToolbar
           selectedProviderId={selectedProviderId}

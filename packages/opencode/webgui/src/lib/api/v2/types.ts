@@ -130,6 +130,11 @@ export type V2Model = {
   family?: string
   capabilities?: { tools?: boolean; input?: string[]; output?: string[] }
   variants?: { id: string; settings?: Record<string, unknown> }[]
+  /** Models disabled through the opencode config are excluded before this flag is read. */
+  enabled?: boolean
+  release_date?: string
+  status?: string
+  time?: { released?: number }
   [key: string]: unknown
 }
 

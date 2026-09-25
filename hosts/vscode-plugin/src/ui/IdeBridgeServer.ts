@@ -305,12 +305,13 @@ class IdeBridgeServer {
                 recent: Array.isArray(data.recent) ? data.recent : [],
                 favorite: Array.isArray(data.favorite) ? data.favorite : [],
                 variant: typeof data.variant === "object" && data.variant !== null ? data.variant : {},
+                user: Array.isArray(data.user) ? data.user : [],
               })
             } else {
-              this.replyWithPayload(session, id, { recent: [], favorite: [], variant: {} })
+              this.replyWithPayload(session, id, { recent: [], favorite: [], variant: {}, user: [] })
             }
           } catch {
-            this.replyWithPayload(session, id, { recent: [], favorite: [], variant: {} })
+            this.replyWithPayload(session, id, { recent: [], favorite: [], variant: {}, user: [] })
           }
           break
         }
@@ -318,7 +319,12 @@ class IdeBridgeServer {
         case "model.update": {
           const dir = this.statePath()
           const file = path.join(dir, "model.json")
-          let existing = { recent: [] as any[], favorite: [] as any[], variant: {} as Record<string, string> }
+          let existing = {
+            recent: [] as any[],
+            favorite: [] as any[],
+            variant: {} as Record<string, string>,
+            user: [] as any[],
+          }
           try {
             if (fs.existsSync(file)) {
               const data = JSON.parse(fs.readFileSync(file, "utf-8"))
@@ -326,11 +332,13 @@ class IdeBridgeServer {
                 recent: Array.isArray(data.recent) ? data.recent : [],
                 favorite: Array.isArray(data.favorite) ? data.favorite : [],
                 variant: typeof data.variant === "object" && data.variant !== null ? data.variant : {},
+                user: Array.isArray(data.user) ? data.user : [],
               }
             }
           } catch {}
           if (payload?.recent !== undefined) existing.recent = payload.recent
           if (payload?.favorite !== undefined) existing.favorite = payload.favorite
+          if (payload?.user !== undefined) existing.user = payload.user
           if (payload?.variant !== undefined) existing.variant = { ...existing.variant, ...payload.variant }
           fs.mkdirSync(dir, { recursive: true })
           fs.writeFileSync(file, JSON.stringify(existing))

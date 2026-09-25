@@ -54,6 +54,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
     showApiKeys,
     setShowApiKeys,
     providers,
+    providerCatalog,
     configuredProviders,
     setConfiguredProviders,
     isLoading,
@@ -195,12 +196,7 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                 )}
 
                 {activeTab === "models" && (
-                  <ModelsTab
-                    formData={formData}
-                    setFormData={setFormData}
-                    providers={providers}
-                    configuredProviders={configuredProviders}
-                  />
+                  <ModelsTab formData={formData} setFormData={setFormData} providers={providerCatalog} />
                 )}
 
                 {activeTab === "advanced" && <AdvancedTab formData={formData} setFormData={setFormData} />}

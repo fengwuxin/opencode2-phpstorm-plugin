@@ -10,6 +10,7 @@ import {
 } from "lexical"
 import { CommandPopover } from "../CommandPopover"
 import { createPortal } from "react-dom"
+import { setEditorPopupOpen } from "../../../lib/editorPopup"
 import { useCommandDetector } from "./CommandDetector"
 import { useCommandHandler } from "./CommandHandler"
 
@@ -51,6 +52,12 @@ export function CommandPlugin() {
 
     return () => cancelAnimationFrame(frame)
   }, [showPopover, query, handlePositionUpdate])
+
+  // Let the send-on-Enter handler defer while this popover is open.
+  useEffect(() => {
+    setEditorPopupOpen("command", showPopover)
+    return () => setEditorPopupOpen("command", false)
+  }, [showPopover])
 
   useEffect(() => {
     if (!showPopover) return

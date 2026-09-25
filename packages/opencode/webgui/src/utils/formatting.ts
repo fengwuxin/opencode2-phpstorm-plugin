@@ -27,11 +27,15 @@ export function formatKM(n: number): string {
 }
 
 /**
- * Format a number as currency
+ * Format a number as currency. Small amounts keep more decimals so per-message
+ * costs do not all round to $0.00.
  * @example formatCost(12.5) // => "$12.50"
+ * @example formatCost(0.0028) // => "$0.0028"
  */
 export function formatCost(n: number): string {
-  return `$${(n || 0).toFixed(2)}`
+  const value = n || 0
+  if (value !== 0 && Math.abs(value) < 0.01) return `$${value.toFixed(4)}`
+  return `$${value.toFixed(2)}`
 }
 
 /**

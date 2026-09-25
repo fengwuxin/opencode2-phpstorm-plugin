@@ -11,6 +11,7 @@ import {
 import { MentionPopover } from "../MentionPopover"
 import { createPortal } from "react-dom"
 import { useIdeBridgeState } from "../../../state/IdeBridgeContext"
+import { setEditorPopupOpen } from "../../../lib/editorPopup"
 import { useMentionDetector } from "./MentionDetector"
 import { useMentionHandler } from "./MentionHandler"
 
@@ -55,10 +56,15 @@ export function MentionPlugin() {
     return () => cancelAnimationFrame(frame)
   }, [showPopover, query, handlePositionUpdate])
 
+  // Let the send-on-Enter handler defer while this popover is open.
+  useEffect(() => {
+    setEditorPopupOpen("mention", showPopover)
+    return () => setEditorPopupOpen("mention", false)
+  }, [showPopover])
+
   // Prevent default keyboard commands when popover is open
   useEffect(() => {
     if (!showPopover) return
-
     const removeArrowDownCommand = editor.registerCommand(
       KEY_ARROW_DOWN_COMMAND,
       () => {

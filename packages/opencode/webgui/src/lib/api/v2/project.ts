@@ -306,11 +306,15 @@ export function projectProvider(provider: V2Provider, models: V2Model[]): Provid
   const owned: Record<string, unknown> = {}
   for (const model of models) {
     if (model.providerID !== provider.id) continue
+    if (model.enabled === false) continue
     owned[model.id] = {
       id: model.id,
       name: model.name ?? model.id,
       providerID: model.providerID,
       family: model.family,
+      // The legacy UI filters by `release_date`; v2 reports it as a unix timestamp.
+      release_date: model.time?.released != null ? new Date(model.time.released).toISOString() : model.release_date,
+      status: model.status,
       capabilities: model.capabilities,
       variants: model.variants,
       options: model.settings,
