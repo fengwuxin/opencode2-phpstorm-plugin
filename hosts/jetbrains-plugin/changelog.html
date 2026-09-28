@@ -1,5 +1,12 @@
 <h2>OpenCode GUI Only 更新日志</h2>
 
+<h3>26.9.2801</h3>
+<ul>
+  <li>修复回答提问后卡住不动：回复表单时按 v2 的字段 key 传值（原来发的是 <code>{answer:{value:[...]}}</code>，服务端报 <code>Unknown form field: value</code>，表单一直 pending 导致模型一直等待）</li>
+  <li>选项标签自动映射回字段的 value，多选字段传数组，数字/布尔字段按类型转换，自定义输入原样提交</li>
+  <li>回答失败时弹提示（原来静默失败，看着像卡死）</li>
+</ul>
+
 <h3>26.9.2518</h3>
 <ul>
   <li>插件更名 <b>OpenCode GUI Only</b>，作者 fengwuxin；插件 ID 变更，旧版需先卸载再安装</li>

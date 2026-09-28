@@ -5,6 +5,7 @@ import { QuestionTabs } from "./QuestionTabs"
 import { QuestionOptions } from "./QuestionOptions"
 import { ConfirmTab } from "./ConfirmTab"
 import { useMessages } from "../../../../state/MessagesContext"
+import { useToast } from "../../../../state/ToastContext"
 
 interface QuestionPartProps {
   request: QuestionRequest
@@ -12,12 +13,18 @@ interface QuestionPartProps {
 
 export function QuestionPart({ request }: QuestionPartProps) {
   const { replyQuestion, rejectQuestion } = useMessages()
+  const { showToast } = useToast()
   const questions = request.questions
   const [activeTab, setActiveTab] = useState(0)
   const [answers, setAnswers] = useState<QuestionAnswer[]>(() => questions.map(() => []))
   const [customInputs, setCustomInputs] = useState<string[]>(() => questions.map(() => ""))
   const [isLoading, setIsLoading] = useState(false)
   const [editingCustom, setEditingCustom] = useState(false)
+
+  /** Surfaces a failed reply: otherwise the question stays pending and the model keeps waiting. */
+  const reportFailure = useCallback(() => {
+    showToast(t("回答提问失败，请重试"), { title: t("错误"), variant: "error", duration: 6000 })
+  }, [showToast])
 
   // Single question with single select = auto-submit mode
   const isSingleQuestionSingleSelect = useMemo(
@@ -47,25 +54,21 @@ export function QuestionPart({ request }: QuestionPartProps) {
   const handleSubmit = useCallback(async () => {
     setIsLoading(true)
     try {
-      await replyQuestion(request.id, answers)
-    } catch (error) {
-      console.error("[QuestionPart] Failed to submit answers:", error)
+      if (!(await replyQuestion(request.id, answers))) reportFailure()
     } finally {
       setIsLoading(false)
     }
-  }, [request.id, answers, replyQuestion])
+  }, [request.id, answers, replyQuestion, reportFailure])
 
   // Handle rejecting/dismissing
   const handleDismiss = useCallback(async () => {
     setIsLoading(true)
     try {
-      await rejectQuestion(request.id)
-    } catch (error) {
-      console.error("[QuestionPart] Failed to reject question:", error)
+      if (!(await rejectQuestion(request.id))) reportFailure()
     } finally {
       setIsLoading(false)
     }
-  }, [request.id, rejectQuestion])
+  }, [request.id, rejectQuestion, reportFailure])
 
   // Handle option toggle
   const handleToggleOption = useCallback(
@@ -92,8 +95,8 @@ export function QuestionPart({ request }: QuestionPartProps) {
             // Submit immediately
             setIsLoading(true)
             replyQuestion(request.id, [[label]])
-              .catch((error: unknown) => {
-                console.error("[QuestionPart] Failed to submit answer:", error)
+              .then((ok) => {
+                if (!ok) reportFailure()
               })
               .finally(() => {
                 setIsLoading(false)
@@ -109,7 +112,7 @@ export function QuestionPart({ request }: QuestionPartProps) {
         return newAnswers
       })
     },
-    [activeTab, isMultiple, isSingleQuestionSingleSelect, request.id, questions.length, replyQuestion]
+    [activeTab, isMultiple, isSingleQuestionSingleSelect, request.id, questions.length, replyQuestion, reportFailure]
   )
 
   // Handle custom input change
@@ -175,8 +178,8 @@ export function QuestionPart({ request }: QuestionPartProps) {
         if (isSingleQuestionSingleSelect) {
           setIsLoading(true)
           replyQuestion(request.id, [[value]])
-            .catch((error: unknown) => {
-              console.error("[QuestionPart] Failed to submit custom answer:", error)
+            .then((ok) => {
+              if (!ok) reportFailure()
             })
             .finally(() => {
               setIsLoading(false)
@@ -200,6 +203,7 @@ export function QuestionPart({ request }: QuestionPartProps) {
     request.id,
     questions.length,
     replyQuestion,
+    reportFailure,
   ])
 
   // Build tabs data

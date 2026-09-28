@@ -102,6 +102,7 @@ const EN: Record<string, string> = {
   "会话压缩已开始，完成后会通知你。": "Session compaction started. You will see a notification when it completes.",
   "压缩会话失败": "Failed to compact session",
   "发送消息失败": "Failed to send message",
+  "回答提问失败，请重试": "Failed to submit the answer, please try again",
   "创建会话失败": "Failed to create session",
   "中止会话失败": "Failed to abort session",
   "会话历史已压缩以节省空间": "Session history has been compacted to save space",

@@ -19,7 +19,7 @@ import {
   projectProvider,
   projectSession,
 } from "./project"
-import type { V2Agent, V2Command, V2Message, V2Model, V2Provider, V2Session } from "./types"
+import type { V2Agent, V2Command, V2FormField, V2Message, V2Model, V2Provider, V2Session } from "./types"
 
 type Result<T> = { data: T; error: null } | { data: null; error: { message: string; data?: unknown } }
 
@@ -43,13 +43,16 @@ async function wrap<T>(run: () => Promise<T>, fallback: string): Promise<Result<
 /** Remembers permission/form requests so replies can be routed to the owning session. */
 const permissionSessions = new Map<string, string>()
 const formSessions = new Map<string, string>()
+/** Fields of pending forms, needed to translate UI answers back into a v2 form answer. */
+const formFields = new Map<string, V2FormField[]>()
 
 export function rememberPermission(id: string, sessionID: string) {
   permissionSessions.set(id, sessionID)
 }
 
-export function rememberForm(id: string, sessionID: string) {
+export function rememberForm(id: string, sessionID: string, fields?: V2FormField[]) {
   formSessions.set(id, sessionID)
+  formFields.set(id, fields ?? [])
 }
 
 export function forgetPermission(id: string) {
@@ -58,6 +61,7 @@ export function forgetPermission(id: string) {
 
 export function forgetForm(id: string) {
   formSessions.delete(id)
+  formFields.delete(id)
 }
 
 /** Converts legacy prompt parts into the v2 prompt payload. */
@@ -403,10 +407,10 @@ export const questionApi = {
       const requestID = options.requestID
       const sessionID = formSessions.get(requestID)
       if (!sessionID) throw new Error(t("未知表单请求：") + requestID)
-      const flat = options.answers.flat()
+      const answer = buildFormAnswer(formFields.get(requestID) ?? [], options.answers)
       await apiData(
         `/api/session/${sessionID}/form/${requestID}/reply`,
-        jsonInit("POST", { answer: { value: flat } })
+        jsonInit("POST", { answer })
       )
       forgetForm(requestID)
       return true
@@ -421,6 +425,39 @@ export const questionApi = {
       forgetForm(requestID)
       return true
     }, t("拒绝提问失败")),
+}
+
+/**
+ * opencode v2 answers a form per field (`{ answer: { <field key>: value } }`) while the question
+ * UI collects the selected option labels. Map the labels back to their option values, keep
+ * free-form input as typed, and coerce number/boolean fields to the type the form declared.
+ * Multiselect fields answer with an array, every other field with a single value.
+ */
+export function buildFormAnswer(
+  fields: V2FormField[],
+  answers: string[][],
+): Record<string, string | number | boolean | string[]> {
+  const answer: Record<string, string | number | boolean | string[]> = {}
+
+  fields.forEach((field, index) => {
+    const selected = answers[index] ?? []
+    if (selected.length === 0) return
+
+    const toValue = (item: string) => field.options?.find((option) => option.label === item)?.value ?? item
+    answer[field.key] = field.type === "multiselect" ? selected.map(toValue) : coerceFormValue(field.type, toValue(selected[0]))
+  })
+
+  return answer
+}
+
+/** Coerces a text answer to the value type the form field declares. */
+function coerceFormValue(type: string, value: string): string | number | boolean {
+  if (type === "boolean") return value === "true" || value === "yes" || value === "1"
+  if (type === "number" || type === "integer") {
+    const parsed = Number(value)
+    return Number.isNaN(parsed) ? value : parsed
+  }
+  return value
 }
 
 /**

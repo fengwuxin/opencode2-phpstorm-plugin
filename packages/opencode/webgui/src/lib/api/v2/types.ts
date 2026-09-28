@@ -187,9 +187,25 @@ export type V2PermissionRequest = {
   [key: string]: unknown
 }
 
+export type V2FormOption = {
+  value: string
+  label: string
+  description?: string
+}
+
+export type V2FormField = {
+  key: string
+  type: string
+  title?: string
+  description?: string
+  options?: V2FormOption[]
+  [key: string]: unknown
+}
+
 export type V2FormRequest = {
   id: string
   sessionID?: string
+  fields?: V2FormField[]
   [key: string]: unknown
 }
 

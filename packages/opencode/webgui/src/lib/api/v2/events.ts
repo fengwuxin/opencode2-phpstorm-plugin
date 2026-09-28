@@ -12,7 +12,7 @@ import type { ServerEvent } from "../events"
 import { apiBase, apiFetch } from "./client"
 import { projectSession, toolBlockToPart } from "./project"
 import { rememberForm, rememberPermission, forgetForm, forgetPermission } from "./facade"
-import type { V2Event, V2ToolBlock } from "./types"
+import type { V2Event, V2FormField, V2ToolBlock } from "./types"
 
 type Emit = (event: ServerEvent) => void
 
@@ -468,7 +468,7 @@ export class V2EventStream {
         const id = String(form.id ?? "")
         const formSessionID = String(form.sessionID ?? sessionID ?? "")
         if (!id) return
-        rememberForm(id, formSessionID)
+        rememberForm(id, formSessionID, Array.isArray(form.fields) ? (form.fields as V2FormField[]) : [])
         this.emit({
           type: "question.asked",
           properties: {
