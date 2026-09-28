@@ -10,7 +10,7 @@ group = "paviko.opencode"
 // Artifact version rule: `YY.M.DD<NN>` — year, month, day of the month and a
 // two-digit per-day build sequence (first build of a day = 01).
 // Example: the first build on 2026-09-25 is 26.9.2501, the next one is 26.9.2502.
-version = "26.9.2801"
+version = "26.9.2802"
 
 // opencode v2 only: the backend is never bundled, the CLI is resolved from the system.
 val guiOnly = project.findProperty("guiOnly")?.toString()?.toBoolean() ?: true
@@ -90,6 +90,13 @@ dependencies {
 }
 
 intellijPlatform {
+    // Marketplace upload: PUBLISH_TOKEN=<token from plugins.jetbrains.com/author/me/tokens> \
+    //   ./gradlew publishPlugin
+    // The very first publication of a new plugin must be uploaded manually on plugins.jetbrains.com.
+    publishing {
+        token.set(providers.environmentVariable("PUBLISH_TOKEN"))
+    }
+
     pluginConfiguration {
         ideaVersion {
             sinceBuild.set("243")
@@ -184,8 +191,9 @@ tasks {
 
     // Ensure no upper build bound is set in plugin.xml so the plugin stays compatible with newer IDEs
     patchPluginXml {
-        // keep sinceBuild from pluginConfiguration, but expand upper bound to newer IDE builds
-        untilBuild.set("261.*")
+        // Unset the upper bound (see PatchPluginXmlTask docs): without until-build the plugin
+        // stays compatible with all IDEs newer than since-build.
+        untilBuild.set(provider { null })
 
         if (guiOnly) {
             pluginId.set("fengwuxin.opencode-gui-only")
