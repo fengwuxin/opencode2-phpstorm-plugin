@@ -10,6 +10,7 @@ interface SessionDropdownProps {
   isDropdownOpen: boolean
   isSelectMode: boolean
   selectedSessions: Set<string>
+  favoriteSessions: string[]
   selectedSessionIndex: number
   searchQuery: string
   editingSessionId: string | null
@@ -18,7 +19,6 @@ interface SessionDropdownProps {
   editInputRef: React.RefObject<HTMLInputElement | null>
   selectedSessionRef: React.RefObject<HTMLDivElement | null>
   sessionListRef: React.RefObject<HTMLDivElement | null>
-  sharingSessionId: string | null
   onSearchChange: (value: string) => void
   onSearchKeyDown: (e: React.KeyboardEvent) => void
   onToggleSelectMode: () => void
@@ -29,9 +29,9 @@ interface SessionDropdownProps {
   onEditChange: (value: string) => void
   onDeleteStart: (sessionId: string, e: React.MouseEvent) => void
   onBulkDeleteStart: () => void
+  onToggleFavorite: (sessionId: string, e: React.MouseEvent) => void
   onCheckboxChange: (sessionId: string, checked: boolean) => void
   onKeyDown: (e: React.KeyboardEvent) => void
-  onToggleShare: (sessionId: string, e: React.MouseEvent) => void
 }
 
 export function SessionDropdown({
@@ -41,6 +41,7 @@ export function SessionDropdown({
   isDropdownOpen,
   isSelectMode,
   selectedSessions,
+  favoriteSessions,
   selectedSessionIndex,
   searchQuery,
   editingSessionId,
@@ -49,7 +50,6 @@ export function SessionDropdown({
   editInputRef,
   selectedSessionRef,
   sessionListRef,
-  sharingSessionId,
   onSearchChange,
   onSearchKeyDown,
   onToggleSelectMode,
@@ -60,9 +60,9 @@ export function SessionDropdown({
   onEditChange,
   onDeleteStart,
   onBulkDeleteStart,
+  onToggleFavorite,
   onCheckboxChange,
   onKeyDown,
-  onToggleShare,
 }: SessionDropdownProps) {
   if (!isDropdownOpen) return null
 
@@ -120,22 +120,22 @@ export function SessionDropdown({
         filteredSessions={filteredSessions}
         isSelectMode={isSelectMode}
         selectedSessions={selectedSessions}
+        favoriteSessions={favoriteSessions}
         selectedSessionIndex={selectedSessionIndex}
         editingSessionId={editingSessionId}
         editingTitle={editingTitle}
         editInputRef={editInputRef}
         selectedSessionRef={selectedSessionRef}
         sessionListRef={sessionListRef}
-        sharingSessionId={sharingSessionId}
         onSessionSelect={handleSelect}
         onEditStart={onEditStart}
         onEditSave={onEditSave}
         onEditCancel={onEditCancel}
         onEditChange={onEditChange}
         onDeleteStart={onDeleteStart}
+        onToggleFavorite={onToggleFavorite}
         onCheckboxChange={onCheckboxChange}
         onKeyDown={onKeyDown}
-        onToggleShare={onToggleShare}
       />
 
       {/* Bulk delete button (shown in select mode when sessions are selected) */}

@@ -249,6 +249,10 @@ class ChatToolWindowFactory : ToolWindowFactory, DumbAware {
                 .setClient(client)
                 .build()
 
+            // Off-screen rendering (IDE registry `ide.browser.jcef.osr.enabled`) is a known
+            // source of IME problems in the embedded browser, so keep it visible in the log.
+            logger.info("Embedded browser created, JCEF OSR mode = ${JBCefApp.isOffScreenRenderingModeEnabled()}")
+
             // opencode v2 protects every /api call with basic auth; answer the challenge
             // instead of letting the embedded browser show a login dialog.
             client.addRequestHandler(

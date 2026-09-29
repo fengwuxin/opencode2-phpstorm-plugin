@@ -23,6 +23,10 @@ interface SessionContextState {
   sessions: Session[]
   setSessions: (sessions: Session[]) => void
 
+  // Favorite sessions (starred in the session list)
+  favoriteSessions: string[]
+  toggleFavoriteSession: (sessionId: string) => Promise<void>
+
   // Loading and error states
   isCreating: boolean
   isLoading: boolean
@@ -123,6 +127,14 @@ export function isDefaultTitle(title: string): boolean {
 }
 
 /**
+ * Last activity of a session: `time.updated` moves whenever a session is continued,
+ * so sorting by it keeps active and recently resumed sessions on top.
+ */
+export function sessionActivity(session: Session): number {
+  return session.time?.updated ?? session.time?.created ?? 0
+}
+
+/**
  * Session provider component
  *
  * Manages the current active session state and provides session-related actions.
@@ -131,6 +143,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
   const [currentSession, setCurrentSession] = useState<Session | null>(() => createVirtualSession())
   const [isVirtualSession, setIsVirtualSession] = useState(true)
   const [sessions, setSessions] = useState<Session[]>([])
+  const [favoriteSessions, setFavoriteSessions] = useState<string[]>([])
   const [isCreating, setIsCreating] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
@@ -177,6 +190,10 @@ export function SessionProvider({ children }: SessionProviderProps) {
 
       if (kv.webgui_agent_model) {
         setAgentModelMap(kv.webgui_agent_model)
+      }
+
+      if (Array.isArray(kv.webgui_favorite_sessions)) {
+        setFavoriteSessions(kv.webgui_favorite_sessions as string[])
       }
 
       if (modelPrefs?.variant) {
@@ -466,6 +483,25 @@ export function SessionProvider({ children }: SessionProviderProps) {
   )
 
   /**
+   * Star / unstar a session. The list lives in the plugin kv store so it survives
+   * reloads of the tool window.
+   */
+  const toggleFavoriteSession = useCallback(
+    async (sessionId: string) => {
+      const next = favoriteSessions.includes(sessionId)
+        ? favoriteSessions.filter((id) => id !== sessionId)
+        : [...favoriteSessions, sessionId]
+      setFavoriteSessions(next)
+      try {
+        await sdk.kv.update({ body: { webgui_favorite_sessions: next } })
+      } catch (err) {
+        console.error("[SessionContext] Failed to save favorite sessions:", err)
+      }
+    },
+    [favoriteSessions],
+  )
+
+  /**
    * Load all sessions
    */
   const loadSessions = useCallback(async () => {
@@ -492,8 +528,8 @@ export function SessionProvider({ children }: SessionProviderProps) {
 
       if (response.data) {
         console.log("[SessionContext] Sessions loaded:", response.data.length)
-        // Sort by creation time (newest first)
-        const sorted = [...response.data].sort((a, b) => b.time.created - a.time.created)
+        // Newest activity first, so active and recently resumed sessions stay on top
+        const sorted = [...response.data].sort((a, b) => sessionActivity(b) - sessionActivity(a))
         setSessions(sorted)
         setIsLoading(false)
         return
@@ -1035,6 +1071,8 @@ export function SessionProvider({ children }: SessionProviderProps) {
     setCurrentSession,
     sessions,
     setSessions,
+    favoriteSessions,
+    toggleFavoriteSession,
     isCreating,
     isLoading,
     error,

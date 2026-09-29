@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react"
 import type { Session } from "@opencode-ai/sdk/client"
+import { sessionActivity } from "../../../state/SessionContext"
 import { useClickOutside } from "../../../hooks/useClickOutside"
 
-export function useSessionDropdown(sessions: Session[]) {
+export function useSessionDropdown(sessions: Session[], currentSessionId?: string) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedSessionIndex, setSelectedSessionIndex] = useState(0)
@@ -50,11 +51,18 @@ export function useSessionDropdown(sessions: Session[]) {
     }
   }, [selectedSessionIndex])
 
-  // Filter sessions by search query
-  const filteredSessions = sessions.filter((session) => {
-    const title = session.title || "Untitled"
-    return title.toLowerCase().includes(searchQuery.toLowerCase())
-  })
+  // Filter sessions by search query, then put the active session first and sort the
+  // rest by last activity so recently resumed sessions stay on top.
+  const filteredSessions = sessions
+    .filter((session) => {
+      const title = session.title || "Untitled"
+      return title.toLowerCase().includes(searchQuery.toLowerCase())
+    })
+    .sort((a, b) => {
+      if (a.id === currentSessionId) return -1
+      if (b.id === currentSessionId) return 1
+      return sessionActivity(b) - sessionActivity(a)
+    })
 
   const toggleDropdown = () => setIsDropdownOpen((prev) => !prev)
 
@@ -85,6 +93,9 @@ export function useSessionDropdown(sessions: Session[]) {
   const handleKeyDown = (e: React.KeyboardEvent, onSelect: (sessionId: string) => void) => {
     if (!isDropdownOpen || filteredSessions.length === 0) return
 
+    // Never interfere with an active IME composition (Chinese/Japanese input)
+    if (e.nativeEvent.isComposing) return
+
     // Disable keyboard navigation when in select mode
     if (isSelectMode) return
 
@@ -114,6 +125,9 @@ export function useSessionDropdown(sessions: Session[]) {
   }
 
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    // Leave arrow keys to the IME while a composition is active
+    if (e.nativeEvent.isComposing) return
+
     if (e.key === "ArrowDown" && filteredSessions.length > 0) {
       e.preventDefault()
       setSelectedSessionIndex(0)

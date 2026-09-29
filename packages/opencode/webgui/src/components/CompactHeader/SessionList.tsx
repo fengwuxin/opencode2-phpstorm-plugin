@@ -8,22 +8,22 @@ interface SessionListProps {
   filteredSessions: Session[]
   isSelectMode: boolean
   selectedSessions: Set<string>
+  favoriteSessions: string[]
   selectedSessionIndex: number
   editingSessionId: string | null
   editingTitle: string
   editInputRef: React.RefObject<HTMLInputElement | null>
   selectedSessionRef: React.RefObject<HTMLDivElement | null>
   sessionListRef: React.RefObject<HTMLDivElement | null>
-  sharingSessionId: string | null
   onSessionSelect: (sessionId: string) => void
   onEditStart: (sessionId: string, currentTitle: string, e: React.MouseEvent) => void
   onEditSave: (sessionId: string) => void
   onEditCancel: () => void
   onEditChange: (value: string) => void
   onDeleteStart: (sessionId: string, e: React.MouseEvent) => void
+  onToggleFavorite: (sessionId: string, e: React.MouseEvent) => void
   onCheckboxChange: (sessionId: string, checked: boolean) => void
   onKeyDown: (e: React.KeyboardEvent) => void
-  onToggleShare: (sessionId: string, e: React.MouseEvent) => void
 }
 
 export function SessionList({
@@ -32,22 +32,22 @@ export function SessionList({
   filteredSessions,
   isSelectMode,
   selectedSessions,
+  favoriteSessions,
   selectedSessionIndex,
   editingSessionId,
   editingTitle,
   editInputRef,
   selectedSessionRef,
   sessionListRef,
-  sharingSessionId,
   onSessionSelect,
   onEditStart,
   onEditSave,
   onEditCancel,
   onEditChange,
   onDeleteStart,
+  onToggleFavorite,
   onCheckboxChange,
   onKeyDown,
-  onToggleShare,
 }: SessionListProps) {
   if (filteredSessions.length === 0) {
     return (
@@ -72,21 +72,21 @@ export function SessionList({
             isEditing={isEditing}
             isSelectMode={isSelectMode}
             isSelected={selectedSessions.has(session.id)}
+            isFavorite={favoriteSessions.includes(session.id)}
             selectedSessionIndex={selectedSessionIndex}
             currentIndex={index}
             editingTitle={editingTitle}
             editInputRef={editInputRef}
             selectedSessionRef={selectedSessionRef}
-            isSharing={sharingSessionId === session.id}
             onSelect={() => onSessionSelect(session.id)}
             onEditStart={(e) => onEditStart(session.id, displayTitle, e)}
             onEditSave={() => onEditSave(session.id)}
             onEditCancel={onEditCancel}
             onEditChange={onEditChange}
             onDeleteStart={(e) => onDeleteStart(session.id, e)}
+            onToggleFavorite={(e) => onToggleFavorite(session.id, e)}
             onCheckboxChange={(checked) => onCheckboxChange(session.id, checked)}
             onKeyDown={onKeyDown}
-            onToggleShare={(e) => onToggleShare(session.id, e)}
           />
         )
       })}

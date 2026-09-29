@@ -388,7 +388,7 @@ const MessageInputInner = forwardRef<
           contentEditableRef={contentEditableRef}
           containerRef={containerRef}
           onEditorChange={handleEditorChange}
-          placeholder={`Hello ${username ?? "owner"}`}
+          placeholder={t("你好，{name}", { name: username ?? t("主人") })}
         />
         <EditorToolbar
           selectedProviderId={selectedProviderId}

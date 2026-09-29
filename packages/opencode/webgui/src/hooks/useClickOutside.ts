@@ -181,6 +181,8 @@ export function useClickOutsideWithEscape<T extends HTMLElement = HTMLElement>(
     if (!enabled) return
 
     const handleEscape = (event: KeyboardEvent) => {
+      // Escape cancels an IME composition first; do not close on that keystroke
+      if (event.isComposing) return
       if (event.key === "Escape") {
         handlerRef.current()
       }

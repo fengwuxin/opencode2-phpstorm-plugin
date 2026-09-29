@@ -12,8 +12,6 @@ import { StatusIndicator } from "./StatusIndicator"
 import { ActionButtons } from "./ActionButtons"
 import { UsageDisplay } from "./UsageDisplay"
 import { SessionDropdown } from "./SessionDropdown"
-import { sdk } from "../../lib/api/sdkClient"
-import { useToast } from "../../state/ToastContext"
 
 interface CompactHeaderProps {
   connectionState: ConnectionState
@@ -29,58 +27,21 @@ const CompactHeader = forwardRef<
   CompactHeaderProps
 >(({ connectionState, onNewSession, isCreatingSession, onOpenCommandPalette }, ref) => {
   const { theme, toggleTheme } = useTheme()
-  const { currentSession, setCurrentSession, sessions, setSessions, switchSession, updateSessionTitle, deleteSession } =
-    useSession()
+  const {
+    currentSession,
+    sessions,
+    favoriteSessions,
+    toggleFavoriteSession,
+    switchSession,
+    updateSessionTitle,
+    deleteSession,
+  } = useSession()
   const usage = useSessionUsage()
-  const toast = useToast()
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [sharingSessionId, setSharingSessionId] = useState<string | null>(null)
-
-  const handleToggleShareSession = useCallback(
-    async (sessionId: string, e: React.MouseEvent) => {
-      e.stopPropagation()
-      const session = sessions.find((s) => s.id === sessionId)
-      if (!session) return
-
-      setSharingSessionId(sessionId)
-      const sessionIsShared = !!session.share?.url
-
-      if (sessionIsShared) {
-        const res = await sdk.session.unshare({ path: { id: sessionId } })
-        if (res.data) {
-          // Update session in the list for immediate UI feedback
-          setSessions(sessions.map((s) => (s.id === sessionId ? res.data! : s)))
-          if (currentSession?.id === sessionId) {
-            setCurrentSession(res.data)
-          }
-          toast.showToast(t("已取消会话分享"), { variant: "success" })
-        } else {
-          toast.showToast(t("取消分享失败"), { variant: "error" })
-        }
-      } else {
-        const res = await sdk.session.share({ path: { id: sessionId } })
-        if (res.data) {
-          // Update session in the list for immediate UI feedback
-          setSessions(sessions.map((s) => (s.id === sessionId ? res.data! : s)))
-          if (currentSession?.id === sessionId) {
-            setCurrentSession(res.data)
-          }
-          if (res.data.share?.url) {
-            await navigator.clipboard.writeText(res.data.share.url)
-            toast.showToast(t("分享链接已复制到剪贴板"), { variant: "success" })
-          }
-        } else {
-          toast.showToast(t("分享会话失败"), { variant: "error" })
-        }
-      }
-      setSharingSessionId(null)
-    },
-    [sessions, currentSession, setCurrentSession, setSessions, toast],
-  )
 
   // Session dropdown management
-  const dropdown = useSessionDropdown(sessions)
+  const dropdown = useSessionDropdown(sessions, currentSession?.id)
 
   // Session actions (edit, delete)
   const actions = useSessionActions({
@@ -89,6 +50,14 @@ const CompactHeader = forwardRef<
     updateSessionTitle,
     deleteSession,
   })
+
+  const handleToggleFavorite = useCallback(
+    (sessionId: string, e: React.MouseEvent) => {
+      e.stopPropagation()
+      void toggleFavoriteSession(sessionId)
+    },
+    [toggleFavoriteSession],
+  )
 
   // Expose toggleSessionDropdown method via ref
   useImperativeHandle(
@@ -154,6 +123,7 @@ const CompactHeader = forwardRef<
             isDropdownOpen={dropdown.isDropdownOpen}
             isSelectMode={dropdown.isSelectMode}
             selectedSessions={dropdown.selectedSessions}
+            favoriteSessions={favoriteSessions}
             selectedSessionIndex={dropdown.selectedSessionIndex}
             searchQuery={dropdown.searchQuery}
             editingSessionId={actions.editingSessionId}
@@ -162,7 +132,6 @@ const CompactHeader = forwardRef<
             editInputRef={actions.editInputRef}
             selectedSessionRef={dropdown.selectedSessionRef}
             sessionListRef={dropdown.sessionListRef}
-            sharingSessionId={sharingSessionId}
             onSearchChange={dropdown.setSearchQuery}
             onSearchKeyDown={dropdown.handleSearchKeyDown}
             onToggleSelectMode={dropdown.toggleSelectMode}
@@ -173,9 +142,9 @@ const CompactHeader = forwardRef<
             onEditChange={actions.setEditingTitle}
             onDeleteStart={handleDeleteStart}
             onBulkDeleteStart={handleBulkDeleteStart}
+            onToggleFavorite={handleToggleFavorite}
             onCheckboxChange={dropdown.handleSessionCheckboxChange}
             onKeyDown={(e) => dropdown.handleKeyDown(e, handleSessionSelect)}
-            onToggleShare={handleToggleShareSession}
           />
         </div>
 

@@ -41,6 +41,9 @@ export function useKeyboardShortcuts({
       const target = e.target as HTMLElement
       const isInputField = target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable
 
+      // Never steal keys from an active IME composition (Chinese/Japanese input)
+      if (e.isComposing) return
+
       // Escape: Close modal (works everywhere)
       if (e.key === "Escape" && isModalOpen) {
         e.preventDefault()

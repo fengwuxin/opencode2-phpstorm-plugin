@@ -110,6 +110,7 @@ const EN: Record<string, string> = {
   "发送一条消息开始对话": "Send a message to start the conversation",
   "加载命令...": "Loading commands...",
   "助手提问": "Question from assistant",
+  "收藏会话": "Favorite session",
   "请选择": "Choose an option",
   "输入你的回答...": "Type your own answer...",
   "确认你的回答": "Review your answers",
@@ -310,6 +311,8 @@ const EN: Record<string, string> = {
   "确定删除此会话？此操作不可撤销。": "Are you sure you want to delete this session? This action cannot be undone.",
   "设置": "Settings",
   "说句话，我就开工啦～": "Say something and I'll get to work~",
+  "你好，{name}": "Hello {name}",
+  "主人": "owner",
   "输入以搜索命令...": "Type to search commands...",
   "这会总结对话的较早内容以节省上下文；最近的消息会保留，但更早的细节可能丢失。继续？": "This will summarize earlier parts of the conversation to save context. Recent messages will be kept, but long-term details may be lost. Proceed?",
   "默认显示所有模型；取消勾选即可从列表中隐藏。": "All models are shown by default; uncheck one to hide it from the picker.",
@@ -333,9 +336,7 @@ let current: Language = (() => {
 
 export function getLanguage(): Language {
   return current
-}
-
-export function setLanguage(language: Language) {
+}export function setLanguage(language: Language) {
   if (language === current) return
   current = language
   try {
@@ -346,8 +347,13 @@ export function setLanguage(language: Language) {
   } catch {}
 }
 
-export function t(zh: string): string {
-  if (current === "zh") return zh
-  return EN[zh] ?? zh
+/**
+ * Translates a Chinese source string into the active language and fills in
+ * `{placeholder}` parameters, e.g. t("你好，{name}", { name: "主人" }).
+ */
+export function t(zh: string, params?: Record<string, string | number>): string {
+  const source = current === "zh" ? zh : EN[zh] ?? zh
+  if (!params) return source
+  return source.replace(/\{(\w+)\}/g, (match, key: string) => (key in params ? String(params[key]) : match))
 }
 
