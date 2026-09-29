@@ -9,6 +9,7 @@ interface SessionListProps {
   isSelectMode: boolean
   selectedSessions: Set<string>
   favoriteSessions: string[]
+  runningSessions: (sessionId: string) => boolean
   selectedSessionIndex: number
   editingSessionId: string | null
   editingTitle: string
@@ -33,6 +34,7 @@ export function SessionList({
   isSelectMode,
   selectedSessions,
   favoriteSessions,
+  runningSessions,
   selectedSessionIndex,
   editingSessionId,
   editingTitle,
@@ -73,6 +75,7 @@ export function SessionList({
             isSelectMode={isSelectMode}
             isSelected={selectedSessions.has(session.id)}
             isFavorite={favoriteSessions.includes(session.id)}
+            isRunning={runningSessions(session.id)}
             selectedSessionIndex={selectedSessionIndex}
             currentIndex={index}
             editingTitle={editingTitle}

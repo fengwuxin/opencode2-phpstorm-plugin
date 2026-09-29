@@ -3,7 +3,7 @@ import type { Session } from "@opencode-ai/sdk/client"
 import { sessionActivity } from "../../../state/SessionContext"
 import { useClickOutside } from "../../../hooks/useClickOutside"
 
-export function useSessionDropdown(sessions: Session[], currentSessionId?: string) {
+export function useSessionDropdown(sessions: Session[]) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedSessionIndex, setSelectedSessionIndex] = useState(0)
@@ -51,18 +51,14 @@ export function useSessionDropdown(sessions: Session[], currentSessionId?: strin
     }
   }, [selectedSessionIndex])
 
-  // Filter sessions by search query, then put the active session first and sort the
-  // rest by last activity so recently resumed sessions stay on top.
+  // Filter sessions by search query and sort by last activity (newest first).
+  // Favorites are only a marker and never affect the order.
   const filteredSessions = sessions
     .filter((session) => {
       const title = session.title || "Untitled"
       return title.toLowerCase().includes(searchQuery.toLowerCase())
     })
-    .sort((a, b) => {
-      if (a.id === currentSessionId) return -1
-      if (b.id === currentSessionId) return 1
-      return sessionActivity(b) - sessionActivity(a)
-    })
+    .sort((a, b) => sessionActivity(b) - sessionActivity(a))
 
   const toggleDropdown = () => setIsDropdownOpen((prev) => !prev)
 

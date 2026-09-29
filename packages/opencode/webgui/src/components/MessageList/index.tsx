@@ -19,7 +19,8 @@ interface MessageListProps {
 
 export function MessageList({ sessionID, onUndoToInput }: MessageListProps) {
   const { getMessagesBySession, messages, getQuestionsBySession } = useMessages()
-  const { isIdle, isReasoning, currentSession } = useSession()
+  const { isIdle, isReasoning, currentSession, isSessionRunning } = useSession()
+  const isRunning = isSessionRunning(currentSession?.id ?? "")
 
   // Get pending questions for current session
   const pendingQuestions = sessionID ? getQuestionsBySession(sessionID) : []
@@ -160,8 +161,29 @@ export function MessageList({ sessionID, onUndoToInput }: MessageListProps) {
             </div>
           ))}
 
-          {/* Typing indicator - hide while reasoning parts are streaming */}
-          <TypingIndicator visible={!isIdle && !isReasoning} />
+          {/* Typing indicator - driven by the server session status, hidden while reasoning streams */}
+          <TypingIndicator visible={isRunning && !isReasoning} />
+
+          {/* End of turn marker: makes it obvious that the answer is complete */}
+          {!isRunning && !isReasoning && sortedMessages.length > 0 && (
+            <div className="flex items-center mt-4 px-1 select-none">
+              <div className="flex-1 border-t border-dashed border-gray-300 dark:border-gray-700" />
+              <span className="mx-3 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                {t("本轮已结束")}
+              </span>
+              <div className="flex-1 border-t border-dashed border-gray-300 dark:border-gray-700" />
+            </div>
+          )}
+
+          {/*
+            Spacer below the last content: a bottom margin on the last element is not part of a
+            scroll container's scrollable area, so the gap is expressed as an element height
+            (plus the footer's own top padding) to always be visible.
+          */}
+          <div className="h-6" aria-hidden />
           {/* Scroll anchor */}
           <div ref={messagesEndRef} />
         </div>

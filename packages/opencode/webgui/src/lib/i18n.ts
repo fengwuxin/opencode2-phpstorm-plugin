@@ -311,6 +311,8 @@ const EN: Record<string, string> = {
   "确定删除此会话？此操作不可撤销。": "Are you sure you want to delete this session? This action cannot be undone.",
   "设置": "Settings",
   "说句话，我就开工啦～": "Say something and I'll get to work~",
+  "运行中": "Running",
+  "本轮已结束": "Turn finished",
   "你好，{name}": "Hello {name}",
   "主人": "owner",
   "输入以搜索命令...": "Type to search commands...",

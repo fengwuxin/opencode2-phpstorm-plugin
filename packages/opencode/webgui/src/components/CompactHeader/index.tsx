@@ -32,6 +32,7 @@ const CompactHeader = forwardRef<
     sessions,
     favoriteSessions,
     toggleFavoriteSession,
+    isSessionRunning,
     switchSession,
     updateSessionTitle,
     deleteSession,
@@ -41,7 +42,7 @@ const CompactHeader = forwardRef<
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
   // Session dropdown management
-  const dropdown = useSessionDropdown(sessions, currentSession?.id)
+  const dropdown = useSessionDropdown(sessions)
 
   // Session actions (edit, delete)
   const actions = useSessionActions({
@@ -124,6 +125,7 @@ const CompactHeader = forwardRef<
             isSelectMode={dropdown.isSelectMode}
             selectedSessions={dropdown.selectedSessions}
             favoriteSessions={favoriteSessions}
+            runningSessions={isSessionRunning}
             selectedSessionIndex={dropdown.selectedSessionIndex}
             searchQuery={dropdown.searchQuery}
             editingSessionId={actions.editingSessionId}

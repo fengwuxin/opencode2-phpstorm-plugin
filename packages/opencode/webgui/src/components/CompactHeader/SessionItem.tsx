@@ -19,6 +19,7 @@ interface SessionItemProps {
   isSelectMode: boolean
   isSelected: boolean
   isFavorite: boolean
+  isRunning: boolean
   selectedSessionIndex: number
   currentIndex: number
   editingTitle: string
@@ -42,6 +43,7 @@ export function SessionItem({
   isSelectMode,
   isSelected,
   isFavorite,
+  isRunning,
   selectedSessionIndex,
   currentIndex,
   editingTitle,
@@ -134,12 +136,22 @@ export function SessionItem({
           {/* Edit and Delete buttons (hidden in select mode) */}
           {!isSelectMode && (
             <div className="ml-auto flex items-center gap-2 flex-shrink-0">
-              {/* Timestamp (last activity; hidden on hover or when active) */}
-              <span
-                className={`text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap ${isActive ? "hidden" : "block group-hover:hidden"}`}
-              >
-                {formatTimestamp(session.time.updated ?? session.time.created)}
-              </span>
+              {/* Loading state while the session is running, timestamp otherwise */}
+              {isRunning ? (
+                <span className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 whitespace-nowrap">
+                  <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                  </svg>
+                  {t("运行中")}
+                </span>
+              ) : (
+                <span
+                  className={`text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap ${isActive ? "hidden" : "block group-hover:hidden"}`}
+                >
+                  {formatTimestamp(session.time.updated ?? session.time.created)}
+                </span>
+              )}
 
               {/* Action buttons (visible on hover, when active, or when favorited) */}
               <div className={`${isActive || isFavorite ? "flex" : "hidden group-hover:flex"} items-center gap-1`}>

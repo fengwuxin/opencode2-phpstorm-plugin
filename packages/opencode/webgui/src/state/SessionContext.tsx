@@ -1,5 +1,5 @@
 import { t } from "../lib/i18n"
-import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react"
+import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from "react"
 import { sdk } from "../lib/api/sdkClient"
 import type { Session, FileDiff } from "@opencode-ai/sdk/client"
 import { eventEmitter } from "../lib/api/events"
@@ -26,6 +26,9 @@ interface SessionContextState {
   // Favorite sessions (starred in the session list)
   favoriteSessions: string[]
   toggleFavoriteSession: (sessionId: string) => Promise<void>
+
+  // True while the session is executing (status entries are dropped when idle)
+  isSessionRunning: (sessionId: string) => boolean
 
   // Loading and error states
   isCreating: boolean
@@ -163,6 +166,14 @@ export function SessionProvider({ children }: SessionProviderProps) {
   const [variantMap, setVariantMap] = useState<Record<string, string>>({})
 
   const isReasoning = currentSession?.id ? Boolean(reasoningMap[currentSession.id]) : false
+  const isSessionRunning = useCallback((sessionId: string) => Boolean(statusMap[sessionId]), [statusMap])
+
+  // Tracked in a ref so event handlers always compare against the latest session
+  const currentSessionIdRef = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    currentSessionIdRef.current = currentSession?.id
+  }, [currentSession?.id])
+
   const currentStatus: SessionStatusInfo =
     currentSession?.id && statusMap[currentSession.id]
       ? statusMap[currentSession.id]
@@ -1002,16 +1013,24 @@ export function SessionProvider({ children }: SessionProviderProps) {
         if (existingSession && existingSession.title !== updatedSession.title) {
           console.log("[SessionContext] 🎉 Session title CHANGED:", existingSession.title, "→", updatedSession.title)
         }
-        setSessions((prev) => prev.map((s) => (s.id === updatedSession.id ? updatedSession : s)))
+        // Renames (and other partial events) must not wipe fields they do not carry,
+        // so merge into the known session and keep the previous timestamps when absent.
+        const merge = (session: Session): Session => ({
+          ...session,
+          ...updatedSession,
+          time: updatedSession.time?.updated ? updatedSession.time : session.time,
+        })
+        setSessions((prev) => prev.map((s) => (s.id === updatedSession.id ? merge(s) : s)))
         if (currentSession?.id === updatedSession.id) {
-          setCurrentSession(updatedSession)
+          setCurrentSession((prev) => (prev ? merge(prev) : updatedSession))
         }
       }
     }
 
     const handleSessionDeleted = (event: any) => {
-      if (event.type === "session.deleted" && event.properties?.info) {
-        const deletedId = event.properties.info.id
+      // v2 carries the id as `sessionID`, older payloads nested it under `info`
+      const deletedId = event.properties?.sessionID ?? event.properties?.info?.id
+      if (event.type === "session.deleted" && deletedId) {
         console.log("[SessionContext] Session deleted event:", deletedId)
         setSessions((prev) => prev.filter((s) => s.id !== deletedId))
         setSessionDiffMap((prev) => {
@@ -1044,6 +1063,23 @@ export function SessionProvider({ children }: SessionProviderProps) {
       })
     }
 
+    /** A session that became idle is no longer running (clears the loading state). */
+    const handleSessionIdle = (event: any) => {
+      if (event.type !== "session.idle" || !event.properties) return
+      const sessionID = String(event.properties.sessionID ?? "")
+      if (!sessionID) return
+      setStatusMap((prev) => {
+        if (!prev[sessionID]) return prev
+        const next = { ...prev }
+        delete next[sessionID]
+        return next
+      })
+      // Also clear the local flag: if the user switched to another session while this one
+      // was generating, the idle event would otherwise be ignored and "generating" would
+      // stay visible when coming back.
+      if (sessionID === currentSessionIdRef.current) setIsIdle(true)
+    }
+
     const handleSessionDiff = (event: any) => {
       if (event.type !== "session.diff" || !event.properties) return
       const { sessionID, diff } = event.properties as { sessionID: string; diff: FileDiff[] }
@@ -1055,6 +1091,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
     const unsubscribeUpdated = eventEmitter.on("session.updated", handleSessionUpdated)
     const unsubscribeDeleted = eventEmitter.on("session.deleted", handleSessionDeleted)
     const unsubscribeStatus = eventEmitter.on("session.status", handleSessionStatus)
+    const unsubscribeIdle = eventEmitter.on("session.idle", handleSessionIdle)
     const unsubscribeDiff = eventEmitter.on("session.diff", handleSessionDiff)
 
     return () => {
@@ -1062,6 +1099,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
       unsubscribeUpdated()
       unsubscribeDeleted()
       unsubscribeStatus()
+      unsubscribeIdle()
       unsubscribeDiff()
     }
   }, [currentSession?.id, setReasoning, newVirtual])
@@ -1073,6 +1111,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
     setSessions,
     favoriteSessions,
     toggleFavoriteSession,
+    isSessionRunning,
     isCreating,
     isLoading,
     error,

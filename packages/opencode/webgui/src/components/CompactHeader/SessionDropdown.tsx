@@ -11,6 +11,7 @@ interface SessionDropdownProps {
   isSelectMode: boolean
   selectedSessions: Set<string>
   favoriteSessions: string[]
+  runningSessions: (sessionId: string) => boolean
   selectedSessionIndex: number
   searchQuery: string
   editingSessionId: string | null
@@ -42,6 +43,7 @@ export function SessionDropdown({
   isSelectMode,
   selectedSessions,
   favoriteSessions,
+  runningSessions,
   selectedSessionIndex,
   searchQuery,
   editingSessionId,
@@ -121,6 +123,7 @@ export function SessionDropdown({
         isSelectMode={isSelectMode}
         selectedSessions={selectedSessions}
         favoriteSessions={favoriteSessions}
+        runningSessions={runningSessions}
         selectedSessionIndex={selectedSessionIndex}
         editingSessionId={editingSessionId}
         editingTitle={editingTitle}

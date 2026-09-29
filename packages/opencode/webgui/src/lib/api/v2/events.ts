@@ -145,9 +145,17 @@ export class V2EventStream {
       case "session.renamed":
       case "session.moved": {
         if (!sessionID) return
+        // v2 addresses sessions with `sessionID` and sends partial payloads (a rename only
+        // carries the title), while the projection expects a session object with `id`.
+        // Normalise it so the UI can match the event against the session list.
+        const payload = (data ?? {}) as Record<string, unknown>
+        const info = projectSession({ ...payload, id: payload.id ?? sessionID } as never)
+        if (typeof payload.title === "string" && payload.title.length > 0) {
+          info.title = payload.title
+        }
         this.emit({
           type: event.type === "session.created" ? "session.created" : "session.updated",
-          properties: { sessionID, info: projectSession(data as never) },
+          properties: { sessionID, info },
         } as ServerEvent)
         return
       }
