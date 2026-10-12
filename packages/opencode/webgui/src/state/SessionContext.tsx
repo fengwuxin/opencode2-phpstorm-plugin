@@ -1,8 +1,27 @@
 import { t } from "../lib/i18n"
 import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from "react"
 import { sdk } from "../lib/api/sdkClient"
+import { ideBridge } from "../lib/ideBridge"
 import type { Session, FileDiff } from "@opencode-ai/sdk/client"
 import { eventEmitter } from "../lib/api/events"
+
+/**
+ * Shows a desktop notification through the IDE plugin, falling back to the browser
+ * Notification API when the UI runs outside the IDE.
+ */
+async function notifyDesktop(title: string, content: string) {
+  if (ideBridge.isInstalled()) {
+    await ideBridge.request("notify", { title, content })
+    return
+  }
+  try {
+    if (typeof Notification === "undefined") return
+    const permission = Notification.permission === "default" ? await Notification.requestPermission() : Notification.permission
+    if (permission === "granted") new Notification(title, { body: content })
+  } catch (err) {
+    console.error("[SessionContext] Failed to show notification:", err)
+  }
+}
 
 /**
  * Session context state
@@ -26,6 +45,10 @@ interface SessionContextState {
   // Favorite sessions (starred in the session list)
   favoriteSessions: string[]
   toggleFavoriteSession: (sessionId: string) => Promise<void>
+
+  // Desktop notification when a session finishes its turn
+  notifyOnComplete: boolean
+  setNotifyOnComplete: (enabled: boolean) => Promise<void>
 
   // True while the session is executing (status entries are dropped when idle)
   isSessionRunning: (sessionId: string) => boolean
@@ -147,6 +170,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
   const [isVirtualSession, setIsVirtualSession] = useState(true)
   const [sessions, setSessions] = useState<Session[]>([])
   const [favoriteSessions, setFavoriteSessions] = useState<string[]>([])
+  const [notifyOnComplete, setNotifyOnCompleteState] = useState(true)
   const [isCreating, setIsCreating] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
@@ -173,6 +197,17 @@ export function SessionProvider({ children }: SessionProviderProps) {
   useEffect(() => {
     currentSessionIdRef.current = currentSession?.id
   }, [currentSession?.id])
+
+  // Same for the session list and the notification preference used by the SSE handlers
+  const sessionsRef = useRef<Session[]>([])
+  useEffect(() => {
+    sessionsRef.current = sessions
+  }, [sessions])
+
+  const notifyOnCompleteRef = useRef(true)
+  useEffect(() => {
+    notifyOnCompleteRef.current = notifyOnComplete
+  }, [notifyOnComplete])
 
   const currentStatus: SessionStatusInfo =
     currentSession?.id && statusMap[currentSession.id]
@@ -205,6 +240,10 @@ export function SessionProvider({ children }: SessionProviderProps) {
 
       if (Array.isArray(kv.webgui_favorite_sessions)) {
         setFavoriteSessions(kv.webgui_favorite_sessions as string[])
+      }
+
+      if (typeof kv.webgui_notify_on_complete === "boolean") {
+        setNotifyOnCompleteState(kv.webgui_notify_on_complete)
       }
 
       if (modelPrefs?.variant) {
@@ -496,8 +535,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
   /**
    * Star / unstar a session. The list lives in the plugin kv store so it survives
    * reloads of the tool window.
-   */
-  const toggleFavoriteSession = useCallback(
+   */  const toggleFavoriteSession = useCallback(
     async (sessionId: string) => {
       const next = favoriteSessions.includes(sessionId)
         ? favoriteSessions.filter((id) => id !== sessionId)
@@ -511,6 +549,16 @@ export function SessionProvider({ children }: SessionProviderProps) {
     },
     [favoriteSessions],
   )
+
+  /** Enables/disables the desktop notification for finished turns (stored in the plugin kv). */
+  const setNotifyOnComplete = useCallback(async (enabled: boolean) => {
+    setNotifyOnCompleteState(enabled)
+    try {
+      await sdk.kv.update({ body: { webgui_notify_on_complete: enabled } })
+    } catch (err) {
+      console.error("[SessionContext] Failed to save the notification setting:", err)
+    }
+  }, [])
 
   /**
    * Load all sessions
@@ -1078,6 +1126,14 @@ export function SessionProvider({ children }: SessionProviderProps) {
       // was generating, the idle event would otherwise be ignored and "generating" would
       // stay visible when coming back.
       if (sessionID === currentSessionIdRef.current) setIsIdle(true)
+
+      // Desktop notification for a finished turn (top level sessions only, no subagents)
+      if (notifyOnCompleteRef.current) {
+        const session = sessionsRef.current.find((s) => s.id === sessionID)
+        if (session && !session.parentID) {
+          void notifyDesktop(t("opencode会话结束"), session.title || t("未命名会话"))
+        }
+      }
     }
 
     const handleSessionDiff = (event: any) => {
@@ -1111,6 +1167,8 @@ export function SessionProvider({ children }: SessionProviderProps) {
     setSessions,
     favoriteSessions,
     toggleFavoriteSession,
+    notifyOnComplete,
+    setNotifyOnComplete,
     isSessionRunning,
     isCreating,
     isLoading,

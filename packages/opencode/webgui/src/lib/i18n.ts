@@ -313,6 +313,12 @@ const EN: Record<string, string> = {
   "说句话，我就开工啦～": "Say something and I'll get to work~",
   "运行中": "Running",
   "本轮已结束": "Turn finished",
+  "会话完成时通知": "Notify when a session finishes",
+  "会话生成结束时弹出系统通知，立即生效（不写入 opencode 配置）":
+    "Shows a desktop notification when a turn finishes. Applies immediately (not written to the opencode config)",
+  "会话已完成": "Session finished",
+  "opencode会话结束": "opencode session finished",
+  "未命名会话": "Untitled session",
   "你好，{name}": "Hello {name}",
   "主人": "owner",
   "输入以搜索命令...": "Type to search commands...",

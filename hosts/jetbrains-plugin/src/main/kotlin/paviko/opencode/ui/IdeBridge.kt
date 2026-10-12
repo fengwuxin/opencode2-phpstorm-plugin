@@ -4,6 +4,8 @@ import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.intellij.ide.BrowserUtil
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.LogicalPosition
@@ -25,6 +27,7 @@ import java.net.URLDecoder
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import javax.imageio.ImageIO
 
 data class Session(
@@ -40,6 +43,9 @@ data class SessionInfo(val baseUrl: String, val token: String, val sessionId: St
 object IdeBridge {
     private val LOG = Logger.getInstance(IdeBridge::class.java)
     private val gson = Gson()
+
+    /** Notification group declared in plugin.xml (see META-INF/plugin.xml). */
+    private const val NOTIFICATION_GROUP = "paviko.opencode.notifications"
     
     private var server: HttpServer? = null
     private var port: Int = 0
@@ -434,6 +440,15 @@ object IdeBridge {
                     replyWithPayload(session, id, readClipboard())
                 }
 
+                // Desktop notification for finished turns. macOS routes IDE notifications to
+                // the Notification Center while the IDE window is not focused.
+                "notify" -> {
+                    val title = payload?.get("title")?.asString ?: "OpenCode"
+                    val content = payload?.get("content")?.asString ?: ""
+                    notifyUser(title, content)
+                    replyOk(session, id)
+                }
+
                 else -> replyError(session, id, "Unknown type: $type")
             }
 
@@ -537,9 +552,47 @@ object IdeBridge {
         }
     }
 
+    /**
+     * Shows a desktop notification. On macOS this is a real Notification Center notification
+     * (osascript), because the IDE itself only forwards notifications to the system when its
+     * window is not focused. Other platforms fall back to an IDE notification.
+     */
+    private fun notifyUser(title: String, content: String) {
+        if (System.getProperty("os.name").lowercase().contains("mac") && showMacNotification(title, content)) return
+
+        ApplicationManager.getApplication().invokeLater {
+            try {
+                NotificationGroupManager.getInstance()
+                    .getNotificationGroup(NOTIFICATION_GROUP)
+                    .createNotification(title, content, NotificationType.INFORMATION)
+                    .setImportant(true)
+                    .notify(null)
+            } catch (e: Exception) {
+                LOG.warn("Failed to show notification", e)
+            }
+        }
+    }
+
+    /** Runs `osascript` to display a native macOS notification; false when it could not run. */
+    private fun showMacNotification(title: String, content: String): Boolean {
+        return try {
+            val script = "display notification ${appleScriptString(content)} with title ${appleScriptString(title)}"
+            val process = ProcessBuilder("osascript", "-e", script).start()
+            process.waitFor(3, TimeUnit.SECONDS)
+            true
+        } catch (e: Exception) {
+            LOG.warn("Failed to show macOS notification", e)
+            false
+        }
+    }
+
+    /** Escapes a value so it can be embedded into an AppleScript string literal. */
+    private fun appleScriptString(value: String): String {
+        return "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+    }
+
     /** Converts a clipboard image into PNG bytes. */
-    private fun encodePng(image: java.awt.Image): ByteArray {
-        val width = image.getWidth(null).coerceAtLeast(1)
+    private fun encodePng(image: java.awt.Image): ByteArray {        val width = image.getWidth(null).coerceAtLeast(1)
         val height = image.getHeight(null).coerceAtLeast(1)
         val buffered = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
         val graphics = buffered.createGraphics()

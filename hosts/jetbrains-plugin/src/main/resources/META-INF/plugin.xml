@@ -13,7 +13,7 @@
                            id="paviko.opencode.settings.OpenCodeConfigurable"
                            displayName="OpenCode 插件"/>
     <applicationService serviceImplementation="paviko.opencode.settings.OpenCodeSettings"/>
-    <notificationGroup id="paviko.opencode.notifications" displayType="BALLOON"/>
+    <notificationGroup id="paviko.opencode.notifications" bundle="messages.OpenCodeBundle" key="notification.group.session.finished" displayType="BALLOON"/>
   </extensions>
 
   <actions>

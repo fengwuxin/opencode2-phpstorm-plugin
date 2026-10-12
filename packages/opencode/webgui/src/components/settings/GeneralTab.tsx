@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useProject } from "../../state/ProjectContext"
+import { useSession } from "../../state/SessionContext"
 import { getLanguage, setLanguage, t, type Language } from "../../lib/i18n"
 import type { SetSettingsFormData, SettingsFormData } from "./types"
 
@@ -10,6 +11,7 @@ interface GeneralTabProps {
 
 export function GeneralTab({ formData, setFormData }: GeneralTabProps) {
   const { worktree } = useProject()
+  const { notifyOnComplete, setNotifyOnComplete } = useSession()
   const [language, setLanguageState] = useState<Language>(getLanguage())
   return (
     <div className="space-y-4">
@@ -70,6 +72,21 @@ export function GeneralTab({ formData, setFormData }: GeneralTabProps) {
         </label>
         <p className="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
           {t("在会话期间对文件状态创建快照")}
+        </p>
+      </div>
+
+      <div>
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={notifyOnComplete}
+            onChange={(e) => void setNotifyOnComplete(e.target.checked)}
+            className="rounded border-gray-300 dark:border-gray-700"
+          />
+          <span className="text-sm text-gray-700 dark:text-gray-300">{t("会话完成时通知")}</span>
+        </label>
+        <p className="mt-1 ml-6 text-xs text-gray-500 dark:text-gray-400">
+          {t("会话生成结束时弹出系统通知，立即生效（不写入 opencode 配置）")}
         </p>
       </div>
 
