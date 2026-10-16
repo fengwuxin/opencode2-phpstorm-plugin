@@ -69,10 +69,12 @@ dependencies {
         val localIde = project.findProperty("localIde")?.toString()
         if (localIde != null) {
             local(localIde)
+            bundledPlugin("com.intellij.modules.jcef")
             bundledPlugin("org.jetbrains.plugins.terminal")
         } else {
             intellijIdeaCommunity("2024.3")
             bundledPlugin("com.intellij.java")
+            bundledPlugin("com.intellij.modules.jcef")
             bundledPlugin("org.jetbrains.plugins.terminal")
         }
     }
